@@ -14,11 +14,12 @@
 % such as speed, turn rates, times, etc. into separate files, 
 % all in the subject's folder for later analysis
 
-function PostTrialAnalysis
+function preprocess_data
 
 % -- this function will serve as a main script to use 
-% -- that will handle the individual functiosn that will
+% -- that will handle the individual functions that will
 % -- analyze the data captured by the tracking system
+% -- as well as the control input from participants
 % -- Written By: Rafal Krzysiak
 % -- Advisor: Dr. SAchit Butail
 
