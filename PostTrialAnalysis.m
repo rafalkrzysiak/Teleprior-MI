@@ -21,7 +21,7 @@ trials = ["0002","0003","0004","0005"];
 conditions = ["1","2","3","4"];
 
 % -- functions for post trial analysis
-FilterData(PartialRAW, ID_Data); % -- pass the data collected into an EKF and save everything
+% FilterData(PartialRAW, ID_Data); % -- pass the data collected into an EKF and save everything
 % FilterMany(ID_List, trials, conditions, ID_conditions, PartialRAW, ID_Data);
 % AnimateTraj(); % -- function that will animate the trajectories
 % PlotTraj(); % -- plot the trajectory of the robot in the Omron Lab
@@ -33,7 +33,7 @@ FilterData(PartialRAW, ID_Data); % -- pass the data collected into an EKF and sa
 % CompareTurnRates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % SaveAllDataRPi(ID_List, trials, conditions, ID_conditions);
 % UserKeyboard(ID_List, trials, conditions, ID_conditions);
-% StoreTimeRM(ID_List, trials, conditions, ID_conditions,ID_Data);
+StoreTimeRM(ID_List, trials, conditions, ID_conditions,ID_Data);
 
 end
 
@@ -1292,9 +1292,10 @@ for TRIAL = 4:size(conditions,2)
         EKF_X = movmean(EKF_traj(1,:),15); % -- smooth the data with window size of 15
         
         nexttile
-        %plot();
-        plot(EKF_traj(1,:), EKF_traj(2,:),'.', 'markersize', 8);
-        hold on; plot(EKF_traj(1,ID_Data(ID, 5)), EKF_traj(2,ID_Data(ID, 5)),'k.','markersize', 18);
+        plot(EKF_X,'.', 'markersize', 8);
+        axis square;
+%         plot(EKF_traj(1,:), EKF_traj(2,:),'.', 'markersize', 8);
+%         hold on; plot(EKF_traj(1,ID_Data(ID, 5)), EKF_traj(2,ID_Data(ID, 5)),'k.','markersize', 18);
         
     end
 end
