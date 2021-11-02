@@ -34,21 +34,26 @@ ID_location = 'IDList_Completed.csv';
 ID_Data = csvread(ID_location,1);
 ID_List = ID_Data(:,1);
 ID_conditions = ID_Data(:,2);
+
+% -- Remember: on the tracking computer, the data for the SAR
+%              conditions begins with "0002" and ends with "0005"
+%              While onboard RPi data starts with "1" and ends with "4"
 trials = ["0002","0003","0004","0005"];
 conditions = ["1","2","3","4"];
 
 % -- functions for post trial analysis
-% FilterMany(ID_List, trials, conditions, ID_conditions, PartialRAW, ID_Data);
+% FilterAll(ID_List, trials, conditions, ID_conditions, PartialRAW, ID_Data);
 % PlotAllSpeeds(ID_List, trials, conditions, ID_conditions);
 % PlotAllTurnRates(ID_List, trials, conditions, ID_conditions);
 % AvgTime(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CompareSpeed(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CompareTurnRates(ID_List, trials, conditions, ID_conditions, ID_Data);
-% StoreTimeRM(ID_List, trials, conditions, ID_conditions,ID_Data);
+% StoreTimeRM(ID_List, trials, conditions, ID_conditions, ID_Data);
+% FindTotalPathLength(ID_List, trials, conditions, ID_conditions, ID_Data);
 
 end
 
-function FilterMany(ID_List, trials, conditions, ID_conditions, PartialRAW, ID_Data)
+function FilterAll(ID_List, trials, conditions, ID_conditions, PartialRAW, ID_Data)
 Fig_suplot = 1;
 cond_count = 1;
 
