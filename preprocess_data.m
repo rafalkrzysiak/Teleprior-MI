@@ -10,9 +10,12 @@
 % 6) pathLength (add successive differences in positions)
 % 7) timeStayingInPlace (add the total number of timesteps where speed was
 % less than 0.1 m/s)
-% 8) 
+% 7b) percent of timeStayingInPlace
+% 8) commandedAcceleration
 % such as speed, turn rates, times, etc. into separate files, 
 % all in the subject's folder for later analysis
+% revise approach to clip condition 4 into a and b
+% plots of trajectories per condition. split condition 4 into 4a and b
 
 function preprocess_data
 
