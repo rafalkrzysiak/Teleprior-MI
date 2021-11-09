@@ -1,4 +1,4 @@
-% this will take raw trajectory data, filter it, store secondary measures
+% This will take raw trajectory data, filter it, store secondary measures
 % as follows:
 % divide filtered condition 4 data into 4a (prior to u turn) and 4b
 % likely we'll have 15 4b trials with actual data the rest could be empty
@@ -49,7 +49,8 @@ conditions = ["1","2","3","4"];
 % CompareSpeed(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CompareTurnRates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % StoreTimeRM(ID_List, trials, conditions, ID_conditions, ID_Data);
-FindTotalPathLength(ID_List, trials, conditions, ID_conditions, ID_Data);
+% FindTotalPathLength(ID_List, trials, conditions, ID_conditions, ID_Data);
+timeStayingInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
 
 end
 
@@ -485,21 +486,7 @@ for TRIAL = 1:size(conditions,2)
         
         % -- Initialize the subplot to be used
         nexttile
-%         figure(1); gcf;
-%         
-%         if TRIAL < 4
-%             subplot(size(trials,2)+1,size(ID_List,1),Fig_suplot);
-%         end
-%         
-%         % -- looking if its break turst or not
-%         if TRIAL == 4
-%             if ID_conditions(ID) == 0 % -- keep trust
-%                 subplot(size(trials,2)+1,size(ID_List,1),Fig_suplot);
-%             else % -- break trust
-%                 subplot(size(trials,2)+1,size(ID_List,1),Fig_suplot+size(ID_List,1));
-%             end
-%         end
-        omega = abs(omega);
+        omega = abs(omega); % -- convert all turnrates to positive
 
         plot(time, omega, 'k-', 'linewidth', lw); % -- plot the RAW Trun rate
         hold on; plot(time, mean(omega)*ones(size(time)), 'r-', 'linewidth', lw); % -- plot the mean turn rate
@@ -520,12 +507,8 @@ for TRIAL = 1:size(conditions,2)
             end
         end
         
-        % -- label the y axis of the entire set to say the condition number
-%         if Fig_suplot == (size(ID_List,1)*str2double(condition) - 17)
-%             ylabel(sprintf('condition: %d \n Turn rate (rad/s)', cond_count), 'fontweight', 'normal', 'fontsize', 16);
-%             cond_count = cond_count + 1;
-%         end
-        
+        % -- make the figures look nice
+        ax = gca; 
         if condition == '4'
             xlabel('Time (s)', 'fontweight', 'normal', 'fontsize', 16);
         end
@@ -534,25 +517,12 @@ for TRIAL = 1:size(conditions,2)
             ylabel('Turn rate (rad/s)', 'fontweight', 'normal', 'fontsize', 12);
         end
         title(sprintf('Mean Turn rate: %.2f rad/s', mean(omega)), 'fontweight', 'normal', 'fontsize', 12); 
-        ax = gca; 
         ax.FontSize = 12;
-        
-%         if condition == '1' && ID == size(ID_List,1)/2
-%            title(sprintf('Turn rate VS Time \n Mean Turn rate: %.2f rad/s', mean(omega)), 'fontweight', 'normal', 'fontsize', 12); 
-%            
-%         else
-%             title(sprintf('Mean Turn rate: %.2f rad/s', mean(omega)), 'fontweight', 'normal', 'fontsize', 12); 
-%         end
         
         % -- increment the subplot counter
         Fig_suplot = Fig_suplot + 1;
     end
 end
-
-anova1(Allomega);
-set(gca, 'xticklabel', {'1', '2', '3', '4a', '4b'});
-xlabel('Trial Conditions', 'fontweight','normal', 'fontsize', 16);
-ylabel('Turn Rate (rad/s)', 'fontweight','normal', 'fontsize', 16);
 
 end
 
@@ -560,7 +530,7 @@ function AvgTime(ID_List, trials, conditions, ID_conditions, ID_Data)
 
 % -- hold all the time values
 AllTimes = zeros(size(ID_List,1), size(trials,2));
-TimesCond4Split = AllTimes;
+TimesWithCond4Split = AllTimes;
 
 % -- scaling factor for condition 1
 % -- when the participant drove across the whole lab
@@ -590,10 +560,10 @@ for TRIAL = 1:size(trials,2)
         % -- for the split time array, only the last condition will be split
         % -- Condition 4 time split is at when the participant rotates 180 degrees
         if TRIAL < 4
-            TimesCond4Split(ID, TRIAL) = time(end);
+            TimesWithCond4Split(ID, TRIAL) = time(end);
         else
             % -- looking at the last condition
-            TimesCond4Split(ID, TRIAL) = time(ID_Data(ID, end));
+            TimesWithCond4Split(ID, TRIAL) = time(ID_Data(ID, end));
         end
         
     end
@@ -880,6 +850,60 @@ end
 ax = gca;
 axis([1 4 0 50]); axis square; grid on;
 xlabel('Condition number'); ylabel('Total distance traveled (m)');
+ax.XTickLabel = {'1', '', '2', '','3', '', '4'};
+ax.FontSize = 18;
+
+end
+
+function timeStayingInPlace(ID_List, trials, conditions, ID_conditions, ID_Data)
+% -- create a variable to contain the total time
+% -- that each participant statyed in place during each of the trials
+% -- with size (# trials x # participants)
+TotalTimeInPlace = zeros(size(trials,2), size(ID_List,1));
+
+% -- if speed is < 0.1 m/s save the number of timesteps
+% -- where 0.1 m/s is the threshhold
+thresh = 0.1;
+
+% -- loop through every trial ran
+for TRIAL = 1:size(trials,2)
+    % -- convert the trial/condition variable into a number
+    trial = num2str(trials(TRIAL));
+    condition = num2str(conditions(TRIAL));
+    
+    % -- loop through all IDs 
+    for ID = 1:size(ID_List,1)
+        % -- read the data from the csv file
+        participantID = num2str(ID_List(ID));
+        
+        % -- read the data from the filtered data folder
+        % -- and store the data in a variable "X"
+        % -- State X is 5xT matrix where T is total time
+        dir = strcat("filtered_data/", participantID, "/EKFVel_condition_", condition, ".csv");
+        X = csvread(dir);
+        
+        % -- loop through the duration of the trial starting with t = 0
+        for t = 1:size(X,1)
+           if X(t, 1) < thresh
+               TotalTimeInPlace(TRIAL, ID) = TotalTimeInPlace(TRIAL, ID) + 1;
+           end
+        end
+        
+    end
+end
+
+% -- once the total time in place for every participant 
+% -- per trial is calculated, plot the total time in place
+% -- against every participant
+figure(1); gcf; clf;
+for participant = 1:size(ID_List,1)
+    hold on; plot([1, 2, 3, 4], TotalTimeInPlace(:, participant), '.-', 'linewidth', 2, 'markersize', 2);
+end
+
+% -- Make the figure look nice
+ax = gca;
+axis([1 4 0 650]); axis square; grid on;
+xlabel('Condition number'); ylabel('Total timesteps stayed in place');
 ax.XTickLabel = {'1', '', '2', '','3', '', '4'};
 ax.FontSize = 18;
 
