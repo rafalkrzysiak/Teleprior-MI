@@ -49,7 +49,7 @@ conditions = ["1","2","3","4"];
 % CompareSpeed(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CompareTurnRates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % StoreTimeRM(ID_List, trials, conditions, ID_conditions, ID_Data);
-% FindTotalPathLength(ID_List, trials, conditions, ID_conditions, ID_Data);
+FindTotalPathLength(ID_List, trials, conditions, ID_conditions, ID_Data);
 
 end
 
@@ -560,47 +560,47 @@ function AvgTime(ID_List, trials, conditions, ID_conditions, ID_Data)
 
 % -- hold all the time values
 AllTimes = zeros(size(ID_List,1), size(trials,2));
+TimesCond4Split = AllTimes;
 
+% -- scaling factor for condition 1
+% -- when the participant drove across the whole lab
 k_tf = 2.27;
 
-% -- loop through every single ID number in the list
+% -- loop through every trial ran
 for TRIAL = 1:size(trials,2)
+    % -- convert the trial/condition variable into a number
     trial = num2str(trials(TRIAL));
     condition = num2str(conditions(TRIAL));
     
+    % -- loop through all IDs 
     for ID = 1:size(ID_List,1)
         % -- read the data from the csv file
         participantID = num2str(ID_List(ID));
         
+        % -- read the data from rpi and tracking computer
         DataFile = strcat(participantID,'/trial_',trial,'/data.csv');
         onBoard = strcat(participantID,'/condition_',condition,'/WheelVel.csv');
-
         data = csvread(DataFile, 2);
         RpiData = csvread(onBoard);
-
         [x, y, z, Rx, Ry, Rz, tx, ty, CamID, time, Vel, omega] = ReadData(data, RpiData);
         
         % -- for all trials before the last condition
+        AllTimes(ID,TRIAL) = time(end);
+        
+        % -- for the split time array, only the last condition will be split
+        % -- Condition 4 time split is at when the participant rotates 180 degrees
         if TRIAL < 4
-            if TRIAL == 1
-                % -- scale the time using the value determined through testing
-                AllTimes(ID, TRIAL) = time(end)/k_tf;
-            else
-                AllTimes(ID, TRIAL) = time(end);
-            end
+            TimesCond4Split(ID, TRIAL) = time(end);
         else
             % -- looking at the last condition
-            AllTimes(ID, TRIAL) = time(ID_Data(ID, end));
+            TimesCond4Split(ID, TRIAL) = time(ID_Data(ID, end));
         end
         
     end
 end
 
-% -- plot the ANOVA
-% p = anova1(AllTimes);
-% set(gca, 'xticklabel', {'1', '2', '3', '4a', '4b'});
-% xlabel('Trial Conditions', 'fontweight','normal', 'fontsize', 16);
-% ylabel('Time (s)', 'fontweight','normal', 'fontsize', 16);
+% -- save the times to find the target
+
 end
 
 function CompareSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data)
@@ -647,34 +647,9 @@ for TRIAL = 1:size(conditions,2)
         t2 = size(TIME,2);
         rpiT = floor(t1/t2);
         EKF_Vel = abs(EKF_Vel);
-        Vel = abs(Vel);
-        
-%         % -- Initialize the subplot to be used
-%         figure(1); gcf;
-%         
-%         if TRIAL < 4
-%             subplot(size(trials,2)+1,size(ID_List,1),Fig_suplot);
-%         end
-%         
-%         % -- looking if its break turst or not
-%         if TRIAL == 4
-%             if ID_conditions(ID) == 0 % -- keep trust
-%                 subplot(size(trials,2)+1,size(ID_List,1),Fig_suplot);
-%             else % -- break trust
-%                 subplot(size(trials,2)+1,size(ID_List,1),Fig_suplot+size(ID_List,1));
-%             end
-%         end
-%         nexttile
-%         plot(time, Vel, 'k-', 'linewidth', lw); % -- plot the RAW velocity
-% %         hold on; plot(time, mean(Vel)*ones(size(time)), 'r-', 'linewidth', lw); % -- plot the mean velocity
-% %         plot(TIME, EKF_Vel, 'b-', 'linewidth', lw); % -- plot the EKF estimated velocity
-%         %hold on; plot(TIME, mean(EKF_Vel)*ones(size(TIME)), 'c-', 'linewidth', lw); % -- plot the mean velocity of EKF
-%         set(gca,'xtick',[0:round(time(end)/4, -1):time(end)])
-%         axis([0 time(end) 0 .5]);
-%         set(gca,'ytick',[0:0.25:.5]);
-%         grid on;
+        Vel = abs(Vel); % -- we only want the positive value of the speed
 
-%         % -- save the mean vel
+        % -- save the mean speed
         if TRIAL < 4
             % -- for all trials before the last condition
             AllVel(ID, TRIAL) = mean(Vel);
@@ -682,15 +657,11 @@ for TRIAL = 1:size(conditions,2)
         else
             % -- for the last condition
                 AllVel(ID, TRIAL) = mean(Vel(1:rpiT*ID_Data(ID, end),1));
-                AllEKFVel(ID, TRIAL) = mean( EKF_Vel(1:ID_Data(ID, end),1) );
+                AllEKFVel(ID, TRIAL) = mean(EKF_Vel(1:ID_Data(ID, end),1) );
         end
         
-        % -- label the y axis of the entire set to say the condition number
-%         if Fig_suplot == (size(ID_List,1)*str2double(condition) - 23)
-%             ylabel(sprintf('condition: %d \n Velocity (m/s)', cond_count), 'fontweight', 'normal', 'fontsize', 12);
-%             cond_count = cond_count + 1;
-%         end
-        
+        % -- make the figures look nice
+        ax = gca; 
         if condition == '4'
             xlabel('Time (s)', 'fontweight', 'normal', 'fontsize', 12);
         end
@@ -700,33 +671,12 @@ for TRIAL = 1:size(conditions,2)
         end
         
         title(sprintf('Mean speed: %.2f m/s', mean(Vel)), 'fontweight', 'normal', 'fontsize', 12);
-        
-        ax = gca; 
         ax.FontSize = 12;
-        
-%         if condition == '1' & ID == size(ID_List,1)/2
-%            title(sprintf('Velocity VS Time \n Mean \n Vel: %.2f m/s', mean(Vel)), 'fontweight', 'normal', 'fontsize', 8); 
-%            
-%         else
-%             title(sprintf('Mean \n Vel: %.2f m/s', mean(Vel)), 'fontweight', 'normal', 'fontsize', 8); 
-%         end
         
         % -- increment the subplot counter
         Fig_suplot = Fig_suplot + 1;
     end
 end
-
-% anova1(AllVel);
-% set(gca, 'xticklabel', {'1', '2', '3', '4a', '4b'});
-% xlabel('Trial Conditions', 'fontweight','normal', 'fontsize', 16);
-% ylabel('Velocity (m/s)', 'fontweight','normal', 'fontsize', 16);
-% title('ANOVA on RPi Velocity', 'fontweight','normal', 'fontsize', 16);
-% 
-% anova1(AllEKFVel);
-% set(gca, 'xticklabel', {'1', '2', '3', '4a', '4b'});
-% xlabel('Trial Conditions', 'fontweight','normal', 'fontsize', 16);
-% ylabel('Tracker Velocity (m/s)', 'fontweight','normal', 'fontsize', 16);
-% title('ANOVA on EKF Tracker Velocity', 'fontweight','normal', 'fontsize', 16);
 
 end
 
@@ -879,6 +829,59 @@ for TRIAL = 4:size(conditions,2)
         
     end
 end
+
+end
+
+function FindTotalPathLength(ID_List, trials, conditions, ID_conditions, ID_Data)
+
+% -- create a variable to contain the total distance
+% -- that each participant drives during each of the trials
+% -- with size (# trials x # participants)
+TotalDistance = zeros(size(trials,2), size(ID_List,1));
+
+% -- loop through every trial ran
+for TRIAL = 1:size(trials,2)
+    % -- convert the trial/condition variable into a number
+    trial = num2str(trials(TRIAL));
+    condition = num2str(conditions(TRIAL));
+    
+    % -- loop through all IDs 
+    for ID = 1:size(ID_List,1)
+        % -- read the data from the csv file
+        participantID = num2str(ID_List(ID));
+        
+        % -- read the data from the filtered data folder
+        % -- and store the data in a variable "X"
+        % -- State X is 5xT matrix where T is total time
+        dir = strcat("filtered_data/", participantID, "/EKFtraj_condition_", condition, ".csv");
+        X = csvread(dir);
+        
+        % -- loop through the duration of the trial starting with t = 1
+        for t = 2:size(X,2)
+           % -- get the dx and dy of the position 
+           % -- then calculate the norm of dx and dy
+           dx = X(1,t) - X(1,t-1);
+           dy = X(2,t) - X(2,t-1);
+           TotalDistance(TRIAL, ID) = TotalDistance(TRIAL, ID) + sqrt(dx^2 + dy^2);
+        end
+        
+    end
+end
+
+% -- once the total distance traveled for every participant 
+% -- per trial is calculated, plot the distances traveled
+% -- against every participant
+figure(1); gcf; clf;
+for participant = 1:size(ID_List,1)
+    hold on; plot([1, 2, 3, 4], TotalDistance(:, participant), '.-', 'linewidth', 2, 'markersize', 2);
+end
+
+% -- Make the figure look nice
+ax = gca;
+axis([1 4 0 50]); axis square; grid on;
+xlabel('Condition number'); ylabel('Total distance traveled (m)');
+ax.XTickLabel = {'1', '', '2', '','3', '', '4'};
+ax.FontSize = 18;
 
 end
 
