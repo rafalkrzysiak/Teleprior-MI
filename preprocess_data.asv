@@ -48,12 +48,12 @@ conditions = ["1","2","3","4"];
 % FilterAll(ID_List, trials, conditions, ID_conditions, PartialRAW, ID_Data);
 % PlotAllSpeeds(ID_List, trials, conditions, ID_conditions);
 % PlotAllTurnRates(ID_List, trials, conditions, ID_conditions);
-timeToFind(ID_List, trials, conditions, ID_conditions, ID_Data);
+% timeToFind(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CompareSpeed(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CompareTurnRates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % StoreTimeRM(ID_List, trials, conditions, ID_conditions, ID_Data);
 % FindTotalPathLength(ID_List, trials, conditions, ID_conditions, ID_Data);
-% timeStayingInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
+timeStayingInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
 
 end
 
@@ -561,9 +561,11 @@ for TRIAL = 1:size(trials,2)
         
         % -- for the split time array, only the last condition will be split
         % -- Condition 4 time split is at when the participant rotates 180 degrees
-        if TRIAL == 4
+        if TRIAL = 4
+            TimesWithCond4Split(ID, TRIAL) = time(end);
+        else
             % -- looking at the last condition
-            AllTimes(ID,TRIAL+1) = time(end) - time(ID_Data(ID, end));
+            TimesWithCond4Split(ID, TRIAL) = time(ID_Data(ID, end));
         end
         
     end
