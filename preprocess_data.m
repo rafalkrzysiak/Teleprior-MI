@@ -55,6 +55,7 @@ conditions = ["1","2","3","4"];
 % FindTotalPathLength(ID_List, trials, conditions, ID_conditions, ID_Data);
 % timeStayingInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
 % DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
+% CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
 PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 
 end
@@ -1042,6 +1043,49 @@ end % -- end condition loop
 
 end
 
+function CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data)
+
+% -- loop through all conditions
+for Condition = 1:4
+    % -- create figure
+    figure(Condition); gcf; clf;
+    
+    % -- loop through each participant
+    for ii = 1:size(ID_Data, 1)
+        % -- define the file that contains commanded wheel speeds and load it
+        CommandedInputFile = strcat('RAW/', num2str(ID_Data(ii,1)), ...
+            '/condition_', num2str(Condition), '/WheelVel.csv');
+        U = load(CommandedInputFile);
+        
+        % -- convert the commanded left and right wheel speeds to 
+        % -- commanded speed and turnrate
+        % -- commanded wheel speeds saved in mm/s
+        CommandedSpeed = (((U(:,2) + U(:,3))/ 1000) / 2);
+        
+        % -- define the commanded acceleration variable and
+        % -- loop through all the commanded speed values and get the
+        % -- commanded acceleration
+        CommandAccel = zeros(1, size(U, 1)-1);
+        
+        for t = 2:size(U, 1)
+           % -- a=dv/dt
+           CommandAccel(1,t-1) = (CommandedSpeed(t) - CommandedSpeed(t-1)) / (U(t) - U(t-1)); 
+        end
+        
+        % -- plot the commanded acceleration 
+        hold on; 
+        plot(U(2:end,1), CommandAccel);
+        
+    end
+    
+    % -- make figure look nice
+    xlabel('time (s)', 'fontsize', 12, 'fontweight', 'normal');
+    ylabel('acceleration (m/s^2)', 'fontsize', 12, 'fontweight', 'normal');
+    title(sprintf('Condition:%d', Condition), 'fontsize', 12, 'fontweight', 'normal');
+end
+
+end
+
 function PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data)
 
 Ns=size(ID_Data,1);
@@ -1049,7 +1093,7 @@ Ns=size(ID_Data,1);
 % Load the omron lab mosaic 
 OmronLabMap = imread('maps/OmronLabMosaicCrop_lowres.jpg');
 
-nr=5; % number of rows
+nr=7; % number of rows
 nc=4; % number of conditions
 
 for ii = 1:size(ID_Data, 1)
@@ -1079,6 +1123,7 @@ for ii = 1:size(ID_Data, 1)
         axis image; 
         title(sprintf('Condition:%d', Condition), 'fontsize', 18, 'fontweight', 'normal');
         
+        % -- plot the speed of the robot
         subplot(nr,nc,Condition+nc*1)
         EKFspeedFile = strcat('filtered_data/', num2str(ID_Data(ii,1)), ...
             '/EKFVel_condition_', num2str(Condition), '.csv');
@@ -1089,7 +1134,7 @@ for ii = 1:size(ID_Data, 1)
         ylabel('Speed (m/s)');
         xlabel('time (s)');
         
-        
+        % -- plot the turn rate of the robot
         subplot(nr,nc,Condition+nc*2)
         EKFomFile = strcat('filtered_data/', num2str(ID_Data(ii,1)), ...
             '/EKFom_condition_', num2str(Condition), '.csv');
@@ -1108,8 +1153,8 @@ for ii = 1:size(ID_Data, 1)
         % -- convert the commanded left and right wheel speeds to 
         % -- commanded speed and turnrate
         % -- commanded wheel speeds saved in mm/s
-        CommandedSpeed = abs(((U(:,2) + U(:,3))/ 1000) / 2);
-        CommandedTurnRate = abs(((U(:,2) - U(:,3))/ 1000) / .3084);
+        CommandedSpeed = (((U(:,2) + U(:,3))/ 1000) / 2);
+        CommandedTurnRate = (((U(:,2) - U(:,3))/ 1000) / .3084);
         
         % -- define the time range
         time = U(:,1);
@@ -1117,13 +1162,41 @@ for ii = 1:size(ID_Data, 1)
         % -- plot the commanded speed for each condition
         subplot(nr,nc,Condition+nc*3)
         plot(time, CommandedSpeed, 'b-', 'linewidth', 2);
-        ylabel('Commanded speed (m/s)');
+        ylabel({'Commanded','speed (m/s)'});
         xlabel('time (s)');
         
         % -- plot the commanded turn rate for each condition
         subplot(nr,nc,Condition+nc*4)
         plot(time, CommandedTurnRate, 'b-', 'linewidth', 2);
-        ylabel('Commanded turn rate (rad/s)');
+        ylabel({'Commanded','turn rate (rad/s)'});
+        xlabel('time (s)');
+        
+        % -- commanded acceleration
+        CommandAccel = zeros(1, size(CommandedSpeed, 1)-1);
+        
+        for t = 2:size(CommandedSpeed, 1)
+           % -- a=dv/dt
+           CommandAccel(1,t-1) = (CommandedSpeed(t) - CommandedSpeed(t-1)) / (U(t) - U(t-1)); 
+        end
+        
+        % -- plot the commanded acceleration 
+        subplot(nr,nc,Condition+nc*5)
+        plot(U(2:end,1), CommandAccel);
+        ylabel({'Commanded', 'acceleration (m/s^2)'});
+        xlabel('time (s)');
+        
+        % -- commanded angular acceleration
+        CommandAngAccel = zeros(1, size(CommandedTurnRate, 1)-1);
+        
+        for t = 2:size(CommandedSpeed, 1)
+           % -- a=dv/dt
+           CommandAngAccel(1,t-1) = (CommandedTurnRate(t) - CommandedTurnRate(t-1)) / (U(t) - U(t-1)); 
+        end
+        
+        % -- plot the commanded angular acceleration 
+        subplot(nr,nc,Condition+nc*6)
+        plot(U(2:end,1), CommandAngAccel);
+        ylabel({'Commanded Ang.', 'acceleration (rad/s^2)'});
         xlabel('time (s)');
         
         drawnow;
