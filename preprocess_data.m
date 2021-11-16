@@ -129,7 +129,7 @@ for TRIAL = 1:size(trials,2)
                      sin(x(3))*dt 0; 
                      0 dt]*...
                     [1 0; 
-                     0 .05]*...
+                     0 .1]*...
                     [cos(x(3))*dt 0; 
                      sin(x(3))*dt 0; 
                      0 dt]';
@@ -1189,7 +1189,7 @@ for ii = 1:size(ID_Data, 1)
         CommandAngAccel = zeros(1, size(CommandedTurnRate, 1)-1);
         
         for t = 2:size(CommandedSpeed, 1)
-           % -- a=dv/dt
+           % -- a=domega/dt
            CommandAngAccel(1,t-1) = (CommandedTurnRate(t) - CommandedTurnRate(t-1)) / (U(t) - U(t-1)); 
         end
         
