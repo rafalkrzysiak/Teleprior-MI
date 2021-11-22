@@ -54,9 +54,9 @@ conditions = ["1","2","3","4"];
 % StoreTimeRM(ID_List, trials, conditions, ID_conditions, ID_Data);
 % FindTotalPathLength(ID_List, trials, conditions, ID_conditions, ID_Data);
 % timeStayingInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
-% DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
+DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
-PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
+% PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 
 end
 
@@ -871,7 +871,7 @@ end
 
 % -- Make the figure look nice
 ax = gca;
-axis([1 4 0 50]); axis square; grid on;
+axis([1 4 0 50]); grid on;
 xlabel('Condition number'); ylabel('Total distance traveled (m)');
 ax.XTickLabel = {'1', '', '2', '','3', '', '4'};
 ax.FontSize = 18;
@@ -959,7 +959,7 @@ end
 
 % -- Make the figure look nice
 ax = gca;
-axis([1 4 0 300]); axis square; grid on;
+axis([1 4 0 300]); grid on;
 xlabel('Condition number'); ylabel('Total time stayed in place (s)');
 ax.XTickLabel = {'1', '', '2', '','3', '', '4'};
 ax.FontSize = 18;
@@ -1035,7 +1035,7 @@ for Condition = 1:4
            hold on; plot(X(1,1), X(2,1), 'bs', 'markersize', 10, 'linewidth', 3); % -- starting point
            plot(X(1,end), X(2,end), 'bx', 'markersize', 10, 'linewidth', 3); % -- end point
            plot(X(1,:), X(2,:), 'b-', 'linewidth', 2); % -- trajectory
-           plot(X(4,end), X(5,end), 'rs', 'markersize', 10, 'linewidth', 3); % -- Target location
+           plot(X(4,end-1), X(5,end-1), 'rs', 'markersize', 10, 'linewidth', 3); % -- Target location
            axis image; title(sprintf('Condition: %d', Condition), 'fontsize', 18, 'fontweight', 'normal');
        end
    end % -- end participant loop
@@ -1044,6 +1044,9 @@ end % -- end condition loop
 end
 
 function CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data)
+
+conditionlabel = {'No Map, No Target', 'No Map, Yes Target',...
+                  'Yes Map, No Target', 'Yes Map, Yes Target'};
 
 % -- loop through all conditions
 for Condition = 1:4
@@ -1079,9 +1082,11 @@ for Condition = 1:4
     end
     
     % -- make figure look nice
-    xlabel('time (s)', 'fontsize', 12, 'fontweight', 'normal');
-    ylabel('acceleration (m/s^2)', 'fontsize', 12, 'fontweight', 'normal');
-    title(sprintf('Condition:%d', Condition), 'fontsize', 12, 'fontweight', 'normal');
+    xlabel('time (s)', 'fontsize', 18, 'fontweight', 'normal');
+    ylabel('Commanded acceleration (m/s^2)', 'fontsize', 18, 'fontweight', 'normal');
+    title(conditionlabel(Condition), 'fontsize', 18, 'fontweight', 'normal');
+    ax = gca;
+    ax.FontSize = 18;
 end
 
 end
