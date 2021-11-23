@@ -54,9 +54,11 @@ conditions = ["1","2","3","4"];
 % StoreTimeRM(ID_List, trials, conditions, ID_conditions, ID_Data);
 % FindTotalPathLength(ID_List, trials, conditions, ID_conditions, ID_Data);
 % timeStayingInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
-DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
-% CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
+% DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
+CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
 % PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
+% SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
+% SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
 
 end
 
@@ -623,8 +625,8 @@ for TRIAL = 1:size(conditions,2)
         
         % -- read the data from the csv file
         participantID = num2str(ID_List(ID));
-        onBoard = strcat(participantID,'/condition_',conditions(TRIAL),'/WheelVel.csv');
-        DataFile = strcat(participantID,'/trial_',trials(TRIAL),'/data.csv');
+        onBoard = strcat('RAW/',participantID,'/condition_',conditions(TRIAL),'/WheelVel.csv');
+        DataFile = strcat('RAW/',participantID,'/trial_',trials(TRIAL),'/data.csv');
         data = csvread(DataFile, 2);
         % -- store the data
         RpiData = csvread(onBoard);
@@ -698,8 +700,8 @@ for TRIAL = 1:size(conditions,2)
         
         % -- read the data from the csv file
         participantID = num2str(ID_List(ID));
-        onBoard = strcat(participantID,'/condition_',conditions(TRIAL),'/WheelVel.csv');
-        DataFile = strcat(participantID,'/trial_',trials(TRIAL),'/data.csv');
+        onBoard = strcat('RAW/',participantID,'/condition_',conditions(TRIAL),'/WheelVel.csv');
+        DataFile = strcat('RAW/',participantID,'/trial_',trials(TRIAL),'/data.csv');
         data = csvread(DataFile, 2);
         % -- store the data
         RpiData = csvread(onBoard);
@@ -799,7 +801,8 @@ end
 end
 
 function StoreTimeRM(ID_List, trials, conditions, ID_conditions, ID_Data)
-tiledlayout(1,size(ID_List,1));
+% tiledlayout(1,size(ID_List,1));
+tiledlayout(1,15);
 
 for TRIAL = 4:size(conditions,2)
     
@@ -809,17 +812,19 @@ for TRIAL = 4:size(conditions,2)
     for ID = 1:size(ID_List,1)
         
         % -- read the data from the csv file
-        participantID = num2str(ID_List(ID));
-        EKF_traj_data = strcat('filtered_data/', participantID, '/EKFtraj_condition_', num2str(TRIAL),'.csv');
-        EKF_traj = csvread(EKF_traj_data);
-        EKF_X = movmean(EKF_traj(1,:),15); % -- smooth the data with window size of 15
-        
-        nexttile
-        plot(EKF_X,'.', 'markersize', 8);
-        axis square;
-%         plot(EKF_traj(1,:), EKF_traj(2,:),'.', 'markersize', 8);
-%         hold on; plot(EKF_traj(1,ID_Data(ID, 5)), EKF_traj(2,ID_Data(ID, 5)),'k.','markersize', 18);
-        
+        if ~ID_Data(ID, 2)
+            participantID = num2str(ID_List(ID));
+            EKF_traj_data = strcat('filtered_data/', participantID, '/EKFtraj_condition_', num2str(TRIAL),'.csv');
+            EKF_traj = csvread(EKF_traj_data);
+            EKF_X = movmean(EKF_traj(1,:),15); % -- smooth the data with window size of 15
+            EKF_Y = movmean(EKF_traj(2,:),15); % -- smooth the data with window size of 15
+
+            nexttile
+            plot(EKF_X,'.', 'markersize', 8);
+            axis square; title(sprintf('%4d', ID_List(ID)),'fontsize', 12, 'fontweight', 'normal');
+    %         plot(EKF_traj(1,:), EKF_traj(2,:),'.', 'markersize', 8);
+    %         hold on; plot(EKF_traj(1,ID_Data(ID, 5)), EKF_traj(2,ID_Data(ID, 5)),'k.','markersize', 18);
+        end
     end
 end
 
@@ -875,6 +880,9 @@ axis([1 4 0 50]); grid on;
 xlabel('Condition number'); ylabel('Total distance traveled (m)');
 ax.XTickLabel = {'1', '', '2', '','3', '', '4'};
 ax.FontSize = 18;
+
+% -- save data to csv file
+csvwrite('stats data/TotalDistanceTravel.csv',TotalDistance);
 
 end
 
@@ -980,7 +988,7 @@ OmronLabMap = imread('maps/OmronLabMosaicCrop_lowres.jpg');
 % -- loop though all conditions and sub-conditions
 for Condition = 1:4
    % -- create a figure that corresponds to the condition number
-   figure(Condition); gcf; clf;
+   figure(Condition+1); gcf; clf;
    
    % -- plot the Search environment
    imagesc([-0.25 15],[-0.5 7.5], flip(OmronLabMap));
@@ -988,8 +996,8 @@ for Condition = 1:4
    
    % -- 
    if Condition == 4
-       % -- create a figure that corresponds to the condition number
-       figure(Condition+1); gcf; clf;
+       % -- create another figure for condition 4
+       figure(Condition+2); gcf; clf;
 
        % -- plot the Search environment
        imagesc([-0.25 15],[-0.5 7.5], flip(OmronLabMap));
@@ -1012,30 +1020,31 @@ for Condition = 1:4
        % -- otherwise just plot everything
        if Condition == 4
            if ID_Data(ii, 2)
-               figure(Condition+1);
+               figure(Condition+2);
                % -- plot all data for condition 4b
                hold on; plot(X(1,ID_Data(ii, end)), X(2,ID_Data(ii, end)), 'bs', 'markersize', 10, 'linewidth', 3); % -- starting point
                plot(X(1,end), X(2,end), 'bx', 'markersize', 10, 'linewidth', 3); % -- end point
                plot(X(1,ID_Data(ii, end):end), X(2,ID_Data(ii, end):end), 'b-', 'linewidth', 2); % -- trajectory
-               plot(X(4,end), X(5,end), 'rs', 'markersize', 10, 'linewidth', 3); % -- Target location
+               plot(X(4,5), X(5,5), 'rs', 'markersize', 10, 'linewidth', 3); % -- Target location
                axis image; title(sprintf('Condition: %db', Condition), 'fontsize', 18, 'fontweight', 'normal');
                
-           else
-               figure(Condition);
-               % -- plot all data prior to condition 4b
-               hold on; plot(X(1,1), X(2,1), 'bs', 'markersize', 10, 'linewidth', 3); % -- starting point
-               plot(X(1,ID_Data(ii, end)), X(2,ID_Data(ii, end)), 'bx', 'markersize', 10, 'linewidth', 3); % -- end point
-               plot(X(1,1:ID_Data(ii, end)), X(2,1:ID_Data(ii, end)), 'b-', 'linewidth', 2); % -- trajectory
-               plot(X(4,end), X(5,end), 'rs', 'markersize', 10, 'linewidth', 3); % -- Target location
-               axis image; title(sprintf('Condition: %da', Condition), 'fontsize', 18, 'fontweight', 'normal');
            end
+           
+           % -- we want to regardless plot all of condition 4a
+           figure(Condition+1);
+           % -- plot all data prior to condition 4b
+           hold on; plot(X(1,1), X(2,1), 'bs', 'markersize', 10, 'linewidth', 3); % -- starting point
+           plot(X(1,ID_Data(ii, end)), X(2,ID_Data(ii, end)), 'bx', 'markersize', 10, 'linewidth', 3); % -- end point
+           plot(X(1,1:ID_Data(ii, end)), X(2,1:ID_Data(ii, end)), 'b-', 'linewidth', 2); % -- trajectory
+           plot(X(4,5), X(5,5), 'rs', 'markersize', 10, 'linewidth', 3); % -- Target location
+           axis image; title(sprintf('Condition: %da', Condition), 'fontsize', 18, 'fontweight', 'normal');
        else
-           figure(Condition);
+           figure(Condition+1);
            % -- plot all data prior to condition 4
            hold on; plot(X(1,1), X(2,1), 'bs', 'markersize', 10, 'linewidth', 3); % -- starting point
            plot(X(1,end), X(2,end), 'bx', 'markersize', 10, 'linewidth', 3); % -- end point
            plot(X(1,:), X(2,:), 'b-', 'linewidth', 2); % -- trajectory
-           plot(X(4,end-1), X(5,end-1), 'rs', 'markersize', 10, 'linewidth', 3); % -- Target location
+           plot(X(4,5), X(5,5), 'rs', 'markersize', 10, 'linewidth', 3); % -- Target location
            axis image; title(sprintf('Condition: %d', Condition), 'fontsize', 18, 'fontweight', 'normal');
        end
    end % -- end participant loop
@@ -1044,17 +1053,17 @@ end % -- end condition loop
 end
 
 function CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data)
-
+Ns = size(ID_Data, 1);
 conditionlabel = {'No Map, No Target', 'No Map, Yes Target',...
                   'Yes Map, No Target', 'Yes Map, Yes Target'};
 
 % -- loop through all conditions
 for Condition = 1:4
     % -- create figure
-    figure(Condition); gcf; clf;
+    figure(Condition+1); gcf; clf;
     
     % -- loop through each participant
-    for ii = 1:size(ID_Data, 1)
+    for ii = Ns:Ns
         % -- define the file that contains commanded wheel speeds and load it
         CommandedInputFile = strcat('RAW/', num2str(ID_Data(ii,1)), ...
             '/condition_', num2str(Condition), '/WheelVel.csv');
@@ -1212,4 +1221,118 @@ end
 
 end
 
+function SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data)
 
+% -- number of participants
+Ns=size(ID_Data,1);
+
+% -- create arrays that will contain the speeds of the robot
+% -- and the commanded input speeds
+% -- Format: [c1, c2, c3, c4a, c4b, SQ1, SQ2, SQ3, SQ4, SQ5]
+RobotSpeed = zeros(Ns, 10);
+CommandedSpeed = RobotSpeed;
+
+% -- loop through all participants
+for ii = 1:size(ID_Data, 1)
+    
+    % -- loop through each of the conditions
+    for Condition = 1:4
+        % -- get the filtered and RAW data
+        filtered_dir = strcat('filtered_data/',num2str(ID_Data(ii,1)),'/EKFVel_condition_',...
+                              num2str(Condition),'.csv');
+        raw_dir = strcat('RAW/',num2str(ID_Data(ii,1)),'/condition_',num2str(Condition),...
+                         '\WheelVel.csv');
+        U = load(raw_dir);
+        U_EKF = load(filtered_dir);
+        
+        % -- convert the commanded wheel speed values to overall 
+        % -- commended speed
+        U_com = abs(((U(:,2) + U(:,3))/ 1000) / 2);
+        U_EKF = abs(U_EKF);
+        
+        % -- check if its condition 4
+        if Condition == 4
+            % -- check if break trust
+            if ID_Data(ii, 2)
+                RobotSpeed(ii, Condition+1) = mean(U_EKF(ID_Data(ii, end): end));
+                CommandedSpeed(ii, Condition+1) = mean(U_com(5*ID_Data(ii, end): end));
+                RobotSpeed(ii, Condition) = mean(U_EKF(1:ID_Data(ii, end)));
+                CommandedSpeed(ii, Condition) = mean(U_com(1:5*ID_Data(ii, end)));
+            else % -- otherwise store as regular
+                RobotSpeed(ii, Condition) = mean(U_EKF);
+                CommandedSpeed(ii, Condition) = mean(U_com);
+            end
+        else
+            RobotSpeed(ii, Condition) = mean(U_EKF);
+            CommandedSpeed(ii, Condition) = mean(U_com);
+        end
+    end
+    
+    % -- populate the questionnaire portion of the array
+    RobotSpeed(ii,6:end) = ID_Data(ii, 3:end-1);
+    CommandedSpeed(ii,6:end) = ID_Data(ii, 3:end-1);
+end
+
+% -- save the arrays as csv files within the stats data folder
+csvwrite('stats data\RobotSpeedData.csv', RobotSpeed);
+csvwrite('stats data\ComSpeedData.csv', CommandedSpeed);
+
+end
+
+function SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data)
+
+% -- number of participants
+Ns=size(ID_Data,1);
+
+% -- create arrays that will contain the speeds of the robot
+% -- and the commanded input speeds
+% -- Format: [c1, c2, c3, c4a, c4b, SQ1, SQ2, SQ3, SQ4, SQ5]
+RobotTurnrate = zeros(Ns, 10);
+CommandedTurnrate = RobotTurnrate;
+
+% -- loop through all participants
+for ii = 1:size(ID_Data, 1)
+    
+    % -- loop through each of the conditions
+    for Condition = 1:4
+        % -- get the filtered and RAW data
+        filtered_dir = strcat('filtered_data/',num2str(ID_Data(ii,1)),'/EKFom_condition_',...
+                              num2str(Condition),'.csv');
+        raw_dir = strcat('RAW/',num2str(ID_Data(ii,1)),'/condition_',num2str(Condition),...
+                         '\WheelVel.csv');
+        U = load(raw_dir);
+        U_EKF = load(filtered_dir);
+        
+        % -- convert the commanded wheel speed values to overall 
+        % -- commended speed
+        U_com = abs(((U(:,2) - U(:,3))/ 1000) / .3084);
+        U_EKF = abs(U_EKF);
+        
+        % -- check if its condition 4
+        if Condition == 4
+            % -- check if break trust
+            if ID_Data(ii, 2)
+                RobotTurnrate(ii, Condition+1) = mean(U_EKF(ID_Data(ii, end): end));
+                CommandedTurnrate(ii, Condition+1) = mean(U_com(5*ID_Data(ii, end): end));
+                RobotTurnrate(ii, Condition) = mean(U_EKF(1:ID_Data(ii, end)));
+                CommandedTurnrate(ii, Condition) = mean(U_com(1:5*ID_Data(ii, end)));
+            else % -- otherwise store as regular
+                RobotTurnrate(ii, Condition) = mean(U_EKF);
+                CommandedTurnrate(ii, Condition) = mean(U_com);
+            end
+        else
+            RobotTurnrate(ii, Condition) = mean(U_EKF);
+            CommandedTurnrate(ii, Condition) = mean(U_com);
+        end
+    end
+    
+    % -- populate the questionnaire portion of the array
+    RobotTurnrate(ii,6:end) = ID_Data(ii, 3:end-1);
+    CommandedTurnrate(ii,6:end) = ID_Data(ii, 3:end-1);
+end
+
+% -- save the arrays as csv files within the stats data folder
+csvwrite('stats data\RobotTurnrateData.csv', RobotTurnrate);
+csvwrite('stats data\ComTurnrateData.csv', CommandedTurnrate);
+
+end
