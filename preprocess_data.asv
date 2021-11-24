@@ -805,14 +805,13 @@ function StoreTimeRM(ID_List, trials, conditions, ID_conditions, ID_Data)
 Ns = size(ID_Data,1);
 
 % tiledlayout(1,size(ID_List,1));
-tiledlayout(1,Ns);
+tiledlayout(1,15);
 
 % -- create matrix to contain the ID of the participant
 % -- as well as the time that corresponds to the threshold distance
 % -- that the participant has been at in condition 3
 % -- top row: ID, bottom row: time split
 SplitTime = zeros(2, Ns);
-dist = zeros(1, Ns);
 
 for TRIAL = 3:size(conditions,2)
     
@@ -843,30 +842,18 @@ for TRIAL = 3:size(conditions,2)
             % -- looking at only the participants that were given incorrect
             % -- target location information
             if ID_Data(ID, 2)
-                
-                % -- When we give incorrect target location information to
-                % -- the participants, we place the target in the opposite X
-                % -- direction of the search environment. Because of this
-                % -- we need to flip the x position only to where they 
-                % -- initially believed the target to be located at.
-                if X(4,end) > 8
-                    X_t = 3.3;
-                else
-                    X_t = 12.9;
-                end
-                
                 % -- loop through time of the experiment
                 for timestep = 1:size(X,2)
                     % -- calculate the dx and dy between the target
                     % -- location and robot position
-                    dx = (X_t - X(1,timestep));
-                    dy = (X(5,5) - X(2,timestep));
+                    dx = (X(4,end) - X(1,timestep));
+                    dy = (X(5,end) - X(2,timestep));
                     Dist = sqrt(dx^2 + dy^2);
                     
                     % -- check if the distance between the robot and the
                     % -- target is within the threshold, break the loop and
-                    % -- save the current atime at which it met the threshold
-                    if Dist <= mean(dist)+1.5
+                    % -- save the current time at which it met the threshold
+                    if Dist <= mean(dist)+1
                         SplitTime(1,ID) = ID_List(ID);
                         SplitTime(2,ID) = timestep * 0.5;
                        break; 
@@ -891,8 +878,7 @@ for TRIAL = 3:size(conditions,2)
     end
 end
 
-% -- save the data in a csv file
-csvwrite('stats data\SplitTime.csv',SplitTime);
+
 
 end
 
