@@ -561,18 +561,22 @@ for TRIAL = 1:size(trials,2)
         RpiData = csvread(onBoard);
         [x, y, z, Rx, Ry, Rz, tx, ty, CamID, time, Vel, omega] = ReadData(data, RpiData);
         
-        % -- for all trials before the last condition
-        AllTimes(ID,TRIAL) = time(end);
+        
         
         % -- for the split time array, only the last condition will be split
         % -- Condition 4 time split is at when the participant rotates 180 degrees
         if TRIAL == 4
-            % -- looking at the last condition
+            % -- for all trials at condition 4
+            AllTimes(ID,TRIAL) = time(ID_Data(ID, end));
+            
+            % -- looking at only those who have been given incorrect target
+            % -- location information
             if ID_Data(ID, 2)
                 AllTimes(ID,TRIAL+1) = time(end) - time(ID_Data(ID, end));
-            else
-                AllTimes(ID,TRIAL) = time(ID_Data(ID, end));
             end
+        else
+            % -- for all trials before the last condition
+            AllTimes(ID,TRIAL) = time(end);
         end
         
     end
