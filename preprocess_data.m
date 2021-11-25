@@ -48,10 +48,10 @@ conditions = ["1","2","3","4"];
 % FilterAll(ID_List, trials, conditions, ID_conditions, PartialRAW, ID_Data);
 % PlotAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 % PlotAllTurnRates(ID_List, trials, conditions, ID_conditions);
-% timeToFind(ID_List, trials, conditions, ID_conditions, ID_Data);
+timeToFind(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CompareSpeed(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CompareTurnRates(ID_List, trials, conditions, ID_conditions, ID_Data);
-StoreTimeRM(ID_List, trials, conditions, ID_conditions, ID_Data);
+% StoreTimeRM(ID_List, trials, conditions, ID_conditions, ID_Data);
 % FindTotalPathLength(ID_List, trials, conditions, ID_conditions, ID_Data);
 % timeStayingInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
 % DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
@@ -868,7 +868,7 @@ for TRIAL = 3:size(conditions,2)
                     % -- save the current atime at which it met the threshold
                     if Dist <= mean(dist)+1.5
                         SplitTime(1,ID) = ID_List(ID);
-                        SplitTime(2,ID) = timestep * 0.5;
+                        SplitTime(2,ID) = timestep;
                        break; 
                     end
                 end
@@ -876,7 +876,7 @@ for TRIAL = 3:size(conditions,2)
                 % -- get the end time for the participants given
                 % -- correct target location information
                 SplitTime(1,ID) = ID_List(ID);
-                SplitTime(2,ID) = size(X,2) * 0.5;
+                SplitTime(2,ID) = size(X,2);
             end
             
             % -- display the split
@@ -885,14 +885,14 @@ for TRIAL = 3:size(conditions,2)
 
             nexttile
             plot(EKF_X,'.', 'markersize', 8); disp(ID);
-            hold on; plot(SplitTime(2,ID)*2, EKF_X(1,SplitTime(2,ID)*2),'r.', 'markersize', 12);
+            hold on; plot(SplitTime(2,ID), EKF_X(1,SplitTime(2,ID)),'r.', 'markersize', 12);
             axis square; title(sprintf('%4d', ID_List(ID)),'fontsize', 12, 'fontweight', 'normal');
         end
     end
 end
 
 % -- save the data in a csv file
-csvwrite('stats data\SplitTime.csv',SplitTime);
+csvwrite('stats data\SplitTime.csv',SplitTime');
 
 end
 
