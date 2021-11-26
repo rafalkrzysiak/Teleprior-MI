@@ -48,7 +48,7 @@ conditions = ["1","2","3","4"];
 % FilterAll(ID_List, trials, conditions, ID_conditions, PartialRAW, ID_Data);
 % PlotAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 % PlotAllTurnRates(ID_List, trials, conditions, ID_conditions);
-timeToFind(ID_List, trials, conditions, ID_conditions, ID_Data);
+% timeToFind(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CompareSpeed(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CompareTurnRates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % StoreTimeRM(ID_List, trials, conditions, ID_conditions, ID_Data);
