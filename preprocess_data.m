@@ -55,12 +55,13 @@ conditions = ["1","2","3","4"];
 % FindTotalPathLength(ID_List, trials, conditions, ID_conditions, ID_Data);
 % timeStayingInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
 % DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
-CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
+% CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
 % PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 % SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 % SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
 % Stopping_percentage(ID_List, trials, conditions, ID_conditions, ID_Data)
+KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
 
 end
 
@@ -1664,5 +1665,62 @@ ax.FontSize = 18;
 % -- save the data
 csvwrite('stats data\TotalTimeStopping.csv', [TotalTimestopping',ID_Data(:,3:7)]);
 csvwrite('stats data\TotalPercentStopping.csv', [TotalPercentStopping',ID_Data(:,3:7)]);
+
+end
+
+function KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data)
+
+% -- get the number of participants
+Ns=size(ID_Data,1);
+
+% -- remember how the data is stored:
+% -- [time, vL, vR, key up, key down, key left, key right]
+% -- Create array that will store the degree values of the keypresses 
+% -- forward: 90, backward: 270, left: 180, right: 0
+theta = [90, 270, 0, 180]+45;
+dt = 0.1;
+
+% -- loop through every participant
+for ii = 1:Ns
+    
+    % -- loop through all conditions
+    for condition = 1:4
+       
+        % -- get the directory location of the specific
+        % -- participant and condition tested
+        dir = strcat('RAW/', num2str(ID_Data(ii,1)), '/condition_',...
+                     num2str(condition), '/WheelVel.csv');
+        U = load(dir);
+        
+        % -- convert keyboard boolean values as degrees
+        % -- then make it a single column vector
+        keys = U(:,4:end);
+        keys = keys.*theta;
+        Theta = sum(keys,2);
+        
+        % -- create a time vector that matches the length of
+        % -- time that was ran for the condition tested
+        r = 0:dt:(size(keys,1)-1)*dt;
+        
+        % -- define the v_dot size
+        v_dot = zeros(size(Theta,1),1);
+        theta_dot = v_dot;
+        r_dot = theta_dot;
+        v = theta_dot;
+        
+        % -- we want to loop throughout time
+        % -- v = r*exp(i*theta)
+        % -- v_dot = theta_dot*r*exp(i*theta) + r_dot*exp(i*theta)
+        for t = 2:size(keys,1)
+           % -- calculate v_dot
+           v(t,1) = r(t)*(cosd(Theta(t)) + sind(Theta(t)));
+           theta_dot(t,1) = (Theta(t) - Theta(t-1))/dt;
+           r_dot(t,1) = (r(t) - r(t-1))/dt;
+           v_dot(t,1) = theta_dot(t-1,1)*r(t)*(cosd(Theta(t)) + sind(Theta(t))) + ...
+                          r_dot(t-1,1)*(cosd(Theta(t)) + sind(Theta(t)));
+        end
+        
+    end
+end
 
 end
