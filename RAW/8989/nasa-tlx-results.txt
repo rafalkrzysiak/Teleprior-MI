@@ -1,0 +1,5 @@
+Experiment 1,8989,Condition 0,85,35,40,5,5,5
+Experiment 1,8989,Condition 1,30,40,60,0,20,15
+Experiment 1,8989,Condition 2,5,5,25,0,20,5
+Experiment 1,8989,Condition 3,40,5,55,0,5,5
+Experiment 1,8989,Condition 4,45,45,45,0,35,20

@@ -1,0 +1,5 @@
+Experiment 1,6801,Condition 0,0,0,0,10,15,0
+Experiment 1,6801,Condition 1,0,5,20,0,10,5
+Experiment 1,6801,Condition 2,25,0,20,0,0,10
+Experiment 1,6801,Condition 3,0,0,0,0,0,0
+Experiment 1,6801,Condition 4,0,0,0,0,0,0

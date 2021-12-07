@@ -1,0 +1,5 @@
+Experiment 1,1418,Condition 0,0,0,0,0,0,0
+Experiment 1,1418,Condition 1,5,0,5,0,15,0
+Experiment 1,1418,Condition 2,5,0,0,0,0,0
+Experiment 1,1418,Condition 3,10,0,0,5,15,0
+Experiment 1,1418,Condition 4,0,0,0,0,0,0

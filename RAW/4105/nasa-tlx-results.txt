@@ -1,0 +1,5 @@
+Experiment 1,4105,Condition 0,0,0,50,25,35,35
+Experiment 1,4105,Condition 1,0,0,50,0,30,20
+Experiment 1,4105,Condition 2,0,0,35,0,0,0
+Experiment 1,4105,Condition 3,0,0,35,0,0,0
+Experiment 1,4105,Condition 4,0,0,40,0,0,15

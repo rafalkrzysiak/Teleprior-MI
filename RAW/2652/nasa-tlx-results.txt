@@ -1,0 +1,5 @@
+Experiment 1,2652,Condition 0,0,0,0,0,0,0
+Experiment 1,2652,Condition 1,30,0,50,20,30,0
+Experiment 1,2652,Condition 2,10,0,35,5,10,0
+Experiment 1,2652,Condition 3,30,0,30,30,20,20
+Experiment 1,2652,Condition 4,20,0,40,40,20,50

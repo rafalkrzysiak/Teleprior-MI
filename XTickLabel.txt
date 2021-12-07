@@ -1,0 +1,4 @@
+\begin{tabular}{c} No Map \\ No Target\end{tabular}
+\begin{tabular}{c} No Map \\ Yes Target\end{tabular}
+\begin{tabular}{c} Yes Map \\ No Target\end{tabular}
+\begin{tabular}{c} Yes Map \\ Yes Target\end{tabular}

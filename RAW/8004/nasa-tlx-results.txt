@@ -1,0 +1,6 @@
+Experiment 1,8004,Condition 0,35,30,5,10,30,0
+Experiment 1,8004,Condition 1,55,35,35,10,60,5
+Experiment 1,8004,Condition 2,60,30,65,30,80,35
+Experiment 1,8004,Condition 3,65,20,75,0,35,20
+Experiment 1,8004,Condition 4,70,30,85,40,65,65
+

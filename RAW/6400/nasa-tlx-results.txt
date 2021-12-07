@@ -1,0 +1,5 @@
+Experiment 1,6400,Condition 0,40,35,50,50,30,50
+Experiment 1,6400,Condition 1,45,35,50,35,55,50
+Experiment 1,6400,Condition 2,50,50,55,20,45,45
+Experiment 1,6400,Condition 3,50,45,50,30,30,40
+Experiment 1,6400,Condition 4,30,10,25,5,20,25

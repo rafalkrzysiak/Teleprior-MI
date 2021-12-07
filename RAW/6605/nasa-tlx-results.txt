@@ -1,0 +1,5 @@
+Experiment 1,6605,Condition 0,15,0,15,30,0,10
+Experiment 1,6605,Condition 1,85,60,90,25,65,70
+Experiment 1,6605,Condition 2,60,10,55,5,55,50
+Experiment 1,6605,Condition 3,55,40,65,20,55,55
+Experiment 1,6605,Condition 4,65,45,70,20,50,70

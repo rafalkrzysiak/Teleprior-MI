@@ -1,0 +1,6 @@
+Experiment 1,1181,Condition 0,50,20,60,0,35,50
+Experiment 1,1181,Condition 1,70,55,60,0,70,80
+Experiment 1,1181,Condition 2,30,50,100,0,65,50
+Experiment 1,1181,Condition 3,60,55,100,5,50,70
+Experiment 1,1181,Condition 4,50,55,100,0,50,30
+

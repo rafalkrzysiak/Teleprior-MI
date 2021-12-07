@@ -1,0 +1,5 @@
+Experiment 1,3472,Condition 1,10,25,40,15,35,55
+Experiment 1,3472,Condition 1,30,55,55,0,20,55
+Experiment 1,3472,Condition 1,0,25,75,0,40,5
+Experiment 1,3472,Condition 1,25,60,35,5,60,60
+Experiment 1,3472,Condition 1,0,0,60,0,10,0

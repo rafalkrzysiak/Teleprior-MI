@@ -55,10 +55,12 @@ conditions = ["1","2","3","4"];
 % FindTotalPathLength(ID_List, trials, conditions, ID_conditions, ID_Data);
 % timeStayingInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
 % DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
-% CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
+CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
 % PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 % SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 % SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
+% NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
+% Stopping_percentage(ID_List, trials, conditions, ID_conditions, ID_Data)
 
 end
 
@@ -905,7 +907,7 @@ function FindTotalPathLength(ID_List, trials, conditions, ID_conditions, ID_Data
 % -- create a variable to contain the total distance
 % -- that each participant drives during each of the trials
 % -- with size (# trials x # participants)
-TotalDistance = zeros(size(trials,2), size(ID_List,1));
+TotalDistance = zeros(size(trials,2)+1, size(ID_List,1));
 
 % -- loop through every trial ran
 for TRIAL = 1:size(trials,2)
@@ -925,12 +927,32 @@ for TRIAL = 1:size(trials,2)
         X = csvread(dir);
         
         % -- loop through the duration of the trial starting with t = 1
-        for t = 2:size(X,2)
-           % -- get the dx and dy of the position 
-           % -- then calculate the norm of dx and dy
-           dx = X(1,t) - X(1,t-1);
-           dy = X(2,t) - X(2,t-1);
-           TotalDistance(TRIAL, ID) = TotalDistance(TRIAL, ID) + sqrt(dx^2 + dy^2);
+        if TRIAL < 4
+            for t = 2:size(X,2)
+               % -- get the dx and dy of the position 
+               % -- then calculate the norm of dx and dy
+               dx = X(1,t) - X(1,t-1);
+               dy = X(2,t) - X(2,t-1);
+               TotalDistance(TRIAL, ID) = TotalDistance(TRIAL, ID) + sqrt(dx^2 + dy^2);
+            end
+        else
+            for t = 2:ID_Data(ID,end)
+               % -- get the dx and dy of the position 
+               % -- then calculate the norm of dx and dy
+               dx = X(1,t) - X(1,t-1);
+               dy = X(2,t) - X(2,t-1);
+               TotalDistance(TRIAL, ID) = TotalDistance(TRIAL, ID) + sqrt(dx^2 + dy^2);
+            end
+            
+            if ID_Data(ID, 2) % -- if condition 4b
+                for t = ID_Data(ID,end):size(X,2)
+                   % -- get the dx and dy of the position 
+                   % -- then calculate the norm of dx and dy
+                   dx = X(1,t) - X(1,t-1);
+                   dy = X(2,t) - X(2,t-1);
+                   TotalDistance(TRIAL+1, ID) = TotalDistance(TRIAL+1, ID) + sqrt(dx^2 + dy^2);
+                end
+            end
         end
         
     end
@@ -941,18 +963,18 @@ end
 % -- against every participant
 figure(1); gcf; clf;
 for participant = 1:size(ID_List,1)
-    hold on; plot([1, 2, 3, 4], TotalDistance(:, participant), '.-', 'linewidth', 2, 'markersize', 2);
+    hold on; plot([1, 2, 3, 4, 5], TotalDistance(:, participant), '.-', 'linewidth', 2, 'markersize', 2);
 end
 
 % -- Make the figure look nice
 ax = gca;
-axis([1 4 0 50]); grid on;
+axis([1 5 0 50]); grid on;
 xlabel('Condition number'); ylabel('Total distance traveled (m)');
-ax.XTickLabel = {'1', '', '2', '','3', '', '4'};
+ax.XTickLabel = {'1', '', '2', '','3', '', '4', '', '5'};
 ax.FontSize = 18;
 
 % -- save data to csv file
-csvwrite('stats data/TotalDistanceTravel.csv',TotalDistance);
+csvwrite('stats data/TotalDistanceTravel.csv',TotalDistance');
 
 end
 
@@ -1043,7 +1065,7 @@ ax.XTickLabel = {'1', '', '2', '','3', '', '4'};
 ax.FontSize = 18;
 
 % -- save the data
-csvwrite('stats data\TotalTimeInPlace.csv', TotalTimeInPlace);
+csvwrite('stats data\TotalTimeInPlace.csv', TotalTimeInPlace');
 
 end
 
@@ -1052,72 +1074,47 @@ function DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data)
 % -- get the number of participants
 Ns=size(ID_Data,1);
 
+% -- opacity of the trajectory line
+alpha = 0.25;
+
 % -- Load the omron lab mosaic 
 OmronLabMap = imread('maps/OmronLabMosaicCrop_lowres.jpg');
 
 % -- loop though all conditions and sub-conditions
 for Condition = 1:4
    % -- create a figure that corresponds to the condition number
-   figure(Condition+1); gcf; clf;
+   figure(Condition); gcf; clf;
    
    % -- plot the Search environment
-   imagesc([-0.25 15],[-0.5 7.5], flip(OmronLabMap));
+   imagesc([-0.15 15],[-0.5 7.5], flip(OmronLabMap));
    set(gca,'xdir','reverse','ydir','reverse');
-   
-   % -- 
-   if Condition == 4
-       % -- create another figure for condition 4
-       figure(Condition+2); gcf; clf;
-
-       % -- plot the Search environment
-       imagesc([-0.25 15],[-0.5 7.5], flip(OmronLabMap));
-       set(gca,'xdir','reverse','ydir','reverse');
-   end
    
    % -- loop through all participants of the experiment
    for ii = 1:Ns
        
         % -- create the string that corresponds to the name of the file
         % -- that contains the trajectory data
-        EKFtrajFile = strcat('filtered_data/', num2str(ID_Data(ii,1)), ...
-            '/EKFtraj_condition_', num2str(Condition), '.csv');
+        trajFile = strcat('RAW/', num2str(ID_Data(ii,1)), ...
+            '/trial_000', num2str(Condition+1), '/data.csv');
         
         % -- load the file that contains the trajectory data
-        X = load(EKFtrajFile);
-       
-       % -- check what condition it is
-       % -- if the condition is not 4 we have to divide up the trajectory
-       % -- otherwise just plot everything
-       if Condition == 4
-           if ID_Data(ii, 2)
-               figure(Condition+2);
-               % -- plot all data for condition 4b
-               hold on; plot(X(1,ID_Data(ii, end)), X(2,ID_Data(ii, end)), 'bs', 'markersize', 10, 'linewidth', 3); % -- starting point
-               plot(X(1,end), X(2,end), 'bx', 'markersize', 10, 'linewidth', 3); % -- end point
-               plot(X(1,ID_Data(ii, end):end), X(2,ID_Data(ii, end):end), 'b-', 'linewidth', 2); % -- trajectory
-               plot(X(4,5), X(5,5), 'rs', 'markersize', 10, 'linewidth', 3); % -- Target location
-               axis image; title(sprintf('Condition: %db', Condition), 'fontsize', 18, 'fontweight', 'normal');
-               
-           end
-           
-           % -- we want to regardless plot all of condition 4a
-           figure(Condition+1);
-           % -- plot all data prior to condition 4b
-           hold on; plot(X(1,1), X(2,1), 'bs', 'markersize', 10, 'linewidth', 3); % -- starting point
-           plot(X(1,ID_Data(ii, end)), X(2,ID_Data(ii, end)), 'bx', 'markersize', 10, 'linewidth', 3); % -- end point
-           plot(X(1,1:ID_Data(ii, end)), X(2,1:ID_Data(ii, end)), 'b-', 'linewidth', 2); % -- trajectory
-           plot(X(4,5), X(5,5), 'rs', 'markersize', 10, 'linewidth', 3); % -- Target location
-           axis image; title(sprintf('Condition: %da', Condition), 'fontsize', 18, 'fontweight', 'normal');
-       else
-           figure(Condition+1);
-           % -- plot all data prior to condition 4
-           hold on; plot(X(1,1), X(2,1), 'bs', 'markersize', 10, 'linewidth', 3); % -- starting point
-           plot(X(1,end), X(2,end), 'bx', 'markersize', 10, 'linewidth', 3); % -- end point
-           plot(X(1,:), X(2,:), 'b-', 'linewidth', 2); % -- trajectory
-           plot(X(4,5), X(5,5), 'rs', 'markersize', 10, 'linewidth', 3); % -- Target location
-           axis image; title(sprintf('Condition: %d', Condition), 'fontsize', 18, 'fontweight', 'normal');
-       end
+        Data = csvread(trajFile,2);
+        X(:,1) = Data(:,4); X(:,2) = Data(:,5); 
+        X(:,3) = Data(:,13); X(:,4) = Data(:,14);
+        X = X(X(:,1)~=0,:); % -- remove the zeros
+        
+        figure(Condition);
+        % -- plot all data prior to condition 4
+        hold on; plot(X(5,1), X(5,2), 'bs', 'markersize', 10, 'linewidth', 3); % -- starting point
+        plot(X(end,1), X(end,2), 'bx', 'markersize', 10, 'linewidth', 3); % -- end point
+        plot(X(5:end,1), X(5:end,2), 'color',[0,0,0]+alpha, 'linewidth', 1); % -- trajectory
+        plot(X(end,3), X(end,4), 'gs', 'markersize', 10, 'linewidth', 3); % -- Target location
+        axis image; xlabel('X(m)'); ylabel('Y(m)'); 
+        %title(sprintf('Condition: %d', Condition), 'fontsize', 18, 'fontweight', 'normal');
+        clear X;
    end % -- end participant loop
+   ax = gca;
+   ax.FontSize = 18;
 end % -- end condition loop
 
 end
@@ -1126,14 +1123,16 @@ function CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Da
 Ns = size(ID_Data, 1);
 conditionlabel = {'No Map, No Target', 'No Map, Yes Target',...
                   'Yes Map, No Target', 'Yes Map, Yes Target'};
+              
+% -- array to hold all mean values of commanded acceleration
+% -- for each participant during each trial
+CommandedAccel = zeros(Ns, 5);
 
 % -- loop through all conditions
 for Condition = 1:4
-    % -- create figure
-    figure(Condition+1); gcf; clf;
     
     % -- loop through each participant
-    for ii = Ns:Ns
+    for ii = 1:Ns
         % -- define the file that contains commanded wheel speeds and load it
         CommandedInputFile = strcat('RAW/', num2str(ID_Data(ii,1)), ...
             '/condition_', num2str(Condition), '/WheelVel.csv');
@@ -1147,17 +1146,50 @@ for Condition = 1:4
         % -- define the commanded acceleration variable and
         % -- loop through all the commanded speed values and get the
         % -- commanded acceleration
-        CommandAccel = zeros(1, size(U, 1)-1);
+        Accel = zeros(1, size(CommandedSpeed, 1)-1);
         
-        for t = 2:size(U, 1)
-           % -- a=dv/dt
-           CommandAccel(1,t-1) = (CommandedSpeed(t) - CommandedSpeed(t-1)) / (U(t) - U(t-1)); 
-        end
-        
-        % -- plot the commanded acceleration 
-        hold on; 
-        plot(U(2:end,1), CommandAccel);
-        
+        % -- loop through only conditions 1-3 for each participant
+        if Condition < 4
+            for t = 2:size(U, 1)
+               % -- a=dv/dt
+               Accel(1,t-1) = (CommandedSpeed(t) - CommandedSpeed(t-1)) / (U(t) - U(t-1)); 
+            end
+            
+            % -- get the mean of the Accel
+            CommandedAccel(ii,Condition) = mean(Accel);
+            
+        else % -- looking at condition 4
+            % -- specifically looking at condition 4b
+            if ID_Data(ii,2)
+                Accel = zeros(1, size(CommandedSpeed(1:5*ID_Data(ii,end)), 2)-1);
+                for t = 2:5*ID_Data(ii,end)
+                   % -- a=dv/dt
+                   Accel(1,t-1) = (CommandedSpeed(t) - CommandedSpeed(t-1)) / (U(t) - U(t-1)); 
+                end
+
+                % -- get the mean of the Accel
+                CommandedAccel(ii,Condition) = mean(Accel);
+                
+                Accel = zeros(1, size(CommandedSpeed(5*ID_Data(ii,end):end), 2)-1);
+                for t = 5*ID_Data(ii,end):size(CommandedSpeed,1)
+                   % -- a=dv/dt
+                   Accel(1,t-1) = (CommandedSpeed(t) - CommandedSpeed(t-1)) / (U(t) - U(t-1)); 
+                end
+
+                % -- get the mean of the Accel
+                CommandedAccel(ii,Condition+1) = mean(Accel);
+                
+            else
+                % -- if not breaking trust (condition 4a)
+                for t = 2:size(U, 1)
+                   % -- a=dv/dt
+                   Accel(1,t-1) = (CommandedSpeed(t) - CommandedSpeed(t-1)) / (U(t) - U(t-1)); 
+                end
+
+                % -- get the mean of the Accel
+                CommandedAccel(ii,Condition) = mean(Accel);
+            end
+        end 
     end
     
     % -- make figure look nice
@@ -1168,6 +1200,10 @@ for Condition = 1:4
     ax.FontSize = 18;
 end
 
+% -- create csv file to store the commanded acceleration for each
+% -- participant during each condition
+csvwrite('stats data/CommandedAccel.csv',[CommandedAccel,ID_Data(:,3:end-1)]);
+
 end
 
 function PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data)
@@ -1177,116 +1213,210 @@ Ns=size(ID_Data,1);
 % Load the omron lab mosaic 
 OmronLabMap = imread('maps/OmronLabMosaicCrop_lowres.jpg');
 
-nr=7; % number of rows
-nc=4; % number of conditions
+nr=5; % number of rows
+nc=5; % number of conditions (remember: condition 4 is split into 4a and 4b)
 
 for ii = 1:size(ID_Data, 1)
-    % -- create figure dedicated to an individual ID
-    % -- and create a tiled layout of 1x4
-    figure(ii); gcf; clf;% -- contains fig num 1 -> # participants
     
-    % -- loop through each of the conditions
-    for Condition = 1:4
-        subplot(nr,nc,Condition)
-        % -- create the string that corresponds to the name of the file
-        % -- that contains the trajectory data
-        EKFtrajFile = strcat('filtered_data/', num2str(ID_Data(ii,1)), ...
-            '/EKFtraj_condition_', num2str(Condition), '.csv');
+    % -- only want to loop through individuals that hav undergone
+    % -- condition 4b (incorrect prior knowledge of target location)
+    if ID_Data(ii, 2)
         
-        % -- load the file that contains the trajectory data
-        X = load(EKFtrajFile);
-        
-        % -- begin plotting the data
-%             nexttile
-        imagesc([-1 15],[-1 7.5], flip(OmronLabMap));
-        set(gca,'xdir','reverse','ydir','reverse');
-        hold on; plot(X(1,1), X(2,1), 'bs', 'markersize', 6, 'linewidth', 3); % -- starting point
-        plot(X(1,end), X(2,end), 'bx', 'markersize', 6, 'linewidth', 3); % -- end point
-        plot(X(1,:), X(2,:), 'b-', 'linewidth', 3); % -- trajectory
-        plot(X(4,1), X(5,1), 'rs', 'markersize', 6, 'linewidth', 3); % -- Target location
-        axis image; 
-        title(sprintf('Condition:%d', Condition), 'fontsize', 18, 'fontweight', 'normal');
-        
-        % -- plot the speed of the robot
-        subplot(nr,nc,Condition+nc*1)
-        EKFspeedFile = strcat('filtered_data/', num2str(ID_Data(ii,1)), ...
-            '/EKFVel_condition_', num2str(Condition), '.csv');
-        SP = load(EKFspeedFile);
-        dt = 0.5;
-        time = 0:dt:size(SP,1)*dt;
-        plot(time(1:end-1), SP, 'b-', 'linewidth', 2);
-        ylabel('Speed (m/s)');
-        xlabel('time (s)');
-        
-        % -- plot the turn rate of the robot
-        subplot(nr,nc,Condition+nc*2)
-        EKFomFile = strcat('filtered_data/', num2str(ID_Data(ii,1)), ...
-            '/EKFom_condition_', num2str(Condition), '.csv');
-        OM = load(EKFomFile);
-        dt = 0.5;
-        time = 0:dt:size(OM,1)*dt;
-        plot(time(1:end-1), OM, 'b-', 'linewidth', 2);
-        ylabel('Turn rate (rad/s)');
-        xlabel('time (s)');
-        
-        % -- define the file that contains commanded wheel speeds and load it
-        CommandedInputFile = strcat('RAW/', num2str(ID_Data(ii,1)), ...
-            '/condition_', num2str(Condition), '/WheelVel.csv');
-        U = load(CommandedInputFile);
-        
-        % -- convert the commanded left and right wheel speeds to 
-        % -- commanded speed and turnrate
-        % -- commanded wheel speeds saved in mm/s
-        CommandedSpeed = (((U(:,2) + U(:,3))/ 1000) / 2);
-        CommandedTurnRate = (((U(:,2) - U(:,3))/ 1000) / .3084);
-        
-        % -- define the time range
-        time = U(:,1);
-        
-        % -- plot the commanded speed for each condition
-        subplot(nr,nc,Condition+nc*3)
-        plot(time, CommandedSpeed, 'b-', 'linewidth', 2);
-        ylabel({'Commanded','speed (m/s)'});
-        xlabel('time (s)');
-        
-        % -- plot the commanded turn rate for each condition
-        subplot(nr,nc,Condition+nc*4)
-        plot(time, CommandedTurnRate, 'b-', 'linewidth', 2);
-        ylabel({'Commanded','turn rate (rad/s)'});
-        xlabel('time (s)');
-        
-        % -- commanded acceleration
-        CommandAccel = zeros(1, size(CommandedSpeed, 1)-1);
-        
-        for t = 2:size(CommandedSpeed, 1)
-           % -- a=dv/dt
-           CommandAccel(1,t-1) = (CommandedSpeed(t) - CommandedSpeed(t-1)) / (U(t) - U(t-1)); 
+        % -- create figure dedicated to an individual ID
+        % -- and create a tiled layout of 1x4
+        figure(ii); gcf; clf;% -- contains fig num 1 -> # participants
+    
+        % -- loop through each of the conditions
+        for Condition = 1:4
+            
+            % -- create the string that corresponds to the name of the file
+            % -- that contains the trajectory data
+            EKFtrajFile = strcat('filtered_data/', num2str(ID_Data(ii,1)), ...
+                '/EKFtraj_condition_', num2str(Condition), '.csv');
+
+            % -- load the file that contains the trajectory data
+            X = load(EKFtrajFile);
+            
+            EKFspeedFile = strcat('filtered_data/', num2str(ID_Data(ii,1)), ...
+                '/EKFVel_condition_', num2str(Condition), '.csv');
+            SP = load(EKFspeedFile);
+            dt = 0.5;
+            
+            EKFomFile = strcat('filtered_data/', num2str(ID_Data(ii,1)), ...
+                '/EKFom_condition_', num2str(Condition), '.csv');
+            OM = load(EKFomFile);
+            
+            % -- define the file that contains commanded wheel speeds and load it
+            CommandedInputFile = strcat('RAW/', num2str(ID_Data(ii,1)), ...
+                '/condition_', num2str(Condition), '/WheelVel.csv');
+            U = load(CommandedInputFile);
+
+            % -- convert the commanded left and right wheel speeds to 
+            % -- commanded speed and turnrate
+            % -- commanded wheel speeds saved in mm/s
+            CommandedSpeed = (((U(:,2) + U(:,3))/ 1000) / 2);
+            CommandedTurnRate = (((U(:,2) - U(:,3))/ 1000) / .3084);
+            
+            % -- check what condition we are trying to plot
+            if Condition < 4
+                % -- begin plotting the data
+                subplot(nr,nc,5*(Condition-1)+1)
+                imagesc([-1 15],[-1 7.5], flip(OmronLabMap));
+                set(gca,'xdir','reverse','ydir','reverse');
+                hold on; plot(X(1,1), X(2,1), 'bs', 'markersize', 6, 'linewidth', 3); % -- starting point
+                plot(X(1,end), X(2,end), 'bx', 'markersize', 6, 'linewidth', 3); % -- end point
+                plot(X(1,:), X(2,:), 'b-', 'linewidth', 3); % -- trajectory
+                plot(X(4,1), X(5,1), 'rs', 'markersize', 6, 'linewidth', 3); % -- Target location
+                axis image; 
+                %title(sprintf('Condition:%d', Condition), 'fontsize', 18, 'fontweight', 'normal');
+
+                % -- plot the speed of the robot
+                subplot(nr,nc,5*(Condition-1)+2)
+                time = 0:dt:size(SP,1)*dt;
+                plot(time(1:end-1), abs(SP), 'b-', 'linewidth', 2);
+                ylabel('Speed (m/s)');
+                xlabel('time (s)');
+                grid on;
+
+                % -- plot the turn rate of the robot
+                subplot(nr,nc,5*(Condition-1)+3)
+                time = 0:dt:size(OM,1)*dt;
+                plot(time(1:end-1), abs(OM), 'b-', 'linewidth', 2);
+                ylabel('Turn rate (rad/s)');
+                xlabel('time (s)'); grid on;
+
+                % -- plot the commanded speed for each condition
+                subplot(nr,nc,5*(Condition-1)+4)
+                % -- define the time range
+                time = U(:,1);
+                plot(time, abs(CommandedSpeed), 'k-', 'linewidth', 2);
+                ylabel({'Commanded','speed (m/s)'});
+                xlabel('time (s)'); grid on;
+
+                % -- plot the commanded turn rate for each condition
+                subplot(nr,nc,5*(Condition-1)+5)
+                plot(time, abs(CommandedTurnRate), 'k-', 'linewidth', 2);
+                ylabel({'Commanded','turn rate (rad/s)'});
+                xlabel('time (s)'); grid on;
+            
+            else % -- if we are looking at condition 4
+                % -- begin plotting the data
+                subplot(nr,nc,5*(Condition-1)+1)
+                imagesc([-1 15],[-1 7.5], flip(OmronLabMap));
+                set(gca,'xdir','reverse','ydir','reverse');
+                hold on; plot(X(1,1), X(2,1), 'bs', 'markersize', 6, 'linewidth', 3); % -- starting point
+                plot(X(1,ID_Data(ii,end)), X(2,ID_Data(ii,end)), 'bx', 'markersize', 6, 'linewidth', 3); % -- end point
+                plot(X(1,1:ID_Data(ii,end)), X(2,1:ID_Data(ii,end)), 'b-', 'linewidth', 3); % -- trajectory
+                plot(X(4,1), X(5,1), 'rs', 'markersize', 6, 'linewidth', 3); % -- Target location
+                axis image; 
+                %title(sprintf('Condition:%d', Condition), 'fontsize', 18, 'fontweight', 'normal');
+
+                % -- plot the speed of the robot
+                subplot(nr,nc,5*(Condition-1)+2)
+                time = 0:dt:size(SP,1)*dt;
+                plot(time(1:ID_Data(ii,end)), abs(SP(1:ID_Data(ii,end))), 'b-', 'linewidth', 2);
+                ylabel('Speed (m/s)');
+                xlabel('time (s)'); grid on;
+
+                % -- plot the turn rate of the robot
+                subplot(nr,nc,5*(Condition-1)+3)
+                time = 0:dt:size(OM,1)*dt;
+                plot(time(1:ID_Data(ii,end)), abs(OM(1:ID_Data(ii,end))), 'b-', 'linewidth', 2);
+                ylabel('Turn rate (rad/s)');
+                xlabel('time (s)'); grid on;
+
+                % -- plot the commanded speed for each condition
+                subplot(nr,nc,5*(Condition-1)+4)
+                % -- define the time range
+                time = U(:,1);
+                plot(time(1:5*ID_Data(ii,end)), abs(CommandedSpeed(1:5*ID_Data(ii,end))), 'k-', 'linewidth', 2);
+                ylabel({'Commanded','speed (m/s)'});
+                xlabel('time (s)'); grid on;
+
+                % -- plot the commanded turn rate for each condition
+                subplot(nr,nc,5*(Condition-1)+5)
+                plot(time(1:5*ID_Data(ii,end)), abs(CommandedTurnRate(1:5*ID_Data(ii,end))), 'k-', 'linewidth', 2);
+                ylabel({'Commanded','turn rate (rad/s)'});
+                xlabel('time (s)'); grid on;
+                
+                % --------------------------------------------
+                % -- begin plotting the data for condition 4b
+                subplot(nr,nc,5*(Condition)+1)
+                imagesc([-1 15],[-1 7.5], flip(OmronLabMap));
+                set(gca,'xdir','reverse','ydir','reverse');
+                hold on; plot(X(1,ID_Data(ii,end)), X(2,ID_Data(ii,end)), 'bs', 'markersize', 6, 'linewidth', 3); % -- starting point
+                plot(X(1,end), X(2,end), 'bx', 'markersize', 6, 'linewidth', 3); % -- end point
+                plot(X(1,ID_Data(ii,end):end), X(2,ID_Data(ii,end):end), 'b-', 'linewidth', 3); % -- trajectory
+                plot(X(4,1), X(5,1), 'rs', 'markersize', 6, 'linewidth', 3); % -- Target location
+                axis image; 
+                %title(sprintf('Condition:%d', Condition), 'fontsize', 18, 'fontweight', 'normal');
+
+                % -- plot the speed of the robot
+                subplot(nr,nc,5*(Condition)+2)
+                time = 0:dt:size(SP,1)*dt;
+                plot(time(ID_Data(ii,end):end-1), abs(SP(ID_Data(ii,end):end)), 'b-', 'linewidth', 2);
+                ylabel('Speed (m/s)');
+                xlabel('time (s)'); grid on;
+
+                % -- plot the turn rate of the robot
+                subplot(nr,nc,5*(Condition)+3)
+                time = 0:dt:size(OM,1)*dt;
+                plot(time(ID_Data(ii,end):end-1), abs(OM(ID_Data(ii,end):end)), 'b-', 'linewidth', 2);
+                ylabel('Turn rate (rad/s)');
+                xlabel('time (s)'); grid on;
+
+                % -- plot the commanded speed for each condition
+                subplot(nr,nc,5*(Condition)+4)
+                % -- define the time range
+                time = U(:,1);
+                plot(time(5*ID_Data(ii,end):end), abs(CommandedSpeed(5*ID_Data(ii,end):end)), 'k-', 'linewidth', 2);
+                ylabel({'Commanded','speed (m/s)'});
+                xlabel('time (s)'); grid on;
+
+                % -- plot the commanded turn rate for each condition
+                subplot(nr,nc,5*(Condition)+5)
+                plot(time(5*ID_Data(ii,end):end), abs(CommandedTurnRate(5*ID_Data(ii,end):end)), 'k-', 'linewidth', 2);
+                ylabel({'Commanded','turn rate (rad/s)'});
+                xlabel('time (s)'); grid on;
+            
+            end
+
+            drawnow;
+    %         
+    %         
+    %         % -- commanded acceleration
+    %         CommandAccel = zeros(1, size(CommandedSpeed, 1)-1);
+    %         
+    %         for t = 2:size(CommandedSpeed, 1)
+    %            % -- a=dv/dt
+    %            CommandAccel(1,t-1) = (CommandedSpeed(t) - CommandedSpeed(t-1)) / (U(t) - U(t-1)); 
+    %         end
+    %         
+    %         % -- plot the commanded acceleration 
+    %         subplot(nr,nc,Condition+nc*5)
+    %         plot(U(2:end,1), CommandAccel);
+    %         ylabel({'Commanded', 'acceleration (m/s^2)'});
+    %         xlabel('time (s)');
+    %         
+    %         % -- commanded angular acceleration
+    %         CommandAngAccel = zeros(1, size(CommandedTurnRate, 1)-1);
+    %         
+    %         for t = 2:size(CommandedSpeed, 1)
+    %            % -- a=domega/dt
+    %            CommandAngAccel(1,t-1) = (CommandedTurnRate(t) - CommandedTurnRate(t-1)) / (U(t) - U(t-1)); 
+    %         end
+    %         
+    %         % -- plot the commanded angular acceleration 
+    %         subplot(nr,nc,Condition+nc*6)
+    %         plot(U(2:end,1), CommandAngAccel);
+    %         ylabel({'Commanded Ang.', 'acceleration (rad/s^2)'});
+    %         xlabel('time (s)');
+
+            
         end
-        
-        % -- plot the commanded acceleration 
-        subplot(nr,nc,Condition+nc*5)
-        plot(U(2:end,1), CommandAccel);
-        ylabel({'Commanded', 'acceleration (m/s^2)'});
-        xlabel('time (s)');
-        
-        % -- commanded angular acceleration
-        CommandAngAccel = zeros(1, size(CommandedTurnRate, 1)-1);
-        
-        for t = 2:size(CommandedSpeed, 1)
-           % -- a=domega/dt
-           CommandAngAccel(1,t-1) = (CommandedTurnRate(t) - CommandedTurnRate(t-1)) / (U(t) - U(t-1)); 
-        end
-        
-        % -- plot the commanded angular acceleration 
-        subplot(nr,nc,Condition+nc*6)
-        plot(U(2:end,1), CommandAngAccel);
-        ylabel({'Commanded Ang.', 'acceleration (rad/s^2)'});
-        xlabel('time (s)');
-        
-        drawnow;
+        set(gcf, 'position', [54, 511, 1681, 441]);
+    %     print('-dpng', ['./stats data/', num2str(ID_Data(ii,1)), '_traj.png']);
     end
-    set(gcf, 'position', [54, 511, 1681, 441]);
-%     print('-dpng', ['./stats data/', num2str(ID_Data(ii,1)), '_traj.png']);
 end
 
 end
@@ -1404,5 +1534,135 @@ end
 % -- save the arrays as csv files within the stats data folder
 csvwrite('stats data\RobotTurnrateData.csv', RobotTurnrate);
 csvwrite('stats data\ComTurnrateData.csv', CommandedTurnrate);
+
+end
+
+function NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
+
+% -- get the number of participants
+Ns=size(ID_Data,1);
+
+% -- create variable to store all the mean values for the
+% -- NASA TLX questions asked during the experiment
+% -- size of (Ns x 7) = (Number of participants x [ID, 6 questions])
+% -- Mental demand: Low - High
+% -- Physical demand: Low - High
+% -- Temporal demand: Low - High
+% -- Performance: Perfect - Failure
+% -- Effort: Low - High
+% -- Frustration: Low - High
+AvgResults = zeros(Ns, 6);
+
+% -- loop through all participants
+for ii = 1:Ns
+     % -- create str that corresponds to NASA TLX data location
+     dir = strcat('RAW/', num2str(ID_Data(ii,1)), '/nasa-tlx-results.txt');
+     NASATLX = readtable(dir); % -- data as table because of numbers and letters in txt file
+     
+     % -- extract the values of the answers only
+     results = table2array(NASATLX(:,4:9));
+     
+     % -- get the mean values of the answers
+     AvgResults(ii,:) = mean(results);
+end
+
+% -- save the results as a csv file later for the live script
+csvwrite('stats data/NASATLXResults.csv', AvgResults);
+
+end
+
+function Stopping_percentage(ID_List, trials, conditions, ID_conditions, ID_Data)
+% -- create a variable to contain the total time
+% -- that each participant statyed in place during each of the trials
+% -- with size (# trials x # participants)
+TotalTimestopping = zeros(size(trials,2)+1, size(ID_List,1));
+TotalPercentStopping = TotalTimestopping;
+
+% -- if speed is < 0.1 m/s save the number of timesteps
+% -- where 0.1 m/s is the threshhold
+thresh = 0.1;
+
+% -- time step dt
+dt = 0.5;
+
+% -- loop through every trial ran
+for TRIAL = 1:size(trials,2)
+    % -- convert the trial/condition variable into a number
+    trial = num2str(trials(TRIAL));
+    condition = num2str(conditions(TRIAL));
+    
+    % -- loop through all IDs 
+    for ID = 1:size(ID_List,1)
+        % -- read the data from the csv file
+        participantID = num2str(ID_List(ID));
+        
+        % -- read the data from the filtered data folder
+        % -- and store the data in a variable "X"
+        % -- State X is 5xT matrix where T is total time
+        dir = strcat("filtered_data/", participantID, "/EKFom_condition_", condition, ".csv");
+        X = csvread(dir);
+        
+        % -- check what condition we are looking at
+        if TRIAL == 4
+            % -- if condition 4b
+            if ID_Data(ID, 2) % -- if break condition condition met
+                for t = 1:size(X,1) % -- loop throughout the entire time
+                    if t >= ID_Data(ID,end) % -- if the timestep is on or past the break trust point, add the timesteps
+                        if X(t, 1) > thresh
+                            TotalTimestopping(TRIAL+1, ID) = TotalTimestopping(TRIAL+1, ID) + 1;
+                        end
+                    else % -- if the timestep is prior to break trust point, add the time steps
+                        if X(t, 1) > thresh
+                            TotalTimestopping(TRIAL, ID) = TotalTimestopping(TRIAL, ID) + 1;
+                        end
+                    end
+                end
+                TotalPercentStopping(TRIAL, ID) = TotalTimestopping(TRIAL, ID)/size(X,1);
+                TotalPercentStopping(TRIAL+1, ID) = TotalTimestopping(TRIAL+1, ID)/size(X,1);
+                
+            % -- otherwise, condition 4a
+            else
+                for t = 1:ID_Data(ID,end)
+                    if X(t, 1) > thresh
+                        TotalTimestopping(TRIAL, ID) = TotalTimestopping(TRIAL, ID) + 1;
+                    end
+                end
+                TotalPercentStopping(TRIAL, ID) = TotalTimestopping(TRIAL, ID)/size(X,1);
+            end
+            
+        % -- conditions 1-3
+        else
+            % -- loop through the duration of the trial starting with t = 0
+            for t = 1:size(X,1)
+               if X(t, 1) > thresh
+                   TotalTimestopping(TRIAL, ID) = TotalTimestopping(TRIAL, ID) + 1;
+               end
+            end
+            TotalPercentStopping(TRIAL, ID) = TotalTimestopping(TRIAL, ID)/size(X,1);
+        end
+    end
+end
+
+% -- convert from time steps to total time
+TotalTimestopping = dt*TotalTimestopping;
+
+% -- once the total time in place for every participant 
+% -- per trial is calculated, plot the total time in place
+% -- against every participant
+figure(1); gcf; clf;
+for participant = 1:size(ID_List,1)
+    hold on; plot([1, 2, 3, 4], TotalTimestopping(1:4, participant), '.-', 'linewidth', 2, 'markersize', 2);
+end
+
+% -- Make the figure look nice
+ax = gca;
+axis([1 4 0 300]); grid on;
+xlabel('Condition number'); ylabel('Total time stayed in place (s)');
+ax.XTickLabel = {'1', '', '2', '','3', '', '4'};
+ax.FontSize = 18;
+
+% -- save the data
+csvwrite('stats data\TotalTimeStopping.csv', [TotalTimestopping',ID_Data(:,3:7)]);
+csvwrite('stats data\TotalPercentStopping.csv', [TotalPercentStopping',ID_Data(:,3:7)]);
 
 end
