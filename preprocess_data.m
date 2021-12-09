@@ -61,7 +61,8 @@ conditions = ["1","2","3","4"];
 % SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
 % Stopping_percentage(ID_List, trials, conditions, ID_conditions, ID_Data)
-KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
+% KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
+TrackerError();
 
 end
 
@@ -1723,4 +1724,12 @@ for ii = 1:Ns
     end
 end
 
+end
+
+function TrackerError()
+
+% -- read the data collected for finding the tracker error
+% -- Define the directory that holds the csv file
+% -- Remember: trail_0001 -> board with two markers
+dir = "Tracking Error/trial_0001/data.csv";
 end
