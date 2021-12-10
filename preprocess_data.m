@@ -60,15 +60,12 @@ conditions = ["1","2","3","4"];
 % SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 % SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
-<<<<<<< Updated upstream
 % Stopping_percentage(ID_List, trials, conditions, ID_conditions, ID_Data)
 % KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
 % TrackerErrorBoard();
 TrackerErrorMarkersEverywhere();
-=======
-Stopping_percentage(ID_List, trials, conditions, ID_conditions, ID_Data)
+% Stopping_percentage(ID_List, trials, conditions, ID_conditions, ID_Data)
 % KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
->>>>>>> Stashed changes
 
 end
 
