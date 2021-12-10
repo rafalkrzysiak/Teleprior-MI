@@ -60,10 +60,15 @@ conditions = ["1","2","3","4"];
 % SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 % SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
+<<<<<<< Updated upstream
 % Stopping_percentage(ID_List, trials, conditions, ID_conditions, ID_Data)
 % KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
 % TrackerErrorBoard();
 TrackerErrorMarkersEverywhere();
+=======
+Stopping_percentage(ID_List, trials, conditions, ID_conditions, ID_Data)
+% KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
+>>>>>>> Stashed changes
 
 end
 
@@ -1605,17 +1610,20 @@ for TRIAL = 1:size(trials,2)
         dir = strcat("filtered_data/", participantID, "/EKFom_condition_", condition, ".csv");
         X = csvread(dir);
         
+        diry = strcat("filtered_data/", participantID, "/EKFVel_condition_", condition, ".csv");
+        Y = csvread(diry);
+        
         % -- check what condition we are looking at
         if TRIAL == 4
             % -- if condition 4b
             if ID_Data(ID, 2) % -- if break condition condition met
                 for t = 1:size(X,1) % -- loop throughout the entire time
                     if t >= ID_Data(ID,end) % -- if the timestep is on or past the break trust point, add the timesteps
-                        if X(t, 1) > thresh
+                        if X(t, 1) > thresh && Y(t,1) < thresh
                             TotalTimestopping(TRIAL+1, ID) = TotalTimestopping(TRIAL+1, ID) + 1;
                         end
                     else % -- if the timestep is prior to break trust point, add the time steps
-                        if X(t, 1) > thresh
+                        if X(t, 1) > thresh && Y(t,1) < thresh
                             TotalTimestopping(TRIAL, ID) = TotalTimestopping(TRIAL, ID) + 1;
                         end
                     end
@@ -1626,7 +1634,7 @@ for TRIAL = 1:size(trials,2)
             % -- otherwise, condition 4a
             else
                 for t = 1:ID_Data(ID,end)
-                    if X(t, 1) > thresh
+                    if X(t, 1) > thresh && Y(t,1) < thresh
                         TotalTimestopping(TRIAL, ID) = TotalTimestopping(TRIAL, ID) + 1;
                     end
                 end
@@ -1637,7 +1645,7 @@ for TRIAL = 1:size(trials,2)
         else
             % -- loop through the duration of the trial starting with t = 0
             for t = 1:size(X,1)
-               if X(t, 1) > thresh
+               if X(t, 1) > thresh && Y(t,1) < thresh
                    TotalTimestopping(TRIAL, ID) = TotalTimestopping(TRIAL, ID) + 1;
                end
             end
