@@ -1973,11 +1973,6 @@ Nmp = size(measured, 1);
 % -- where the rows are (dl,z,rx,ry,rz) and columns are (mean, std)
 data_mpair = zeros(5, 2, Np);
 
-% -- calculate the errors of each measurement from the tracker to the real
-% -- world measurement and calculate the overall error
-% -- rows correspond to the marker pair, column is difference between measurement
-error = zeros(Nmp, 1);
-
 % -- loop through every measured marker pair and get the distance  
 % -- and difference in pose between the markers in the pair
 for ii = 1:Nmp
@@ -2025,13 +2020,13 @@ for ii = 1:Nmp
           measured(ii, 1), measured(ii, 2), measured(ii, 3), data_mpair(1,1,ii), data_mpair(1,2,ii)), 'Interpreter', 'latex', 'fontsize', fs);
       
     legend('dl', 'true');
-    
-    % -- calculate the errors of each measurement from the tracker to the real
-    error(ii, 1) = measured(ii,3) - data_mpair(1,1,ii);
 end
 
-% -- get the mean and std of the error
-errorData = [mean(error), std(error)]
+% -- calculate the errors of each measurement from the tracker to the real
+% -- world measurement and calculate the overall error
+% -- rows correspond to the marker pair, column is difference between measurement
+error = zeros(Nmp, 1);
+
 
 % -- plot the position of the marker on a figure to see the spread
 for ii = 1:Nm
