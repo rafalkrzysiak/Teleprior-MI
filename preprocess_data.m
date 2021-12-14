@@ -59,11 +59,11 @@ conditions = ["1","2","3","4"];
 % PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 % SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 % SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
-% NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
+NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
 % Stopping_percentage(ID_List, trials, conditions, ID_conditions, ID_Data)
 % KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
 % TrackerErrorBoard();
-TrackerErrorMarkersEverywhere();
+% TrackerErrorMarkersEverywhere();
 % Stopping_percentage(ID_List, trials, conditions, ID_conditions, ID_Data)
 % KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
 
@@ -1048,11 +1048,14 @@ for TRIAL = 1:size(trials,2)
             end
         end
         
+        % -- scale it to be in between 0 and 1
+        TotalTimeInPlace(TRIAL, ID) = TotalTimeInPlace(TRIAL, ID)/size(X,1);
+        TotalTimeInPlace(TRIAL+1, ID) = TotalTimeInPlace(TRIAL+1, ID)/size(X,1);
     end
 end
 
 % -- convert from time steps to total time
-TotalTimeInPlace = dt*TotalTimeInPlace;
+TotalTimeInPlace = TotalTimeInPlace;
 
 % -- once the total time in place for every participant 
 % -- per trial is calculated, plot the total time in place
@@ -1064,13 +1067,13 @@ end
 
 % -- Make the figure look nice
 ax = gca;
-axis([1 4 0 300]); grid on;
+axis([1 4 0 1]); grid on;
 xlabel('Condition number'); ylabel('Total time stayed in place (s)');
 ax.XTickLabel = {'1', '', '2', '','3', '', '4'};
 ax.FontSize = 18;
 
 % -- save the data
-csvwrite('stats data\TotalTimeInPlace.csv', TotalTimeInPlace');
+csvwrite('stats data\TotalTimeInPlace.csv', [TotalTimeInPlace', ID_Data(:,3:end-1)]);
 
 end
 
@@ -1082,16 +1085,16 @@ Ns=size(ID_Data,1);
 % -- opacity of the trajectory line
 alpha = 0.25;
 
-% -- Load the omron lab mosaic 
-OmronLabMap = imread('maps/OmronLabMosaicCrop_lowres.jpg');
+% -- Load the omron lab mosaic OmronLabMosaicCrop_lowres 
+OmronLabMap = imread('maps/blankMap.jpg');
 
 % -- loop though all conditions and sub-conditions
 for Condition = 1:4
    % -- create a figure that corresponds to the condition number
-   figure(Condition); gcf; clf;
+   figure(Condition+1); gcf; clf;
    
    % -- plot the Search environment
-   imagesc([-0.15 15],[-0.5 7.5], flip(OmronLabMap));
+   imagesc([-0.2 15],[-0.5 7], flip(OmronLabMap));
    set(gca,'xdir','reverse','ydir','reverse');
    
    % -- loop through all participants of the experiment
@@ -1108,7 +1111,7 @@ for Condition = 1:4
         X(:,3) = Data(:,13); X(:,4) = Data(:,14);
         X = X(X(:,1)~=0,:); % -- remove the zeros
         
-        figure(Condition);
+        figure(Condition+1);
         % -- plot all data prior to condition 4
         hold on; plot(X(5,1), X(5,2), 'bs', 'markersize', 10, 'linewidth', 3); % -- starting point
         plot(X(end,1), X(end,2), 'bx', 'markersize', 10, 'linewidth', 3); % -- end point
@@ -1557,6 +1560,7 @@ Ns=size(ID_Data,1);
 % -- Effort: Low - High
 % -- Frustration: Low - High
 AvgResults = zeros(Ns, 6);
+results = zeros(5,6,Ns);
 
 % -- loop through all participants
 for ii = 1:Ns
@@ -1565,14 +1569,38 @@ for ii = 1:Ns
      NASATLX = readtable(dir); % -- data as table because of numbers and letters in txt file
      
      % -- extract the values of the answers only
-     results = table2array(NASATLX(:,4:9));
+     results(:,:,ii) = table2array(NASATLX(:,4:9));
      
      % -- get the mean values of the answers
-     AvgResults(ii,:) = mean(results);
+     AvgResults(ii,:) = mean(results(:,:,ii));
+end
+
+% -- calculate the mean and standard deviation of the NASA TLX results
+% -- Remember: The first row for all participants was for condition 0
+% --           don't need to include that one, only rows 2-5 for conditions 1-4
+% -- it will be a 6x4 array, 6 questions (rows) x 4 conditions (columns)
+TLX_mean = zeros(6,4);
+TLX_std = TLX_mean;
+TLX_question = zeros(Ns, 4); % -- looking at individual quesions paired with all conditions
+
+% -- loop through all rows and columns 
+for question = 1:6
+    for condition = 1:4
+        TLX_mean(question,condition) = mean(results(condition, question, :));
+        TLX_std(question,condition) = std(results(condition, question, :));
+        
+        % -- loop through every participant
+        for ii = 1:Ns
+            TLX_question(ii,condition) = results(condition,question,ii);
+        end
+    end
+    csvwrite(sprintf('stats data/TLX_question_%d.csv', question), TLX_question);
 end
 
 % -- save the results as a csv file later for the live script
 csvwrite('stats data/NASATLXResults.csv', AvgResults);
+csvwrite('stats data/NASATLXMean.csv',TLX_mean);
+csvwrite('stats data/NASATLXstd.csv',TLX_std);
 
 end
 
@@ -1969,7 +1997,8 @@ title(sprintf('Mean: %.3f $\\pm$ %.3f m', mean(data(5,1,:)), std(data(5,2,:))), 
 % -- populated as follows: [marker ID 1, Marker ID 2, distance measured real world]
 measured = csvread('MarkerDist.csv');
 
-% -- get the number of measured marker pairs
+% -- get the number of measured marker pairs throughout the lab
+% -- measurements were done from marker to marker
 Nmp = size(measured, 1);
 
 % -- create array that will store the mean and standard deviation for each
@@ -1981,7 +2010,7 @@ data_mpair = zeros(5, 2, Np);
 % -- calculate the errors of each measurement from the tracker to the real
 % -- world measurement and calculate the overall error
 % -- rows correspond to the marker pair, column is difference between measurement
-error = zeros(Nmp, 1);
+error = zeros(Nmp, 2);
 
 % -- loop through every measured marker pair and get the distance  
 % -- and difference in pose between the markers in the pair
@@ -2032,11 +2061,16 @@ for ii = 1:Nmp
     legend('dl', 'true');
     
     % -- calculate the errors of each measurement from the tracker to the real
-    error(ii, 1) = measured(ii,3) - data_mpair(1,1,ii);
+    error(ii, 1) = measured(ii,3) - data_mpair(1,1,ii); % -- difference in measurement between markers (m)
+    error(ii, 2) = data_mpair(end,1,ii); % -- orientation between markers (rad)
 end
 
 % -- get the mean and std of the error
-errorData = [mean(error), std(error)]
+LengthErrorData = [mean(error(:,1)), std(error(:,1))]
+OrientationErrorData = [mean(error(:,2)), std(error(:,2))]
+
+% -- save the tracker error values as a csv file
+csvwrite('stats data/TrackerErrorData.csv', [LengthErrorData; OrientationErrorData]);
 
 % -- plot the position of the marker on a figure to see the spread
 for ii = 1:Nm
