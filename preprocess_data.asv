@@ -59,11 +59,11 @@ conditions = ["1","2","3","4"];
 % PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 % SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 % SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
-NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
+% NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
 % Stopping_percentage(ID_List, trials, conditions, ID_conditions, ID_Data)
 % KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
 % TrackerErrorBoard();
-% TrackerErrorMarkersEverywhere();
+TrackerErrorMarkersEverywhere();
 % Stopping_percentage(ID_List, trials, conditions, ID_conditions, ID_Data)
 % KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
 
@@ -1594,7 +1594,7 @@ for question = 1:6
             TLX_question(ii,condition) = results(condition,question,ii);
         end
     end
-    csvwrite(sprintf('stats data/TLX_question_',), TLX_question);
+    csvwrite(sprintf('stats data/TLX_question_%d.csv', question), TLX_question);
 end
 
 % -- save the results as a csv file later for the live script
@@ -1974,6 +1974,9 @@ for ii = 1:Np
     hold on; plot(drz);
     xlabel('Time (s)', 'fontweight', 'normal', 'fontsize', fs);
     ylabel('Difference in Rz (rad)', 'fontweight', 'normal', 'fontsize', fs);
+    
+    % -- save everything in the tracker error folder within the stats data folder
+    csvwrite(sprintf('stats data/TrackerError/Marker pairs/Markerpair%02d.csv',ii), [dl,dz,drx,dry,drz]);
 end
 
 % -- Create title for each of the subplots
@@ -2063,14 +2066,18 @@ for ii = 1:Nmp
     % -- calculate the errors of each measurement from the tracker to the real
     error(ii, 1) = measured(ii,3) - data_mpair(1,1,ii); % -- difference in measurement between markers (m)
     error(ii, 2) = data_mpair(end,1,ii); % -- orientation between markers (rad)
+    
+    % -- save everything in the tracker error folder within the stats data folder
+    csvwrite(sprintf('stats data/TrackerError/Measured pairs/Measuredpair%2d.csv',ii), [dl,dz,drx,dry,drz]);
+    csvwrite(sprintf('stats data/TrackerError/Measured pairs/MeasuredpairData%2d.csv',ii), data_mpair(:,:,ii));
 end
 
 % -- get the mean and std of the error
-LengthErrorData = [mean(error(:,1)), std(error(:,1))]
-OrientationErrorData = [mean(error(:,2)), std(error(:,2))]
+LengthErrorData = [mean(error(:,1)), std(error(:,1))];
+OrientationErrorData = [mean(error(:,2)), std(error(:,2))];
 
 % -- save the tracker error values as a csv file
-csvwrite('stats data/TrackerErrorData.csv', [LengthErrorData; OrientationErrorData]);
+csvwrite('stats data/TrackerError/TrackerErrorData.csv', [LengthErrorData; OrientationErrorData]);
 
 % -- plot the position of the marker on a figure to see the spread
 for ii = 1:Nm
