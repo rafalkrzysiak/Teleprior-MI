@@ -152,7 +152,8 @@ for TRIAL = 1:size(trials,2)
         Hlinfun=@(X) eye(3); 
 
         % -- noise of the tracker
-        Rk=diag([.0418^2 .0418^2 .0277^2]*1); 
+%         Rk=diag([.0418^2 .0418^2 .0277^2]*1); 
+        Rk=diag([.0418 .0418 .0277]*1); 
         %Qk = Rk; % -- how to calculate Qk?
 
         k0=1;
@@ -2127,8 +2128,8 @@ for ii = 1: Nm
     % -- get the state of the marker
     sx1 = 4 + 9*(ii - 1); % -- X column for marker ii
     
-    % -- store the markers state a temp variable
-    % -- eliminating the zeros
+    % -- store the markers sta a temp variable
+    % -- eliminating the zeros from both
     XX = X(X(:,sx1)~=0,(sx1-3):(sx1+5));
     
     % -- get the mean of the X and Y measurement separately
@@ -2139,20 +2140,14 @@ for ii = 1: Nm
     XX(:,4) = XX(:,4)-Xmean;
     XX(:,5) = XX(:,5)-Ymean;
     
-    % -- append the X and Y data separately into a cell array
+    % -- append the X and Y data separately
     CellDataX{ii} = XX(:,4);
     CellDataY{ii} = XX(:,5);
 end
 
-% -- convert the cell array into a single column array then
 % -- get the standard deviation of the X and Y position data
-STD_X_Data = std(cell2mat(CellDataX(:)));
-STD_Y_Data = std(cell2mat(CellDataY(:)));
-
-% -- make a nice table to display when done running
-STD = ["X"; "Y"];
-Value = [STD_X_Data; STD_Y_Data];
-DataTable = table(STD, Value)
+STD_X_Data = std(cell2mat(CellDataX(:)))
+STD_Y_Data = std(cell2mat(CellDataY(:)))
 
 % -- loop through every measured marker pair and get the distance  
 % -- and difference in pose between the markers in the pair
