@@ -59,12 +59,12 @@ conditions = ["1","2","3","4"];
 % PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 % SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 % SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
-% NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
+NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
 % Stopping_percentage(ID_List, trials, conditions, ID_conditions, ID_Data)
 % KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
 % TrackerErrorBoard();
 % TrackerErrorMarkersEverywhere();
-TrackerErrorMarkersGrid();
+% TrackerErrorMarkersGrid();
 % Stopping_percentage(ID_List, trials, conditions, ID_conditions, ID_Data)
 % KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
 
@@ -1561,7 +1561,7 @@ Ns=size(ID_Data,1);
 % -- Effort: Low - High
 % -- Frustration: Low - High
 AvgResults = zeros(Ns, 6);
-results = zeros(5,6,Ns);
+results = zeros(4,6,Ns);
 
 % -- loop through all participants
 for ii = 1:Ns
@@ -1570,7 +1570,7 @@ for ii = 1:Ns
      NASATLX = readtable(dir); % -- data as table because of numbers and letters in txt file
      
      % -- extract the values of the answers only
-     results(:,:,ii) = table2array(NASATLX(:,4:9));
+     results(:,:,ii) = table2array(NASATLX(2:end,4:9));
      
      % -- get the mean values of the answers
      AvgResults(ii,:) = mean(results(:,:,ii));
