@@ -1007,7 +1007,7 @@ end
 
 function timeStayingInPlace(ID_List, trials, conditions, ID_conditions, ID_Data)
 % -- create a variable to contain the total time
-% -- that each participant statyed in place during each of the trials
+% -- that each participant turned in place during each of the trials
 % -- with size (# trials x # participants)
 TotalTimeInPlace = zeros(size(trials,2)+1, size(ID_List,1));
 
@@ -1035,17 +1035,20 @@ for TRIAL = 1:size(trials,2)
         dir = strcat("filtered_data/", participantID, "/EKFVel_condition_", condition, ".csv");
         X = csvread(dir);
         
+        dir = strcat("filtered_data/", participantID, "/EKFom_condition_", condition, ".csv");
+        Y = csvread(dir);
+        
         % -- check what condition we are looking at
         if TRIAL == 4
             % -- if condition 4b
             if ID_Data(ID, 2) % -- if break condition condition met
                 for t = 1:size(X,1) % -- loop throughout the entire time
                     if t >= ID_Data(ID,end) % -- if the timestep is on or past the break trust point, add the timesteps
-                        if X(t, 1) < thresh
+                        if X(t, 1) < thresh && Y(t,1) > thresh
                             TotalTimeInPlace(TRIAL+1, ID) = TotalTimeInPlace(TRIAL+1, ID) + 1;
                         end
                     else % -- if the timestep is prior to break trust point, add the time steps
-                        if X(t, 1) < thresh
+                        if X(t, 1) < thresh && Y(t,1) > thresh
                             TotalTimeInPlace(TRIAL, ID) = TotalTimeInPlace(TRIAL, ID) + 1;
                         end
                     end
@@ -1054,7 +1057,7 @@ for TRIAL = 1:size(trials,2)
             % -- otherwise, condition 4a
             else
                 for t = 1:ID_Data(ID,end)
-                    if X(t, 1) < thresh
+                    if X(t, 1) < thresh && Y(t,1) > thresh
                         TotalTimeInPlace(TRIAL, ID) = TotalTimeInPlace(TRIAL, ID) + 1;
                     end
                 end
@@ -1064,7 +1067,7 @@ for TRIAL = 1:size(trials,2)
         else
             % -- loop through the duration of the trial starting with t = 0
             for t = 1:size(X,1)
-               if X(t, 1) < thresh
+               if X(t, 1) < thresh && Y(t,1) > thresh
                    TotalTimeInPlace(TRIAL, ID) = TotalTimeInPlace(TRIAL, ID) + 1;
                end
             end
@@ -1077,7 +1080,7 @@ for TRIAL = 1:size(trials,2)
 end
 
 % -- convert from time steps to total time
-TotalTimeInPlace = TotalTimeInPlace;
+% TotalTimeInPlace = TotalTimeInPlace;
 
 % -- once the total time in place for every participant 
 % -- per trial is calculated, plot the total time in place
@@ -1656,8 +1659,8 @@ for TRIAL = 1:size(trials,2)
         participantID = num2str(ID_List(ID));
         
         % -- read the data from the filtered data folder
-        % -- and store the data in a variable "X"
-        % -- State X is 5xT matrix where T is total time
+        % -- and store the data in a variable "X" and "Y"
+        % -- State X and Y are each a 5xT matrix where T is total time
         dir = strcat("filtered_data/", participantID, "/EKFom_condition_", condition, ".csv");
         X = csvread(dir);
         
@@ -1670,11 +1673,11 @@ for TRIAL = 1:size(trials,2)
             if ID_Data(ID, 2) % -- if break condition condition met
                 for t = 1:size(X,1) % -- loop throughout the entire time
                     if t >= ID_Data(ID,end) % -- if the timestep is on or past the break trust point, add the timesteps
-                        if X(t, 1) > thresh && Y(t,1) < thresh
+                        if X(t, 1) < thresh && Y(t,1) < thresh % -- both speed and turn rate below threshold value
                             TotalTimestopping(TRIAL+1, ID) = TotalTimestopping(TRIAL+1, ID) + 1;
                         end
                     else % -- if the timestep is prior to break trust point, add the time steps
-                        if X(t, 1) > thresh && Y(t,1) < thresh
+                        if X(t, 1) < thresh && Y(t,1) < thresh
                             TotalTimestopping(TRIAL, ID) = TotalTimestopping(TRIAL, ID) + 1;
                         end
                     end
@@ -1685,7 +1688,7 @@ for TRIAL = 1:size(trials,2)
             % -- otherwise, condition 4a
             else
                 for t = 1:ID_Data(ID,end)
-                    if X(t, 1) > thresh && Y(t,1) < thresh
+                    if X(t, 1) < thresh && Y(t,1) < thresh
                         TotalTimestopping(TRIAL, ID) = TotalTimestopping(TRIAL, ID) + 1;
                     end
                 end
@@ -1696,7 +1699,7 @@ for TRIAL = 1:size(trials,2)
         else
             % -- loop through the duration of the trial starting with t = 0
             for t = 1:size(X,1)
-               if X(t, 1) > thresh && Y(t,1) < thresh
+               if X(t, 1) < thresh && Y(t,1) < thresh
                    TotalTimestopping(TRIAL, ID) = TotalTimestopping(TRIAL, ID) + 1;
                end
             end
@@ -2315,7 +2318,7 @@ for TRIAL = 4:size(trials,2)
             
             % -- plot the results
             figure(1); gcf;
-            hold on; plot(TimeInPlace * dt, 'k-');
+            hold on; plot(TimeInPlace * dt, 'LineWidth', 3, "Color", [0.4, 0.4, 0.4, 0.2]);
             
             % -- hold the values of all the bins to later get the mean
             % -- and std across all participants within a cell array
@@ -2366,13 +2369,15 @@ curve2 = BinCalc(1,:) - BinCalc(2,:);
 x2 = [x, fliplr(x)];
 inBetween = [curve1, fliplr(curve2)];
 figure(1); gcf; 
-hold on; patch(x2, inBetween, [0 0 0.1], 'FaceAlpha', 0.35); % -- plotting the std shaded region
-hold on; plot(BinCalc(1,:), 'k-', 'linewidth', 2); % -- plotting the mean line
+% hold on; patch(x2, inBetween, [0 0 0.1], 'FaceAlpha', 0.35); % -- plotting the std shaded region
+hold on; plot(BinCalc(1,:), 'LineWidth', 3, "Color", [0.4, 0.4, 0.4, 1]); % -- plotting the mean line
+
 
 % -- make the figure look nice
 fs = 18;
+xlim([1 MaxBinSize]);
 xlabel('Bin number');
-ylabel('Total time in place (s)');
+ylabel('Total time in staying still (s)');
 ax = gca;
 ax.FontSize = fs;
 grid on;
