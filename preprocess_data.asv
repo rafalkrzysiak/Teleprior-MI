@@ -2266,7 +2266,7 @@ thresh = 0.1;
 dt = 0.5;
 
 % -- bin size (the number of timesteps)
-BinSize = 40;
+BinSize = 30;
 
 % -- create a counter for the number of participants
 % -- that will have their data saved
@@ -2327,18 +2327,10 @@ for TRIAL = 4:size(trials,2)
     
 end
 
-% -- get the max number of bins used for the data
+% -- get the max bin size
 % -- create an empty array that will hold the values of the bin data
 Ns = size(BinData,2); % -- number of participants
-size0 = 0;
-for ii = 1:Ns % -- loop through all participants
-    SizeVal = size(BinData{1,ii},1); % -- get the size of the bins used in data
-    if SizeVal > size0 % -- check if its larger
-       size0 = SizeVal; % -- save the current largest bins used
-    end
-end
-
-MaxBinSize = size0; % -- relabel to new variable
+MaxBinSize = 14;
 BinValues = zeros(MaxBinSize,Ns); % -- size determined by the max number of bins found for a single participant
 
 % -- calculate the mean and std values of the time to stay in place 
@@ -2354,10 +2346,8 @@ end
 BinCalc = zeros(2,MaxBinSize);
 
 for Bin = 1:MaxBinSize%size(BinData{1,participant}(:,1),1)
-    if sum(BinValues(Bin,:))
-        BinCalc(1,Bin) = mean(BinValues(Bin,[BinValues(Bin,:)~=0])); % -- mean calculation
-        BinCalc(2,Bin) = std(BinValues(Bin,[BinValues(Bin,:)~=0])); % -- std calculation
-    end
+    BinCalc(1,Bin) = mean(BinValues(Bin,[BinValues(Bin,:)~=0])); % -- mean calculation
+    BinCalc(2,Bin) = std(BinValues(Bin,[BinValues(Bin,:)~=0])); % -- std calculation
 end
 
 x = 1:numel(BinCalc(1,:));
@@ -2366,8 +2356,7 @@ curve2 = BinCalc(1,:) - BinCalc(2,:);
 x2 = [x, fliplr(x)];
 inBetween = [curve1, fliplr(curve2)];
 figure(1); gcf; 
-hold on; patch(x2, inBetween, [0 0 0.1], 'FaceAlpha', 0.35); % -- plotting the std shaded region
-hold on; plot(BinCalc(1,:), 'k-', 'linewidth', 2); % -- plotting the mean line
+hold on; patch(x2, inBetween, [0 0 0.1], 'FaceAlpha', 0.2);
 
 % -- make the figure look nice
 fs = 18;
