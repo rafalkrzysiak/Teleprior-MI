@@ -8,9 +8,9 @@
 % 4) comOmega
 % 5) timeToFind (no scaling)
 % 6) pathLength (add successive differences in positions)
-% 7) timeStayingInPlace (add the total number of timesteps where speed was
+% 7) timeTurningInPlace (add the total number of timesteps where speed was
 % less than 0.1 m/s)
-% 7b) percent of timeStayingInPlace
+% 7b) percent of timeTurningInPlace
 % 8) commandedAcceleration
 % such as speed, turn rates, times, etc. into separate files, 
 % all in the subject's folder for later analysis
@@ -53,20 +53,20 @@ conditions = ["1","2","3","4"];
 % CompareTurnRates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % StoreTimeRM(ID_List, trials, conditions, ID_conditions, ID_Data);
 % FindTotalPathLength(ID_List, trials, conditions, ID_conditions, ID_Data);
-% timeStayingInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
+% timeTurningInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
 % DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
 % PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 % SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
-% SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
+SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
-% Stopping_percentage(ID_List, trials, conditions, ID_conditions, ID_Data)
+% timeStayingStill(ID_List, trials, conditions, ID_conditions, ID_Data)
 % KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
 % TrackerErrorBoard();
 % TrackerErrorMarkersEverywhere();
 % TrackerErrorMarkersGrid();
 % KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
-C4b_TimeInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
+% C4b_TimeInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
 
 end
 
@@ -74,7 +74,11 @@ function FilterAll(ID_List, trials, conditions, ID_conditions, PartialRAW, ID_Da
 Fig_suplot = 1;
 cond_count = 1;
 
-tiledlayout(size(trials,2),size(ID_List,1));
+verdate=version('-date');
+veryear=str2double(verdate(end-3:end));
+if veryear>2018
+    tiledlayout(size(trials,2),size(ID_List,1));
+end
 % tiledlayout(1,size(ID_List,1));
 % tiledlayout(4, 4);
 
@@ -87,8 +91,8 @@ for TRIAL = 1:size(trials,2)
         % -- read the data from the csv file
         participantID = num2str(ID_List(ID));
         
-        DataFile = strcat('RAW/',participantID,'/trial_',trial,'/data.csv');
-        onBoard = strcat('RAW/',participantID,'/condition_',condition,'/WheelVel.csv');
+        DataFile = strcat('RAW', filesep, participantID, filesep, 'trial_',trial, filesep,'data.csv');
+        onBoard = strcat('RAW', filesep, participantID,filesep, 'condition_',condition, filesep, 'WheelVel.csv');
 
         data = csvread(DataFile, 2);
         RpiData = csvread(onBoard);
@@ -214,7 +218,9 @@ for TRIAL = 1:size(trials,2)
                 vy = (Xh(2,k) - Xh(2,k-1)) / dt;
                 
                 EKF_Vel(k) = sqrt(vx^2 + vy^2);
-                EKF_om(k) = (Xh(3,k) - Xh(3,k-1)) / dt;
+                % this picks up acute angle only otherwise we will pick up
+                % large angles when passing from +ve to -ve
+                EKF_om(k) = asin(sin(Xh(3,k) - Xh(3,k-1))) / dt;
             end
 
             % -- predict
@@ -226,13 +232,16 @@ for TRIAL = 1:size(trials,2)
         
         % -- before we begin to plot everything, make sure to save all
         % -- the EKF velocities and turn rates into a csv file to be used later
-        directory_str = strcat('filtered_data/', participantID);
-        directory = mkdir(directory_str);
-        EKFVelFile = strcat(directory_str, '/EKFVel_condition_', num2str(TRIAL), '.csv');
-        EKFomFile = strcat(directory_str, '/EKFom_condition_', num2str(TRIAL), '.csv');
-        EKFtrajFile = strcat(directory_str, '/EKFtraj_condition_', num2str(TRIAL), '.csv');
-        csvwrite(EKFVelFile, EKF_Vel); pause(10);
-        csvwrite(EKFomFile, EKF_om); pause(10);
+        directory_str = strcat('filtered_data',filesep, participantID);
+        if ~exist(directory_str, 'dir')
+            mkdir(directory_str);
+        end
+        EKFVelFile = strcat(directory_str, filesep, 'EKFVel_condition_', num2str(TRIAL), '.csv');
+        EKFomFile = strcat(directory_str, filesep, 'EKFom_condition_', num2str(TRIAL), '.csv');
+        EKFtrajFile = strcat(directory_str, filesep, 'EKFtraj_condition_', num2str(TRIAL), '.csv');
+        fprintf('writing data for %s ...\n', participantID);
+        csvwrite(EKFVelFile, EKF_Vel); pause(1);
+        csvwrite(EKFomFile, EKF_om); pause(1);
         csvwrite(EKFtrajFile, [Xh; ones(1,size(Xh,2))*tx(end); ones(1,size(Xh,2))*ty(end)]); pause(10);
         
         if PartialRAW
@@ -1005,7 +1014,7 @@ csvwrite('stats data/TotalDistanceTravel.csv',[TotalDistance',ID_Data(:,3:end-1)
 
 end
 
-function timeStayingInPlace(ID_List, trials, conditions, ID_conditions, ID_Data)
+function timeTurningInPlace(ID_List, trials, conditions, ID_conditions, ID_Data)
 % -- create a variable to contain the total time
 % -- that each participant turned in place during each of the trials
 % -- with size (# trials x # participants)
@@ -1530,10 +1539,10 @@ for ii = 1:size(ID_Data, 1)
     % -- loop through each of the conditions
     for Condition = 1:4
         % -- get the filtered and RAW data
-        filtered_dir = strcat('filtered_data/',num2str(ID_Data(ii,1)),'/EKFom_condition_',...
+        filtered_dir = strcat('filtered_data',filesep,num2str(ID_Data(ii,1)),filesep,'EKFom_condition_',...
                               num2str(Condition),'.csv');
-        raw_dir = strcat('RAW/',num2str(ID_Data(ii,1)),'/condition_',num2str(Condition),...
-                         '\WheelVel.csv');
+        raw_dir = strcat('RAW',filesep,num2str(ID_Data(ii,1)), filesep, 'condition_',num2str(Condition),...
+                         filesep,'WheelVel.csv');
         U = load(raw_dir);
         U_EKF = load(filtered_dir);
         
@@ -1566,8 +1575,8 @@ for ii = 1:size(ID_Data, 1)
 end
 
 % -- save the arrays as csv files within the stats data folder
-csvwrite('stats data\RobotTurnrateData.csv', RobotTurnrate);
-csvwrite('stats data\ComTurnrateData.csv', CommandedTurnrate);
+csvwrite(['stats data', filesep, 'RobotTurnrateData.csv'], RobotTurnrate);
+csvwrite(['stats data', filesep, 'ComTurnrateData.csv'], CommandedTurnrate);
 
 end
 
@@ -1633,7 +1642,7 @@ csvwrite('stats data/NASATLXstd.csv',TLX_std);
 
 end
 
-function Stopping_percentage(ID_List, trials, conditions, ID_conditions, ID_Data)
+function timeStayingStill(ID_List, trials, conditions, ID_conditions, ID_Data)
 % -- create a variable to contain the total time
 % -- that each participant statyed in place during each of the trials
 % -- with size (# trials x # participants)
