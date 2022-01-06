@@ -56,9 +56,9 @@ conditions = ["1","2","3","4"];
 % timeTurningInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
 % DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
-% PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
+PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 % SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
-SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
+% SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
 % timeStayingStill(ID_List, trials, conditions, ID_conditions, ID_Data)
 % KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
@@ -357,7 +357,7 @@ tx = data(:,13); ty = data(:,14); time = data(:,12);
 % -- the saved wheel speeds from the iRobot are in mm
 % -- make sure to convert them to m before calculating v and omega
 Vel = ((RpiData(:,2) + RpiData(:,3))/ 1000) / 2;
-omega = ((RpiData(:,2) - RpiData(:,3))/ 1000) / .3084;
+omega = ((RpiData(:,2) - RpiData(:,3))/ 1000) / .235;%.3084;
 
 % -- omit the zeros
 % x = x(x~=0); y = y(y~=0); z = z(z~=0); time = time(time~=0);
@@ -1297,7 +1297,7 @@ for ii = 1:size(ID_Data, 1)
             % -- commanded speed and turnrate
             % -- commanded wheel speeds saved in mm/s
             CommandedSpeed = (((U(:,2) + U(:,3))/ 1000) / 2);
-            CommandedTurnRate = (((U(:,2) - U(:,3))/ 1000) / .3084);
+            CommandedTurnRate = (((U(:,2) - U(:,3))/ 1000) / .235);
             
             % -- check what condition we are trying to plot
             if Condition < 4
@@ -1548,7 +1548,7 @@ for ii = 1:size(ID_Data, 1)
         
         % -- convert the commanded wheel speed values to overall 
         % -- commended speed
-        U_com = abs(((U(:,2) - U(:,3))/ 1000) / .3084);
+        U_com = abs(((U(:,2) - U(:,3))/ 1000) / .235);
         U_EKF = abs(U_EKF);
         
         % -- check if its condition 4
