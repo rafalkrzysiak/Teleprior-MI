@@ -56,14 +56,14 @@ conditions = ["1","2","3","4"];
 % StoreTimeRM(ID_List, trials, conditions, ID_conditions, ID_Data);
 % totalDistanceTravelled(ID_List, trials, conditions, ID_conditions, ID_Data);
 % timeStayingInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
-timeTurningInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
+% timeTurningInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
 % DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
 % PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 % SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 % SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
-% timeStayingStill(ID_List, trials, conditions, ID_conditions, ID_Data)
+timeStayingStill(ID_List, trials, conditions, ID_conditions, ID_Data)
 % % KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
 % TrackerErrorBoard();
 % TrackerErrorMarkersEverywhere();
@@ -1135,7 +1135,6 @@ function timeTurningInPlace(ID_List, trials, conditions, ID_conditions, ID_Data)
 % -- that each participant turned in place during each of the trials
 % -- with size (# trials x # participants)
 timeTurningInPlace = zeros(size(trials,2)+1, size(ID_List,1));
-fractionTimeTurningInPlace=timeTurningInPlace;
 totalTime=timeTurningInPlace;
  
 % -- if speed is < 0.1 m/s save the number of timesteps
@@ -1213,7 +1212,7 @@ end
 TRIAL=4;
 for ID = 1:size(ID_List,1)
     if ID_Data(ID, 2)
-        fractionTimeTurningInPlace(TRIAL+1, ID) = timeTurningInPlace(TRIAL+1, ID)/totalTime(TRIAL+1,ID);
+        fractionTurningInPlace(TRIAL+1, ID) = timeTurningInPlace(TRIAL+1, ID)/totalTime(TRIAL+1,ID);
     end
 end
  
@@ -1237,8 +1236,7 @@ ax.XTickLabel = {'1', '', '2', '','3', '', '4'};
 ax.FontSize = 18;
  
 % -- save the data
-csvwrite(['stats data', filesep, 'fractionTimeTurningInPlace.csv'], ...
-        [fractionTimeTurningInPlace', ID_Data(:,3:end-1)]);
+csvwrite(['stats data', filesep, 'timeTurningInPlace.csv'], [fractionTimeTurningInPlace', ID_Data(:,3:end-1)]);
  
 end
 
