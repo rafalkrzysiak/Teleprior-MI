@@ -34,6 +34,8 @@ PartialRAW = 1;
 
 % -- begin reading from the IDlist file
 ID_location = 'IDList_Completed.csv';
+% ID Data has columns: id (1), 4byes (2), target loc 1 (3), target loc 2 (4), 
+% target loc 3 (5), target loc 4 (6), moment of realization (7)
 ID_Data = csvread(ID_location,1);
 ID_List = ID_Data(:,1);
 ID_conditions = ID_Data(:,2);
@@ -52,7 +54,7 @@ conditions = ["1","2","3","4"];
 % CompareSpeed(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CompareTurnRates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % StoreTimeRM(ID_List, trials, conditions, ID_conditions, ID_Data);
-% FindTotalPathLength(ID_List, trials, conditions, ID_conditions, ID_Data);
+% totalDistanceTravelled(ID_List, trials, conditions, ID_conditions, ID_Data);
 % timeTurningInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
 % DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
@@ -61,7 +63,7 @@ PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); 
 % SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
 % timeStayingStill(ID_List, trials, conditions, ID_conditions, ID_Data)
-% KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
+% % KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
 % TrackerErrorBoard();
 % TrackerErrorMarkersEverywhere();
 % TrackerErrorMarkersGrid();
@@ -506,7 +508,8 @@ for TRIAL = 1:size(conditions,2)
 
         % -- store the data
         RpiData = csvread(onBoard);
-        omega = ((RpiData(:,2) - RpiData(:,3))/ 1000) / .3084;
+%         omega = ((RpiData(:,2) - RpiData(:,3))/ 1000) / .3084;
+         omega = ((RpiData(:,2) - RpiData(:,3))/ 1000) / .235;
         time = RpiData(:,1);
         
         % -- Initialize the subplot to be used
@@ -938,7 +941,7 @@ end
 
 end
 
-function FindTotalPathLength(ID_List, trials, conditions, ID_conditions, ID_Data)
+function totalDistanceTravelled(ID_List, trials, conditions, ID_conditions, ID_Data)
 
 % -- create a variable to contain the total distance
 % -- that each participant drives during each of the trials
@@ -1018,7 +1021,7 @@ function timeTurningInPlace(ID_List, trials, conditions, ID_conditions, ID_Data)
 % -- create a variable to contain the total time
 % -- that each participant turned in place during each of the trials
 % -- with size (# trials x # participants)
-TotalTimeInPlace = zeros(size(trials,2)+1, size(ID_List,1));
+timeTurningInPlace = zeros(size(trials,2)+1, size(ID_List,1));
 
 % -- if speed is < 0.1 m/s save the number of timesteps
 % -- where 0.1 m/s is the threshhold
@@ -1054,11 +1057,11 @@ for TRIAL = 1:size(trials,2)
                 for t = 1:size(X,1) % -- loop throughout the entire time
                     if t >= ID_Data(ID,end) % -- if the timestep is on or past the break trust point, add the timesteps
                         if X(t, 1) < thresh && Y(t,1) > thresh
-                            TotalTimeInPlace(TRIAL+1, ID) = TotalTimeInPlace(TRIAL+1, ID) + 1;
+                            timeTurningInPlace(TRIAL+1, ID) = timeTurningInPlace(TRIAL+1, ID) + 1;
                         end
                     else % -- if the timestep is prior to break trust point, add the time steps
                         if X(t, 1) < thresh && Y(t,1) > thresh
-                            TotalTimeInPlace(TRIAL, ID) = TotalTimeInPlace(TRIAL, ID) + 1;
+                            timeTurningInPlace(TRIAL, ID) = timeTurningInPlace(TRIAL, ID) + 1;
                         end
                     end
                 end
@@ -1067,7 +1070,7 @@ for TRIAL = 1:size(trials,2)
             else
                 for t = 1:ID_Data(ID,end)
                     if X(t, 1) < thresh && Y(t,1) > thresh
-                        TotalTimeInPlace(TRIAL, ID) = TotalTimeInPlace(TRIAL, ID) + 1;
+                        timeTurningInPlace(TRIAL, ID) = timeTurningInPlace(TRIAL, ID) + 1;
                     end
                 end
             end
@@ -1077,26 +1080,26 @@ for TRIAL = 1:size(trials,2)
             % -- loop through the duration of the trial starting with t = 0
             for t = 1:size(X,1)
                if X(t, 1) < thresh && Y(t,1) > thresh
-                   TotalTimeInPlace(TRIAL, ID) = TotalTimeInPlace(TRIAL, ID) + 1;
+                   timeTurningInPlace(TRIAL, ID) = timeTurningInPlace(TRIAL, ID) + 1;
                end
             end
         end
         
         % -- scale it to be in between 0 and 1
-        TotalTimeInPlace(TRIAL, ID) = TotalTimeInPlace(TRIAL, ID)/size(X,1);
-        TotalTimeInPlace(TRIAL+1, ID) = TotalTimeInPlace(TRIAL+1, ID)/size(X,1);
+        timeTurningInPlace(TRIAL, ID) = timeTurningInPlace(TRIAL, ID)/size(X,1);
+        timeTurningInPlace(TRIAL+1, ID) = timeTurningInPlace(TRIAL+1, ID)/size(X,1);
     end
 end
 
 % -- convert from time steps to total time
-% TotalTimeInPlace = TotalTimeInPlace;
+% timeTurningInPlace = timeTurningInPlace;
 
 % -- once the total time in place for every participant 
 % -- per trial is calculated, plot the total time in place
 % -- against every participant
 figure(1); gcf; clf;
 for participant = 1:size(ID_List,1)
-    hold on; plot([1, 2, 3, 4], TotalTimeInPlace(1:4, participant), '.-', 'linewidth', 2, 'markersize', 2);
+    hold on; plot([1, 2, 3, 4], timeTurningInPlace(1:4, participant), '.-', 'linewidth', 2, 'markersize', 2);
 end
 
 % -- Make the figure look nice
@@ -1107,7 +1110,7 @@ ax.XTickLabel = {'1', '', '2', '','3', '', '4'};
 ax.FontSize = 18;
 
 % -- save the data
-csvwrite('stats data\TotalTimeInPlace.csv', [TotalTimeInPlace', ID_Data(:,3:end-1)]);
+csvwrite(['stats data', filesep, 'timeTurningInPlace.csv'], [timeTurningInPlace', ID_Data(:,3:end-1)]);
 
 end
 
@@ -1736,8 +1739,8 @@ ax.XTickLabel = {'1', '', '2', '','3', '', '4'};
 ax.FontSize = 18;
 
 % -- save the data
-csvwrite('stats data\TotalTimeStopping.csv', [TotalTimestopping',ID_Data(:,3:7)]);
-csvwrite('stats data\TotalPercentStopping.csv', [TotalPercentStopping',ID_Data(:,3:7)]);
+csvwrite(['stats data', filesep, 'timeStayingStill.csv'], [TotalTimestopping',ID_Data(:,3:7)]);
+csvwrite(['stats data', filesep, 'FractionTimeStayingStill.csv'], [TotalPercentStopping',ID_Data(:,3:7)]);
 
 end
 
