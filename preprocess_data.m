@@ -1404,7 +1404,7 @@ if size(ID_Data,1)>1
     nr=5; % number of rows
     nc=5; % number of conditions (remember: condition 4 is split into 4a and 4b)
 else
-    nr=5;
+    nr=4;
     nc=5;
 end
 for ii = 1:size(ID_Data, 1)
@@ -1449,7 +1449,7 @@ for ii = 1:size(ID_Data, 1)
             CommandedTurnRate = (((U(:,2) - U(:,3))/ 1000) / .235);
             
             % -- check what condition we are trying to plot
-            if Condition < 4
+            if Condition < 4 || ID_Data(ii,1) ==9999
                 % -- begin plotting the data
                 subplot(nr,nc,5*(Condition-1)+1)
                 imagesc([-1 15],[-1 7.5], flip(OmronLabMap));
