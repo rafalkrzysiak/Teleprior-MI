@@ -34,11 +34,20 @@ PartialRAW = 1;
 
 % -- begin reading from the IDlist file
 ID_location = 'IDList_Completed.csv';
+
 % ID Data has columns: id (1), 4byes (2), target loc 1 (3), target loc 2 (4), 
 % target loc 3 (5), target loc 4 (6), moment of realization (7)
 ID_Data = csvread(ID_location,1);
+% flag to process calibration experiments
+robot_calib_exp=1;
+if robot_calib_exp
+    ID_Data=[9999, 0, 1,1,3,4,3,10];
+end
+
 ID_List = ID_Data(:,1);
 ID_conditions = ID_Data(:,2);
+
+
 
 % -- Remember: on the tracking computer, the data for the SAR
 %              conditions begins with "0002" and ends with "0005"
@@ -56,10 +65,10 @@ conditions = ["1","2","3","4"];
 % StoreTimeRM(ID_List, trials, conditions, ID_conditions, ID_Data);
 % totalDistanceTravelled(ID_List, trials, conditions, ID_conditions, ID_Data);
 % timeStayingInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
-timeTurningInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
+% timeTurningInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
 % DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
-% PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
+PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 % SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 % SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
@@ -354,7 +363,11 @@ function [x, y, z, Rx, Ry, Rz, tx, ty, ID, time, Vel, omega] = ReadData(data, Rp
 ID = data(:,1); camID = data(:,2); %time = data(:,3);
 x = data(:,4); y = data(:,5); z = data(:,6); 
 Rx = data(:,7); Ry = data(:,8); Rz = data(:,9); 
-tx = data(:,13); ty = data(:,14); time = data(:,12);
+if size(data,2)>9 % if target is not available then don't bother
+    tx = data(:,13); ty = data(:,14); time = data(:,12);
+else
+    tx = x*0; ty=tx; time=data(:,3);
+end
 
 % -- get the velocity and turn rate of the robot
 % -- the saved wheel speeds from the iRobot are in mm
@@ -1387,14 +1400,18 @@ Ns=size(ID_Data,1);
 % Load the omron lab mosaic 
 OmronLabMap = imread('maps/OmronLabMosaicCrop_lowres.jpg');
 
-nr=5; % number of rows
-nc=5; % number of conditions (remember: condition 4 is split into 4a and 4b)
-
+if size(ID_Data,1)>1
+    nr=5; % number of rows
+    nc=5; % number of conditions (remember: condition 4 is split into 4a and 4b)
+else
+    nr=5;
+    nc=5;
+end
 for ii = 1:size(ID_Data, 1)
     
     % -- only want to loop through individuals that hav undergone
     % -- condition 4b (incorrect prior knowledge of target location)
-    if ID_Data(ii, 2)
+    if (ID_Data(ii, 2) || ID_Data(ii,1) ==9999)
         
         % -- create figure dedicated to an individual ID
         % -- and create a tiled layout of 1x4
