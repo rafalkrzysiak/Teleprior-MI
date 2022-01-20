@@ -41,12 +41,12 @@ ID_Data = csvread(ID_location,1);
 % flag to process calibration experiments
 robot_calib_exp=1;
 if robot_calib_exp
-    ID_Data=[9999, 0, 1,1,3,4,3,10];
+%     ID_Data=[9999, 0, 1,1,3,4,3,10]; <--- Old data captured
+    ID_Data=[9998, 0, 1,1,3,4,3,10]; % <--- New data from Di'Quan
 end
 
 ID_List = ID_Data(:,1);
 ID_conditions = ID_Data(:,2);
-
 
 
 % -- Remember: on the tracking computer, the data for the SAR
@@ -1031,8 +1031,6 @@ csvwrite('stats data/TotalDistanceTravel.csv',[TotalDistance',ID_Data(:,3:end-1)
 
 end
 
-
-
 function timeStayingInPlace(ID_List, trials, conditions, ID_conditions, ID_Data)
 % -- create a variable to contain the total time
 % -- that each participant turned in place during each of the trials
@@ -1255,7 +1253,6 @@ csvwrite(['stats data', filesep, 'fractionTimeTurningInPlace.csv'], ...
  
 end
 
-
 function DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data)
 
 % -- get the number of participants
@@ -1411,7 +1408,7 @@ for ii = 1:size(ID_Data, 1)
     
     % -- only want to loop through individuals that hav undergone
     % -- condition 4b (incorrect prior knowledge of target location)
-    if (ID_Data(ii, 2) || ID_Data(ii,1) ==9999)
+    if (ID_Data(ii, 2) || ID_Data(ii,1) ==9998)
         
         % -- create figure dedicated to an individual ID
         % -- and create a tiled layout of 1x4
@@ -1449,7 +1446,7 @@ for ii = 1:size(ID_Data, 1)
             CommandedTurnRate = (((U(:,2) - U(:,3))/ 1000) / .235);
             
             % -- check what condition we are trying to plot
-            if Condition < 4 || ID_Data(ii,1) ==9999
+            if Condition < 4 || ID_Data(ii,1) ==9998
                 % -- begin plotting the data
                 subplot(nr,nc,5*(Condition-1)+1)
                 imagesc([-1 15],[-1 7.5], flip(OmronLabMap));
