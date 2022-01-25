@@ -1406,8 +1406,8 @@ else
 end
 
 % -- forcing terms for the ylim
-MaxSpeed = 0.65;
-MaxTurnRate = 3.5;
+MaxSpeed = 0.6;
+MaxTurnRate = 3.2;
 
 for ii = 1:size(ID_Data, 1)
     
@@ -1515,14 +1515,14 @@ for ii = 1:size(ID_Data, 1)
                 plot(time(1:5*ID_Data(ii,end)), abs(CommandedSpeed(1:5*ID_Data(ii,end))), 'k-', 'linewidth', 2);
                 ylabel({'Commanded','speed (m/s)'});
                 xlabel('time (s)'); grid on;
-                xlim([0 time(5*ID_Data(ii,end))]); ylim([0 MaxSpeed]);
+                xlim([0 time(end)]);
 
                 % -- plot the turn rate of the robot
                 subplot(nr,nc,5*(Condition-1)+3)
                 plot(time(1:5*ID_Data(ii,end)), abs(CommandedTurnRate(1:5*ID_Data(ii,end))), 'k-', 'linewidth', 2);
                 ylabel({'Commanded','turn rate (rad/s)'});
                 xlabel('time (s)'); grid on;
-                xlim([0 time(5*ID_Data(ii,end))]); ylim([0 MaxTurnRate]);
+                xlim([0 time(end)]);
 
                 % -- plot the commanded speed for each condition
                 subplot(nr,nc,5*(Condition-1)+4)
@@ -1530,7 +1530,7 @@ for ii = 1:size(ID_Data, 1)
                 plot(time(1:ID_Data(ii,end)), abs(SP(1:ID_Data(ii,end))), 'b-', 'linewidth', 2);
                 ylabel('Speed (m/s)');
                 xlabel('time (s)'); grid on;
-                xlim([0 time(ID_Data(ii,end))]); ylim([0 MaxSpeed]);
+                xlim([0 time(end)]);
 
                 % -- plot the commanded turn rate for each condition
                 subplot(nr,nc,5*(Condition-1)+5)
@@ -1538,7 +1538,7 @@ for ii = 1:size(ID_Data, 1)
                 plot(time(1:ID_Data(ii,end)), abs(OM(1:ID_Data(ii,end))), 'b-', 'linewidth', 2);
                 ylabel('Turn rate (rad/s)');
                 xlabel('time (s)'); grid on;
-                xlim([0 time(ID_Data(ii,end))]); ylim([0 MaxTurnRate]);
+                xlim([0 time(end)]);
                 
                 % --------------------------------------------
                 % -- begin plotting the data for condition 4b
@@ -1559,14 +1559,14 @@ for ii = 1:size(ID_Data, 1)
                 plot(time(5*ID_Data(ii,end):end), abs(CommandedSpeed(5*ID_Data(ii,end):end)), 'k-', 'linewidth', 2);
                 ylabel({'Commanded','speed (m/s)'});
                 xlabel('time (s)'); grid on;
-                xlim([time(5*ID_Data(ii,end)) time(end)]); ylim([0 MaxSpeed]);
+                xlim([0 time(end)]);
 
                 % -- plot the commanded turn rate of the robot
                 subplot(nr,nc,5*(Condition)+3)
                 plot(time(5*ID_Data(ii,end):end), abs(CommandedTurnRate(5*ID_Data(ii,end):end)), 'k-', 'linewidth', 2);
                 ylabel({'Commanded','turn rate (rad/s)'});
                 xlabel('time (s)'); grid on;
-                xlim([time(5*ID_Data(ii,end)) time(end)]); ylim([0 MaxTurnRate]);
+                xlim([0 time(end)]);
 
                 % -- plot the Robot speed for each condition
                 subplot(nr,nc,5*(Condition)+4)
@@ -1574,7 +1574,7 @@ for ii = 1:size(ID_Data, 1)
                 plot(time(ID_Data(ii,end):end-1), abs(SP(ID_Data(ii,end):end)), 'b-', 'linewidth', 2);
                 ylabel('Speed (m/s)');
                 xlabel('time (s)'); grid on;
-                xlim([time(ID_Data(ii,end)) time(end)]); ylim([0 MaxSpeed]);
+                xlim([0 time(end)]);
 
                 % -- plot the Robot turn rate for each condition
                 subplot(nr,nc,5*(Condition)+5)
@@ -1582,7 +1582,7 @@ for ii = 1:size(ID_Data, 1)
                 plot(time(ID_Data(ii,end):end-1), abs(OM(ID_Data(ii,end):end)), 'b-', 'linewidth', 2);
                 ylabel('Turn rate (rad/s)');
                 xlabel('time (s)'); grid on;
-                xlim([time(ID_Data(ii,end)) time(end)]); ylim([0 MaxTurnRate]);
+                xlim([0 time(end)]);
             
             end
 
