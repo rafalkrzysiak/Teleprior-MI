@@ -39,7 +39,7 @@ ID_location = 'IDList_Completed.csv';
 % target loc 3 (5), target loc 4 (6), moment of realization (7)
 ID_Data = csvread(ID_location,1);
 % flag to process calibration experiments
-robot_calib_exp=0;
+robot_calib_exp=1;
 if robot_calib_exp
 %     ID_Data=[9999, 0, 1,1,3,4,3,10]; <--- Old data captured
     ID_Data=[9998, 0, 1,1,3,4,3,10]; % <--- New data from Di'Quan
@@ -66,13 +66,13 @@ conditions = ["1","2","3","4"];
 % totalDistanceTravelled(ID_List, trials, conditions, ID_conditions, ID_Data);
 % timeStayingInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
 % timeTurningInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
+% timeStayingStill(ID_List, trials, conditions, ID_conditions, ID_Data)
 % DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
-PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
+% PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 % SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 % SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
-% timeStayingStill(ID_List, trials, conditions, ID_conditions, ID_Data)
 % % KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
 % TrackerErrorBoard();
 % TrackerErrorMarkersEverywhere();
@@ -909,6 +909,7 @@ for TRIAL = 4:size(conditions,2)
                     % -- check if the distance between the robot and the
                     % -- target is within the threshold, break the loop and
                     % -- save the current atime at which it met the threshold
+%                     mean(dist)+1.5 = 2.8720
                     if Dist <= mean(dist)+1.5
                         SplitTime(1,ID) = ID_List(ID);
                         SplitTime(2,ID) = timestep;
@@ -1455,7 +1456,7 @@ for ii = 1:size(ID_Data, 1)
                 % -- begin plotting the data
                 subplot(nr,nc,5*(Condition-1)+1)
                 imagesc([-1 15],[-1 7.5], flip(OmronLabMap));
-                set(gca,'xdir','reverse','ydir','reverse');
+                set(gca,'xdir','reverse','ydir','reverse', 'fontsize', 16);
                 hold on; plot(X(1,1), X(2,1), 'bs', 'markersize', 6, 'linewidth', 3); % -- starting point
                 plot(X(1,end), X(2,end), 'bx', 'markersize', 6, 'linewidth', 3); % -- end point
                 plot(X(1,:), X(2,:), 'b-', 'linewidth', 3); % -- trajectory
@@ -1470,6 +1471,7 @@ for ii = 1:size(ID_Data, 1)
                 plot(time, abs(CommandedSpeed), 'k-', 'linewidth', 2);
                 ylabel({'Commanded','speed (m/s)'});
                 xlabel('time (s)'); grid on;
+                set(gca, 'fontsize', 16);
                 xlim([0 time(end)]); ylim([0 MaxSpeed]);
                 
                 % -- plot the turn rate of the robot
@@ -1477,6 +1479,7 @@ for ii = 1:size(ID_Data, 1)
                 plot(time, abs(CommandedTurnRate), 'k-', 'linewidth', 2);
                 ylabel({'Commanded','turn rate (rad/s)'});
                 xlabel('time (s)'); grid on;
+                set(gca, 'fontsize', 16);
                 xlim([0 time(end)]); ylim([0 MaxTurnRate]);
                 
                 % -- plot the commanded speed for each condition
@@ -1485,6 +1488,7 @@ for ii = 1:size(ID_Data, 1)
                 plot(time(1:end-1), abs(SP), 'b-', 'linewidth', 2);
                 ylabel('Speed (m/s)');
                 xlabel('time (s)');
+                set(gca, 'fontsize', 16);
                 grid on; xlim([0 time(end)]); ylim([0 MaxSpeed]);
 
                 % -- plot the commanded turn rate for each condition
@@ -1493,6 +1497,7 @@ for ii = 1:size(ID_Data, 1)
                 plot(time(1:end-1), abs(OM), 'b-', 'linewidth', 2);
                 ylabel('Turn rate (rad/s)');
                 xlabel('time (s)'); grid on;
+                set(gca, 'fontsize', 16);
                 xlim([0 time(end)]); ylim([0 MaxTurnRate]);
 
             
@@ -1505,6 +1510,7 @@ for ii = 1:size(ID_Data, 1)
                 plot(X(1,ID_Data(ii,end)), X(2,ID_Data(ii,end)), 'bx', 'markersize', 6, 'linewidth', 3); % -- end point
                 plot(X(1,1:ID_Data(ii,end)), X(2,1:ID_Data(ii,end)), 'b-', 'linewidth', 3); % -- trajectory
                 plot(X(4,1), X(5,1), 'rs', 'markersize', 6, 'linewidth', 3); % -- Target location
+                set(gca, 'fontsize', 16);
                 axis image; 
                 %title(sprintf('Condition:%d', Condition), 'fontsize', 18, 'fontweight', 'normal');
 
@@ -1515,6 +1521,7 @@ for ii = 1:size(ID_Data, 1)
                 plot(time(1:5*ID_Data(ii,end)), abs(CommandedSpeed(1:5*ID_Data(ii,end))), 'k-', 'linewidth', 2);
                 ylabel({'Commanded','speed (m/s)'});
                 xlabel('time (s)'); grid on;
+                set(gca, 'fontsize', 16);
                 xlim([0 time(5*ID_Data(ii,end))]); ylim([0 MaxSpeed]);
 
                 % -- plot the turn rate of the robot
@@ -1522,6 +1529,7 @@ for ii = 1:size(ID_Data, 1)
                 plot(time(1:5*ID_Data(ii,end)), abs(CommandedTurnRate(1:5*ID_Data(ii,end))), 'k-', 'linewidth', 2);
                 ylabel({'Commanded','turn rate (rad/s)'});
                 xlabel('time (s)'); grid on;
+                set(gca, 'fontsize', 16);
                 xlim([0 time(5*ID_Data(ii,end))]); ylim([0 MaxTurnRate]);
 
                 % -- plot the commanded speed for each condition
@@ -1530,6 +1538,7 @@ for ii = 1:size(ID_Data, 1)
                 plot(time(1:ID_Data(ii,end)), abs(SP(1:ID_Data(ii,end))), 'b-', 'linewidth', 2);
                 ylabel('Speed (m/s)');
                 xlabel('time (s)'); grid on;
+                set(gca, 'fontsize', 16);
                 xlim([0 time(ID_Data(ii,end))]); ylim([0 MaxSpeed]);
 
                 % -- plot the commanded turn rate for each condition
@@ -1538,6 +1547,7 @@ for ii = 1:size(ID_Data, 1)
                 plot(time(1:ID_Data(ii,end)), abs(OM(1:ID_Data(ii,end))), 'b-', 'linewidth', 2);
                 ylabel('Turn rate (rad/s)');
                 xlabel('time (s)'); grid on;
+                set(gca, 'fontsize', 16);
                 xlim([0 time(ID_Data(ii,end))]); ylim([0 MaxTurnRate]);
                 
                 % --------------------------------------------
@@ -1549,6 +1559,7 @@ for ii = 1:size(ID_Data, 1)
                 plot(X(1,end), X(2,end), 'bx', 'markersize', 6, 'linewidth', 3); % -- end point
                 plot(X(1,ID_Data(ii,end):end), X(2,ID_Data(ii,end):end), 'b-', 'linewidth', 3); % -- trajectory
                 plot(X(4,1), X(5,1), 'rs', 'markersize', 6, 'linewidth', 3); % -- Target location
+                set(gca, 'fontsize', 16);
                 axis image; 
                 %title(sprintf('Condition:%d', Condition), 'fontsize', 18, 'fontweight', 'normal');
 
@@ -1559,6 +1570,7 @@ for ii = 1:size(ID_Data, 1)
                 plot(time(5*ID_Data(ii,end):end), abs(CommandedSpeed(5*ID_Data(ii,end):end)), 'k-', 'linewidth', 2);
                 ylabel({'Commanded','speed (m/s)'});
                 xlabel('time (s)'); grid on;
+                set(gca, 'fontsize', 16);
                 xlim([time(5*ID_Data(ii,end)) time(end)]); ylim([0 MaxSpeed]);
 
                 % -- plot the commanded turn rate of the robot
@@ -1566,6 +1578,7 @@ for ii = 1:size(ID_Data, 1)
                 plot(time(5*ID_Data(ii,end):end), abs(CommandedTurnRate(5*ID_Data(ii,end):end)), 'k-', 'linewidth', 2);
                 ylabel({'Commanded','turn rate (rad/s)'});
                 xlabel('time (s)'); grid on;
+                set(gca, 'fontsize', 16);
                 xlim([time(5*ID_Data(ii,end)) time(end)]); ylim([0 MaxTurnRate]);
 
                 % -- plot the Robot speed for each condition
@@ -1574,6 +1587,7 @@ for ii = 1:size(ID_Data, 1)
                 plot(time(ID_Data(ii,end):end-1), abs(SP(ID_Data(ii,end):end)), 'b-', 'linewidth', 2);
                 ylabel('Speed (m/s)');
                 xlabel('time (s)'); grid on;
+                set(gca, 'fontsize', 16);
                 xlim([time(ID_Data(ii,end)) time(end)]); ylim([0 MaxSpeed]);
 
                 % -- plot the Robot turn rate for each condition
@@ -1582,6 +1596,7 @@ for ii = 1:size(ID_Data, 1)
                 plot(time(ID_Data(ii,end):end-1), abs(OM(ID_Data(ii,end):end)), 'b-', 'linewidth', 2);
                 ylabel('Turn rate (rad/s)');
                 xlabel('time (s)'); grid on;
+                set(gca, 'fontsize', 16);
                 xlim([time(ID_Data(ii,end)) time(end)]); ylim([0 MaxTurnRate]);
             
             end
