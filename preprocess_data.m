@@ -79,7 +79,8 @@ conditions = ["1","2","3","4"];
 % TrackerErrorMarkersGrid();
 % KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
 % C4b_TimeInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
-StoreCommandedData(ID_List, trials, conditions, ID_conditions, ID_Data);
+% StoreCommandedData(ID_List, trials, conditions, ID_conditions, ID_Data);
+PlottingSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 
 end
 
@@ -2611,6 +2612,86 @@ for TRIAL = 1:size(trials,2)
         fprintf('Writing Com speed and turn rate data for participant: %4d of condition: %d \n', ID_List(ID), TRIAL);
         csvwrite(ComSpeedLoc, Vel);  pause(1);
         csvwrite(ComTurnRateLoc, omega); pause(1);
+    end
+end
+
+end
+
+function PlottingSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data)
+
+% -- define the frequencie at which the saving of data occured
+Comdt = 0.1; % -- 10 Hz
+Trackdt = 0.5; % -- 2 Hz
+
+% -- begin looping through each trial
+for TRIAL = 1:size(trials,2)
+    trial = num2str(trials(TRIAL));
+    condition = num2str(conditions(TRIAL));
+    
+    % -- loop through each participant
+    for ID = 1:size(ID_List,1)
+        % -- read the data from the csv file that contain the com speed/turnrate
+        participantID = num2str(ID_List(ID));
+        ComSpeedLoc = strcat('filtered_data', filesep, participantID, filesep, 'ComSpeed_condition_', num2str(TRIAL) ,'.csv');
+        ComTurnRateLoc = strcat('filtered_data', filesep, participantID, filesep, 'ComTurnRate_condition_', num2str(TRIAL) ,'.csv');
+        ComSpeed = csvread(ComSpeedLoc); % -- store data in variable
+        ComTuranRate = csvread(ComTurnRateLoc);
+
+        % -- read the data from the csv files that contain the EKF robot speed/turnrate
+        EKFSpeedLoc = strcat('filtered_data', filesep, participantID, filesep, 'EKFVel_condition_', num2str(TRIAL) ,'.csv');
+        EKFTurnRateLoc = strcat('filtered_data', filesep, participantID, filesep, 'EKFom_condition_', num2str(TRIAL) ,'.csv');
+        EKFSpeed = csvread(EKFSpeedLoc); % -- store data in variable
+        EKFTuranRate = csvread(EKFTurnRateLoc);
+
+        % --- create figure
+        figure(ID+1); gcf;
+
+        % -- if the condition is not 4
+        if TRIAL ~= 4
+            subplot(2,3,TRIAL);
+            plot(0:Comdt:Comdt*size(ComSpeed,1)-Comdt, ComSpeed, 'k-', 'LineWidth', 2); % -- plotting the commanded speed data
+            hold on; plot(0:Trackdt:Trackdt*size(EKFSpeed,1)-Trackdt, EKFSpeed, 'b-', 'LineWidth', 2); % -- plotting the robot speed data
+            
+            % -- make it look nice
+            title(strcat('ID: ', participantID, ', Condition: ', condition));
+            xlabel('time (s)');
+            ylabel('Speed (m/s)');
+        
+        else % -- if condition 4 is being looked at enter
+
+            % -- check if the participant was randomly selected to go through condition 4b
+            if ID_Data(ID, 2)
+                % -- plot their 4a portion first 
+                subplot(2,3,TRIAL);
+                plot(0:Comdt:5*ID_Data(TRIAL, end)*Comdt-Comdt, ComSpeed(1:5*ID_Data(TRIAL, end)), 'k-', 'LineWidth', 2); % -- plotting the commanded speed data
+                hold on; plot(0:Trackdt:ID_Data(TRIAL, end)*Trackdt-Trackdt, EKFSpeed(1:ID_Data(TRIAL, end)), 'b-', 'LineWidth', 2); % -- plotting the robot speed data
+                
+                % -- make it look nice
+                title(strcat('ID: ', participantID, ', Condition: ', condition, 'a'));
+                xlabel('time (s)');
+                ylabel('Speed (m/s)');
+
+                % -- then plot their 4b portion of condition 4
+                subplot(2,3,TRIAL+1); % -- the last plot will be of condition 4b
+                plot(Comdt*5*ID_Data(TRIAL, end):Comdt:Comdt*size(ComSpeed,1), ComSpeed(5*ID_Data(TRIAL, end):end), 'k-', 'LineWidth', 2); % -- plotting the commanded speed data
+                hold on; plot(Trackdt*ID_Data(TRIAL, end):Trackdt:Trackdt*size(EKFSpeed,1), EKFSpeed(ID_Data(TRIAL, end):end), 'b-', 'LineWidth', 2); % -- plotting the robot speed data
+            
+                % -- make it look nice
+                title(strcat('ID: ', participantID, ', Condition: ', condition, 'b'));
+                xlabel('time (s)');
+                ylabel('Speed (m/s)');
+            else
+                subplot(2,3,TRIAL);
+                plot(0:Comdt:Comdt*size(ComSpeed,1)-Comdt, ComSpeed, 'k-', 'LineWidth', 2); % -- plotting the commanded speed data
+                hold on; plot(0:Trackdt:Trackdt*size(EKFSpeed,1)-Trackdt, EKFSpeed, 'b-', 'LineWidth', 2); % -- plotting the robot speed data
+            
+                % -- make it look nice
+                title(strcat('ID: ', participantID, ', Condition: ', condition, 'a'));
+                xlabel('time (s)');
+                ylabel('Speed (m/s)');
+            end
+        end
+
     end
 end
 
