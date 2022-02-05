@@ -39,7 +39,7 @@ ID_location = 'IDList_Completed.csv';
 % target loc 3 (5), target loc 4 (6), moment of realization (7)
 ID_Data = csvread(ID_location,1);
 % flag to process calibration experiments
-robot_calib_exp=1;
+robot_calib_exp=0;
 if robot_calib_exp
 %     ID_Data=[9999, 0, 1,1,3,4,3,10]; <--- Old data captured
     ID_Data=[9998, 0, 1,1,3,4,3,10]; % <--- New data from Di'Quan
@@ -79,6 +79,7 @@ conditions = ["1","2","3","4"];
 % TrackerErrorMarkersGrid();
 % KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
 % C4b_TimeInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
+StoreCommandedData(ID_List, trials, conditions, ID_conditions, ID_Data);
 
 end
 
@@ -2581,5 +2582,36 @@ ylabel('Total time in staying still (s)');
 ax = gca;
 ax.FontSize = fs;
 grid on;
+
+end
+
+function StoreCommandedData(ID_List, trials, conditions, ID_conditions, ID_Data)
+
+for TRIAL = 1:size(trials,2)
+    trial = num2str(trials(TRIAL));
+    condition = num2str(conditions(TRIAL));
+    
+    for ID = 1:size(ID_List,1)
+        % -- read the data from the csv file
+        participantID = num2str(ID_List(ID));
+        onBoard = strcat('RAW', filesep, participantID,filesep, 'condition_',condition, filesep, 'WheelVel.csv');
+        RpiData = csvread(onBoard); % -- store data in variable
+
+        % -- begin to extract the individual wheel velocities and convert
+        % -- them into commanded turn rate and speed 
+        % -- Remember: the wheel speeds are stored in mm/s, convert to m/s
+        Vel = ((RpiData(:,2) + RpiData(:,3))/ 1000) / 2;
+        omega = ((RpiData(:,2) - RpiData(:,3))/ 1000) / .235;
+        Vel = abs(Vel); omega = abs(omega); % -- take the absolute value of all values
+
+        % -- create variables that define the location where the data will
+        % -- be stored under the filtered data folder
+        ComSpeedLoc = strcat('filtered_data', filesep, participantID, filesep, 'ComSpeed_condition_', num2str(TRIAL) ,'.csv');
+        ComTurnRateLoc = strcat('filtered_data', filesep, participantID, filesep, 'ComTurnRate_condition_', num2str(TRIAL) ,'.csv');
+        fprintf('Writing Com speed and turn rate data for participant: %4d of condition: %d \n', ID_List(ID), TRIAL);
+        csvwrite(ComSpeedLoc, Vel);  pause(1);
+        csvwrite(ComTurnRateLoc, omega); pause(1);
+    end
+end
 
 end
