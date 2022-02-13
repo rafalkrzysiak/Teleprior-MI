@@ -88,6 +88,24 @@ function varargout=sigstar(groups,stats,nosort)
             groups={};
             stats=[];
         end
+    else
+        conditions=unique([stats(:,1); stats(:,2)]);
+        groups1=[]; 
+        for ii=1:numel(conditions)
+            for jj=ii+1:numel(conditions)
+                idx=stats(:,1)==conditions(ii) & stats(:,2)==conditions(jj);
+                if stats(idx,6) <= 0.05
+                    groups1=[ii,jj, stats(idx,6); groups1];
+                end
+            end
+        end
+        if ~isempty(groups1)
+            groups=num2cell(groups1(:,1:2),2);
+            stats=groups1(:,3);
+        else
+            groups={};
+            stats=[];
+        end
     end
     
 

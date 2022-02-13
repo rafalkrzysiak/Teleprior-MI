@@ -1,0 +1,127 @@
+[Time to find (s)] 
+
+tbl_data =
+
+  4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
+
+    {'Source' }    {'SS'     }    {'df' }    {'MS'      }    {'Chi-sq'  }    {'Prob>Chi-sq'}
+    {'Columns'}    {[71.4828]}    {[  3]}    {[ 23.8276]}    {[ 42.8897]}    {[ 2.5974e-09]}
+    {'Error'  }    {[73.5172]}    {[ 84]}    {[  0.8752]}    {0×0 double}    {0×0 double   }
+    {'Total'  }    {[    145]}    {[115]}    {0×0 double}    {0×0 double}    {0×0 double   }
+
+
+res_data =
+
+    1.0000    2.0000    0.0366    0.9310    1.8255    0.0362
+    1.0000    3.0000   -0.8945         0    0.8945    1.0000
+    1.0000    4.0000    1.0021    1.8966    2.7910    0.0000
+    2.0000    3.0000   -1.8255   -0.9310   -0.0366    0.0362
+    2.0000    4.0000    0.0711    0.9655    1.8600    0.0264
+    3.0000    4.0000    1.0021    1.8966    2.7910    0.0000
+
+[Distance travelled (m)] 
+
+tbl_data =
+
+  4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
+
+    {'Source' }    {'SS'     }    {'df' }    {'MS'      }    {'Chi-sq'  }    {'Prob>Chi-sq'}
+    {'Columns'}    {[58.1034]}    {[  3]}    {[ 19.3678]}    {[ 34.8621]}    {[ 1.3028e-07]}
+    {'Error'  }    {[86.8966]}    {[ 84]}    {[  1.0345]}    {0×0 double}    {0×0 double   }
+    {'Total'  }    {[    145]}    {[115]}    {0×0 double}    {0×0 double}    {0×0 double   }
+
+
+res_data =
+
+    1.0000    2.0000    0.1745    1.0690    1.9634    0.0097
+    1.0000    3.0000   -0.8255    0.0690    0.9634    1.0000
+    1.0000    4.0000    0.7952    1.6897    2.5841    0.0000
+    2.0000    3.0000   -1.8945   -1.0000   -0.1055    0.0191
+    2.0000    4.0000   -0.2738    0.6207    1.5151    0.4028
+    3.0000    4.0000    0.7262    1.6207    2.5151    0.0000
+
+[Fraction time staying in place] 
+
+tbl_data =
+
+  4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
+
+    {'Source' }    {'SS'      }    {'df' }    {'MS'      }    {'Chi-sq'  }    {'Prob>Chi-sq'}
+    {'Columns'}    {[ 17.9655]}    {[  3]}    {[  5.9885]}    {[ 10.7793]}    {[     0.0130]}
+    {'Error'  }    {[127.0345]}    {[ 84]}    {[  1.5123]}    {0×0 double}    {0×0 double   }
+    {'Total'  }    {[     145]}    {[115]}    {0×0 double}    {0×0 double}    {0×0 double   }
+
+
+res_data =
+
+    1.0000    2.0000   -0.5151    0.3793    1.2738    1.0000
+    1.0000    3.0000   -0.6186    0.2759    1.1703    1.0000
+    1.0000    4.0000    0.1745    1.0690    1.9634    0.0097
+    2.0000    3.0000   -0.9979   -0.1034    0.7910    1.0000
+    2.0000    4.0000   -0.2048    0.6897    1.5841    0.2516
+    3.0000    4.0000   -0.1013    0.7931    1.6876    0.1159
+
+[Fraction time spent turning in place] 
+
+tbl_data =
+
+  4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
+
+    {'Source' }    {'SS'      }    {'df' }    {'MS'      }    {'Chi-sq'  }    {'Prob>Chi-sq'}
+    {'Columns'}    {[  4.4483]}    {[  3]}    {[  1.4828]}    {[  2.6690]}    {[     0.4455]}
+    {'Error'  }    {[140.5517]}    {[ 84]}    {[  1.6732]}    {0×0 double}    {0×0 double   }
+    {'Total'  }    {[     145]}    {[115]}    {0×0 double}    {0×0 double}    {0×0 double   }
+
+[Average time spent staying still (s)] 
+
+tbl_data =
+
+  4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
+
+    {'Source' }    {'SS'     }    {'df' }    {'MS'      }    {'Chi-sq'  }    {'Prob>Chi-sq'}
+    {'Columns'}    {[50.9310]}    {[  3]}    {[ 16.9770]}    {[ 30.5586]}    {[ 1.0528e-06]}
+    {'Error'  }    {[94.0690]}    {[ 84]}    {[  1.1199]}    {0×0 double}    {0×0 double   }
+    {'Total'  }    {[    145]}    {[115]}    {0×0 double}    {0×0 double}    {0×0 double   }
+
+
+res_data =
+
+    1.0000    2.0000   -0.0324    0.8621    1.7565    0.0660
+    1.0000    3.0000   -0.5496    0.3448    1.2393    1.0000
+    1.0000    4.0000    0.8642    1.7586    2.6531    0.0000
+    2.0000    3.0000   -1.4117   -0.5172    0.3772    0.7626
+    2.0000    4.0000    0.0021    0.8966    1.7910    0.0491
+    3.0000    4.0000    0.5193    1.4138    2.3082    0.0002
+
+[Fraction time spent staying still] 
+
+tbl_data =
+
+  4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
+
+    {'Source' }    {'SS'     }    {'df' }    {'MS'      }    {'Chi-sq'  }    {'Prob>Chi-sq'}
+    {'Columns'}    {[31.0000]}    {[  3]}    {[ 10.3333]}    {[ 18.6000]}    {[ 3.3072e-04]}
+    {'Error'  }    {[    114]}    {[ 84]}    {[  1.3571]}    {0×0 double}    {0×0 double   }
+    {'Total'  }    {[    145]}    {[115]}    {0×0 double}    {0×0 double}    {0×0 double   }
+
+
+res_data =
+
+    1.0000    2.0000   -0.3427    0.5517    1.4462    0.6220
+    1.0000    3.0000   -0.2048    0.6897    1.5841    0.2516
+    1.0000    4.0000    0.5538    1.4483    2.3427    0.0001
+    2.0000    3.0000   -0.7565    0.1379    1.0324    1.0000
+    2.0000    4.0000    0.0021    0.8966    1.7910    0.0491
+    3.0000    4.0000   -0.1358    0.7586    1.6531    0.1515
+
+[Frequency of stops] 
+
+tbl_data =
+
+  4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
+
+    {'Source' }    {'SS'      }    {'df' }    {'MS'      }    {'Chi-sq'  }    {'Prob>Chi-sq'}
+    {'Columns'}    {[ 10.9310]}    {[  3]}    {[  3.6437]}    {[  6.5586]}    {[     0.0874]}
+    {'Error'  }    {[134.0690]}    {[ 84]}    {[  1.5961]}    {0×0 double}    {0×0 double   }
+    {'Total'  }    {[     145]}    {[115]}    {0×0 double}    {0×0 double}    {0×0 double   }
+

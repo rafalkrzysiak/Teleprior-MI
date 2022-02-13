@@ -70,7 +70,7 @@ conditions = ["1","2","3","4"];
 % DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
 % PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
-% SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
+SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 % SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
 % % KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
@@ -80,7 +80,8 @@ conditions = ["1","2","3","4"];
 % KeypressDist(ID_List, trials, conditions, ID_conditions, ID_Data);
 % C4b_TimeInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
 % StoreCommandedData(ID_List, trials, conditions, ID_conditions, ID_Data);
-PlottingSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
+% PlottingSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
+% PlotSplitC4data(ID_List, trials, conditions, ID_conditions, ID_Data);
 
 end
 
@@ -1267,11 +1268,12 @@ alpha = 0.25;
 % -- Load the omron lab mosaic OmronLabMosaicCrop_lowres 
 OmronLabMap = imread('maps/blankMap.jpg');
 
+figure(1); gcf; clf;
 % -- loop though all conditions and sub-conditions
 for Condition = 1:4
    % -- create a figure that corresponds to the condition number
-   figure(Condition+1); gcf; clf;
-   
+
+   subplot(2,2,Condition);
    % -- plot the Search environment
    imagesc([-0.2 15],[-0.5 7], flip(OmronLabMap));
    set(gca,'xdir','reverse','ydir','reverse');
@@ -1281,27 +1283,52 @@ for Condition = 1:4
        
         % -- create the string that corresponds to the name of the file
         % -- that contains the trajectory data
-        trajFile = strcat('RAW/', num2str(ID_Data(ii,1)), ...
+        RawTrajFile = strcat('RAW/', num2str(ID_Data(ii,1)), ...
             '/trial_000', num2str(Condition+1), '/data.csv');
         
         % -- load the file that contains the trajectory data
-        Data = csvread(trajFile,2);
-        X(:,1) = Data(:,4); X(:,2) = Data(:,5); 
-        X(:,3) = Data(:,13); X(:,4) = Data(:,14);
+        RawData = csvread(RawTrajFile,2);
+        X(:,1) = RawData(:,4); X(:,2) = RawData(:,5); 
+        X(:,3) = RawData(:,13); X(:,4) = RawData(:,14);
         X = X(X(:,1)~=0,:); % -- remove the zeros
         
-        figure(Condition+1);
+        
+        % -- that contains the EKF trajectory data
+        EKFTrajFile = strcat('filtered_data/', num2str(ID_Data(ii,1)), ...
+            '/EKFtraj_condition_', num2str(Condition), '.csv');
+        
+        % -- load the file that contains the trajectory data
+
+        EKFData = csvread(EKFTrajFile); 
+
+        EKFData=EKFData';
+        Xh(:,1) = EKFData(:,1); 
+        Xh(:,2) = EKFData(:,2); 
+        
+
         % -- plot all data prior to condition 4
         hold on; plot(X(5,1), X(5,2), 'bs', 'markersize', 10, 'linewidth', 3); % -- starting point
         plot(X(end,1), X(end,2), 'bx', 'markersize', 10, 'linewidth', 3); % -- end point
-        plot(X(5:end,1), X(5:end,2), 'color',[0,0,0]+alpha, 'linewidth', 1); % -- trajectory
+        
+
+        
+        if Condition==4 && ID_Data(ii,2)
+            plot(Xh(5:ID_Data(ii, 8),1), Xh(5:ID_Data(ii, 8),2), ':', ...
+                        'color',[0,0,0], 'linewidth', 1); % -- trajectory
+            plot(Xh(ID_Data(ii, 8):end,1), Xh(ID_Data(ii, 8):end,2), ':', ...
+                        'color',[0,0,0], 'linewidth', 1); % -- trajectory
+        else
+            plot(Xh(5:end,1), Xh(5:end,2), '-', ...
+                        'color',[0,0,0]+alpha, 'linewidth', 1); % -- trajectory
+        end
         plot(X(end,3), X(end,4), 'gs', 'markersize', 10, 'linewidth', 3); % -- Target location
         axis image; xlabel('X(m)'); ylabel('Y(m)'); 
         %title(sprintf('Condition: %d', Condition), 'fontsize', 18, 'fontweight', 'normal');
-        clear X;
+        clear X Xh;
    end % -- end participant loop
    ax = gca;
    ax.FontSize = 18;
+   drawnow;
 end % -- end condition loop
 
 end
@@ -1653,6 +1680,7 @@ Ns=size(ID_Data,1);
 % -- Format: [c1, c2, c3, c4a, c4b, SQ1, SQ2, SQ3, SQ4, SQ5]
 RobotSpeed = zeros(Ns, 10);
 CommandedSpeed = RobotSpeed;
+FreqStops = zeros(Ns,5);
 
 % -- loop through all participants
 for ii = 1:size(ID_Data, 1)
@@ -1660,10 +1688,10 @@ for ii = 1:size(ID_Data, 1)
     % -- loop through each of the conditions
     for Condition = 1:4
         % -- get the filtered and RAW data
-        filtered_dir = strcat('filtered_data/',num2str(ID_Data(ii,1)),'/EKFVel_condition_',...
+        filtered_dir = strcat('filtered_data',filesep, num2str(ID_Data(ii,1)),filesep, 'EKFVel_condition_',...
                               num2str(Condition),'.csv');
-        raw_dir = strcat('RAW/',num2str(ID_Data(ii,1)),'/condition_',num2str(Condition),...
-                         '\WheelVel.csv');
+        raw_dir = strcat('RAW',filesep, num2str(ID_Data(ii,1)),filesep,'condition_',num2str(Condition),...
+                         filesep,'WheelVel.csv');
         U = load(raw_dir);
         U_EKF = load(filtered_dir);
         
@@ -1678,15 +1706,28 @@ for ii = 1:size(ID_Data, 1)
             if ID_Data(ii, 2)
                 RobotSpeed(ii, Condition+1) = mean(U_EKF(ID_Data(ii, end): end));
                 CommandedSpeed(ii, Condition+1) = mean(U_com(5*ID_Data(ii, end): end));
+                diff_CommandedSpeed=[0; diff(U_com(5*ID_Data(ii, end): end))];
+                FreqStops(ii, Condition+1)=sum(diff_CommandedSpeed<0 & ...
+                    U_com(5*ID_Data(ii, end): end)==0)/numel(U_com(5*ID_Data(ii, end): end));
+           
+                
                 RobotSpeed(ii, Condition) = mean(U_EKF(1:ID_Data(ii, end)));
                 CommandedSpeed(ii, Condition) = mean(U_com(1:5*ID_Data(ii, end)));
+                diff_CommandedSpeed=[0; diff(U_com(1:5*ID_Data(ii, end)))];
+                FreqStops(ii, Condition)=sum(diff_CommandedSpeed<0 & ...
+                    U_com(1:5*ID_Data(ii, end))==0)/numel(U_com(1:5*ID_Data(ii, end)));
             else % -- otherwise store as regular
                 RobotSpeed(ii, Condition) = mean(U_EKF);
                 CommandedSpeed(ii, Condition) = mean(U_com);
+                diff_CommandedSpeed=[0; diff(U_com)];
+                FreqStops(ii, Condition)=sum(diff_CommandedSpeed<0 & U_com==0)/numel(U_com);
             end
         else
             RobotSpeed(ii, Condition) = mean(U_EKF);
             CommandedSpeed(ii, Condition) = mean(U_com);
+            diff_CommandedSpeed=[0; diff(U_com)];
+            FreqStops(ii, Condition)=sum(diff_CommandedSpeed<0 & U_com==0)/numel(U_com);
+            
         end
     end
     
@@ -1696,9 +1737,9 @@ for ii = 1:size(ID_Data, 1)
 end
 
 % -- save the arrays as csv files within the stats data folder
-csvwrite('stats data\RobotSpeedData.csv', RobotSpeed);
-csvwrite('stats data\ComSpeedData.csv', CommandedSpeed);
-
+csvwrite(['stats data', filesep, 'RobotSpeedData.csv'], RobotSpeed);
+csvwrite(['stats data', filesep, 'ComSpeedData.csv'], CommandedSpeed);
+csvwrite(['stats data', filesep, 'FreqStops.csv'], FreqStops);
 end
 
 function SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data)
@@ -2614,6 +2655,163 @@ for TRIAL = 1:size(trials,2)
         csvwrite(ComTurnRateLoc, omega); pause(1);
     end
 end
+
+end
+
+function PlotSplitC4data(ID_List, trials, conditions, ID_conditions, ID_Data)
+
+% -- define the frequencie at which the saving of data occured
+Comdt = 0.1; % -- 10 Hz
+Trackdt = 0.5; % -- 2 Hz
+
+% -- begin looping through each trial
+for TRIAL = size(trials,2)
+    trial = num2str(trials(TRIAL));
+    condition = num2str(conditions(TRIAL));
+    
+    % -- loop through each participant
+    for ID = 1:size(ID_List,1)
+        % -- read the data from the csv file that contain the com speed/turnrate
+        participantID = num2str(ID_List(ID));
+        ComSpeedLoc = strcat('filtered_data', filesep, participantID, filesep, 'ComSpeed_condition_', num2str(TRIAL) ,'.csv');
+        ComTurnRateLoc = strcat('filtered_data', filesep, participantID, filesep, 'ComTurnRate_condition_', num2str(TRIAL) ,'.csv');
+        ComSpeed = csvread(ComSpeedLoc); % -- store data in variable
+        ComTurnRate = csvread(ComTurnRateLoc);
+
+        % -- read the data from the csv files that contain the EKF robot speed/turnrate
+        EKFSpeedLoc = strcat('filtered_data', filesep, participantID, filesep, 'EKFVel_condition_', num2str(TRIAL) ,'.csv');
+        EKFTurnRateLoc = strcat('filtered_data', filesep, participantID, filesep, 'EKFom_condition_', num2str(TRIAL) ,'.csv');
+        EKFSpeed = csvread(EKFSpeedLoc); % -- store data in variable
+        EKFTurnRate = csvread(EKFTurnRateLoc);
+
+        % -- check if the participant was randomly selected to go through condition 4b
+        if ID_Data(ID, 2) % participant had inaccurate knowledge of target
+            ComSpeed_4a(ID).data=(ComSpeed(1:5*ID_Data(TRIAL, end)));
+            ComTurnRate_4a(ID).data=(ComTurnRate(1:5*ID_Data(TRIAL, end)));
+            
+            ComSpeed_4b(ID).data=(ComSpeed(5*ID_Data(TRIAL, end):end));
+            ComTurnRate_4b(ID).data=(ComTurnRate(5*ID_Data(TRIAL, end):end));
+ 
+            
+            % -- plot their 4a portion first 
+%             subplot(2,3,TRIAL);
+%             plot(0:Comdt:5*ID_Data(TRIAL, end)*Comdt-Comdt, ComSpeed(1:5*ID_Data(TRIAL, end)), 'k-', 'LineWidth', 2); % -- plotting the commanded speed data
+%             hold on; plot(0:Trackdt:ID_Data(TRIAL, end)*Trackdt-Trackdt, EKFSpeed(1:ID_Data(TRIAL, end)), 'b-', 'LineWidth', 2); % -- plotting the robot speed data
+% 
+%             % -- make it look nice
+%             title(strcat('ID: ', participantID, ', Condition: ', condition, 'a'));
+%             xlabel('time (s)');
+%             ylabel('Speed (m/s)');
+% 
+%             % -- then plot their 4b portion of condition 4
+%             subplot(2,3,TRIAL+1); % -- the last plot will be of condition 4b
+%             plot(Comdt*5*ID_Data(TRIAL, end):Comdt:Comdt*size(ComSpeed,1), ComSpeed(5*ID_Data(TRIAL, end):end), 'k-', 'LineWidth', 2); % -- plotting the commanded speed data
+%             hold on; plot(Trackdt*ID_Data(TRIAL, end):Trackdt:Trackdt*size(EKFSpeed,1), EKFSpeed(ID_Data(TRIAL, end):end), 'b-', 'LineWidth', 2); % -- plotting the robot speed data
+% 
+%             % -- make it look nice
+%             title(strcat('ID: ', participantID, ', Condition: ', condition, 'b'));
+%             xlabel('time (s)');
+%             ylabel('Speed (m/s)');
+        else
+            ComSpeed_4a(ID).data=ComSpeed;
+            ComTurnRate_4a(ID).data=ComTurnRate;
+            
+            ComSpeed_4b(ID).data=[];
+            ComTurnRate_4b(ID).data=[];
+%             subplot(2,3,TRIAL);
+%             plot(0:Comdt:Comdt*size(ComSpeed,1)-Comdt, ComSpeed, 'k-', 'LineWidth', 2); % -- plotting the commanded speed data
+%             hold on; plot(0:Trackdt:Trackdt*size(EKFSpeed,1)-Trackdt, EKFSpeed, 'b-', 'LineWidth', 2); % -- plotting the robot speed data
+% 
+%             % -- make it look nice
+%             title(strcat('ID: ', participantID, ', Condition: ', condition, 'a'));
+%             xlabel('time (s)');
+%             ylabel('Speed (m/s)');
+        end
+
+    end
+end
+
+% plot all speeds and turn rates in one figure
+figure(1); gcf; clf;
+
+npts=100;
+for ID = 1:size(ID_List,1)
+    if ID_Data(ID, 2)
+        subplot(2,2,1);
+        % interpolate it so that we are looking at % of trial finished
+        % instead of time
+        
+        ComSpeed_4a(ID).data=interp1(1:numel(ComSpeed_4a(ID).data), ...
+                            ComSpeed_4a(ID).data, linspace(1,numel(ComSpeed_4a(ID).data), npts));
+        plot(ComSpeed_4a(ID).data, '-', 'color', ones(1,3)*.75);
+        
+%         plot((1:numel(ComSpeed_4a(ID).data))*Comdt, ComSpeed_4a(ID).data, '-', ...
+%                             'color', ones(1,3)*.5);
+        hold on;
+
+        
+        subplot(2,2,2);
+        ComSpeed_4b(ID).data=interp1(1:numel(ComSpeed_4b(ID).data), ...
+                            ComSpeed_4b(ID).data, linspace(1,numel(ComSpeed_4b(ID).data), npts));
+        plot(ComSpeed_4b(ID).data, '-', 'color', ones(1,3)*.75);
+        
+%         plot((1:numel(ComSpeed_4b(ID).data))*Comdt, ComSpeed_4b(ID).data, '-', ...
+%                             'color', ones(1,3)*.5);
+        hold on;
+        
+        
+        subplot(2,2,3);
+        ComTurnRate_4a(ID).data=interp1(1:numel(ComTurnRate_4a(ID).data), ...
+                            ComTurnRate_4a(ID).data, linspace(1,numel(ComTurnRate_4a(ID).data), npts));
+        plot(ComTurnRate_4a(ID).data, '-', 'color', ones(1,3)*.75);
+%         plot((1:numel(ComTurnRate_4a(ID).data))*Comdt, ComTurnRate_4a(ID).data, '-', ...
+%                             'color', ones(1,3)*.5);
+        hold on;
+        
+        subplot(2,2,4);
+        ComTurnRate_4b(ID).data=interp1(1:numel(ComTurnRate_4b(ID).data), ...
+                            ComTurnRate_4b(ID).data, linspace(1,numel(ComTurnRate_4b(ID).data), npts));
+        plot(ComTurnRate_4b(ID).data, '-', 'color', ones(1,3)*.75);
+%         plot((1:numel(ComTurnRate_4b(ID).data))*Comdt, ComTurnRate_4b(ID).data, '-', ...
+%                             'color', ones(1,3)*.5);
+        hold on;
+        
+    end
+    
+end
+
+figure(1); gcf;
+subplot(2,2,1);
+avg=mean(cat(1,ComSpeed_4a(logical(ID_Data(:,2))).data),1);
+plot(avg, 'k-', 'linewidth', 2);
+set(gca, 'fontsize', 16);
+xlabel('% of trial to high probability region');
+ylabel({'Commanded speed (m/s)'});
+title('Accurate target');
+% ylabel({'Commanded speed' 'Accurate Target (m/s)'});
+
+subplot(2,2,2); 
+avg=mean(cat(1,ComSpeed_4b(logical(ID_Data(:,2))).data),1);
+plot(avg, 'k-', 'linewidth', 2);
+set(gca, 'fontsize', 16);
+xlabel('% of trial to target location');
+title('Inaccurate target');
+% ylabel({'Commanded speed' 'Inaccurate Target (m/s)'});
+
+subplot(2,2,3);
+avg=mean(cat(1,ComTurnRate_4a(logical(ID_Data(:,2))).data),1);
+plot(avg, 'k-', 'linewidth', 2);
+set(gca, 'fontsize', 16, 'ylim', [0 3]);
+xlabel('% of trial to high probability region');
+ylabel({'Commanded turn rate (rad/s)'});
+% ylabel({'Commanded turn rate' 'Accurate Target (rad/s)'});
+
+subplot(2,2,4); 
+avg=mean(cat(1,ComTurnRate_4b(logical(ID_Data(:,2))).data),1);
+plot(avg, 'k-', 'linewidth', 2);
+set(gca, 'fontsize', 16);
+xlabel('% of trial to target location');
+% ylabel({'Commanded turn rate' 'Inaccurate Target (rad/s)'});
 
 end
 
