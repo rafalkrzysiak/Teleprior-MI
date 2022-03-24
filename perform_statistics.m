@@ -100,6 +100,7 @@ t_comSpeed = array2table(comSpeedArray,...
     'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
 plot_and_stats(t_comSpeed, 1:4,  xticklbl, ...
     'Commanded speed (m/s)', '(a)', [], 1);
+set(gca, 'YLim', [0, 0.3]);
 
 % commanded turn rate
 subplot(222)
@@ -111,7 +112,7 @@ t_comTurnRate = array2table(comTurnRateArray,...
     'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
 plot_and_stats(t_comTurnRate, 1:4,  xticklbl, ...
     'Commanded turn rate (rad/s)','(b)',  [], 1);
-
+set(gca, 'YLim', [0, 1/2]);
 
 % Robot speed
 subplot(223);
@@ -123,7 +124,7 @@ t_EKFSpd = array2table(EKFSpdData,...
     'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
 plot_and_stats(t_EKFSpd, 1:4,  xticklbl, ...
     'Robot speed (m/s)', '(c)', [], 1);
-
+set(gca, 'YLim', [0, 0.3]);
 
 % Robot turn rate
 subplot(224);
@@ -135,6 +136,7 @@ t_EKFOmega = array2table(EKFOmegaArray,...
     'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
 plot_and_stats(t_EKFOmega, 1:4,  xticklbl, ...
     'Robot turn rate (rad/s)', '(d)', [],1);
+set(gca, 'YLim', [0, 1]);
 
 diary off;
 
@@ -255,29 +257,6 @@ for ii=1:6
 end
 
 diary off
-
-%% ACCEL
-% -- commanded acceleration
-ComAccelArray = csvread('stats data/CommandedAccel.csv');
-t_ComAccelArray = array2table(ComAccelArray,...
-    'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
-ComAccelArray_bp = boxplot(table2array(t_ComAccelArray(:,1:4)), 'labels', {'C1','C2','C3','C4'});
-ylabel('Commanded Acceleration (m/s)')
-rm_ComAccelArray=fitrm(t_ComAccelArray,'C1-C4~1', 'WithinDesign', within);
-stats_ComAccelArray = ranova(rm_ComAccelArray)
-if stats_ComAccelArray.pValue(1) < 0.05
-    res_ComAccelArray=multcompare(rm_ComAccelArray, 'cond', 'ComparisonType','bonferroni')
-    sigstar([], res_ComAccelArray,1)
-end
-% -- make figure look nice
-box off;
-ax = gca;
-ax.FontSize = 18;
-ax.TickLabelInterpreter = 'latex';
-ax.XTickLabel = {'\begin{tabular}{c} No Map \\ No Target\end{tabular}',...
-                 '\begin{tabular}{c} No Map \\ Yes Target\end{tabular}',...
-                 '\begin{tabular}{c} Yes Map \\ No Target\end{tabular}',...
-                 '\begin{tabular}{c} Yes Map \\ Yes Target\end{tabular}'};
 
 
 function plot_and_stats(data_table, colidx, xticklbl, ylbl, xlbl, ylim, disp1)
