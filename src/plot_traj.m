@@ -4,7 +4,7 @@ ID_Data = csvread('./IDList_Completed.csv',1);
 Ns=size(ID_Data,1);
 
 % Load the omron lab mosaic 
-OmronLabMap = imread('maps/OmronLabMosaicCrop_lowres.jpg');
+OmronLabMap = imread('../data/maps/OmronLabMosaicCrop_lowres.jpg');
 
 nr=5; % number of rows
 nc=4; % number of conditions
@@ -19,7 +19,7 @@ for ii = 1:size(ID_Data, 1)
         subplot(nr,nc,Condition)
         % -- create the string that corresponds to the name of the file
         % -- that contains the trajectory data
-        EKFtrajFile = strcat('filtered_data/', num2str(ID_Data(ii,1)), ...
+        EKFtrajFile = strcat('../data/FILTERED/', num2str(ID_Data(ii,1)), ...
             '/EKFtraj_condition_', num2str(Condition), '.csv');
         
         % -- load the file that contains the trajectory data
@@ -36,7 +36,7 @@ for ii = 1:size(ID_Data, 1)
         axis image;
         
         subplot(nr,nc,Condition+nc*1)
-        EKFspeedFile = strcat('filtered_data/', num2str(ID_Data(ii,1)), ...
+        EKFspeedFile = strcat('../data/FILTERED/', num2str(ID_Data(ii,1)), ...
             '/EKFVel_condition_', num2str(Condition), '.csv');
         SP = load(EKFspeedFile);
         dt = 0.5;
@@ -47,7 +47,7 @@ for ii = 1:size(ID_Data, 1)
         
         
         subplot(nr,nc,Condition+nc*2)
-        EKFomFile = strcat('filtered_data/', num2str(ID_Data(ii,1)), ...
+        EKFomFile = strcat('../data/FILTERED/', num2str(ID_Data(ii,1)), ...
             '/EKFom_condition_', num2str(Condition), '.csv');
         OM = load(EKFomFile);
         dt = 0.5;
