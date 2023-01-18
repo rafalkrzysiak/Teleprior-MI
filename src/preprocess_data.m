@@ -129,7 +129,7 @@ for TRIAL = 1:size(trials,2)
         % -- ground truth of what the tracker saw the robot do
         gt = [Xq; Yq; Rzq];
         
-        EKF_Vel = zeros(size(gt,1), 1);
+        EKF_Speed = zeros(size(gt,1), 1);
         EKF_om = zeros(size(gt,1), 1);
         
         Z = gt; % -- for consistency, make gt the measurement from the tracker
@@ -232,7 +232,7 @@ for TRIAL = 1:size(trials,2)
                 vx = (Xh(1,k) - Xh(1,k-1)) / dt;
                 vy = (Xh(2,k) - Xh(2,k-1)) / dt;
                 
-                EKF_Vel(k) = sqrt(vx^2 + vy^2);
+                EKF_Speed(k) = sqrt(vx^2 + vy^2);
                 % this picks up acute angle only otherwise we will pick up
                 % large angles when passing from +ve to -ve
                 EKF_om(k) = asin(sin(Xh(3,k) - Xh(3,k-1))) / dt;
@@ -255,7 +255,7 @@ for TRIAL = 1:size(trials,2)
         EKFomFile = strcat(directory_str, filesep, 'EKFom_condition_', num2str(TRIAL), '.csv');
         EKFtrajFile = strcat(directory_str, filesep, 'EKFtraj_condition_', num2str(TRIAL), '.csv');
         fprintf('writing data for %s ...\n', participantID);
-        csvwrite(EKFVelFile, EKF_Vel); pause(1);
+        csvwrite(EKFVelFile, EKF_Speed); pause(1);
         csvwrite(EKFomFile, EKF_om); pause(1);
         csvwrite(EKFtrajFile, [Xh; ones(1,size(Xh,2))*tx(end); ones(1,size(Xh,2))*ty(end)]); pause(10);
         
@@ -286,7 +286,7 @@ for TRIAL = 1:size(trials,2)
 %         if TRIAL == 4
 %             if ID_conditions(ID) == 0 % -- keep trust
 %                 subplot(size(trials,2)+1,size(ID_List,1),Fig_suplot);
-%             else % -- break trust
+%             else % -- inaccurate
 %                 subplot(size(trials,2)+1,size(ID_List,1),Fig_suplot+size(ID_List,1));
 %             end
 %         end
@@ -432,7 +432,7 @@ for TRIAL = 1:size(conditions,2)
 %         if TRIAL == 4
 %             if ID_conditions(ID) == 0 % -- keep trust
 %                 subplot(size(trials,2)+1,size(ID_List,1),Fig_suplot);
-%             else % -- break trust
+%             else % -- inaccurate
 %                 subplot(size(trials,2)+1,size(ID_List,1),Fig_suplot+size(ID_List,1));
 %             end
 %         end
@@ -451,7 +451,7 @@ for TRIAL = 1:size(conditions,2)
                 AllVel(ID, TRIAL+1) = nan;
                 VelCel{1,CelColumn} = {[[0; TRIAL; time], [0; ID_List(ID); Vel]]};
             else
-                % -- if break trust
+                % -- if inaccurate
                 AllVel(ID, TRIAL) = nan;
                 AllVel(ID, TRIAL+1) = mean(Vel(ID_Data(ID, end)*5:end));
                 VelCel{1,CelColumn} = {[[1; TRIAL; time], [1; ID_List(ID); Vel]]};
@@ -546,7 +546,7 @@ for TRIAL = 1:size(conditions,2)
                 Allomega(ID, TRIAL) = mean(omega);
                 Allomega(ID, TRIAL+1) = nan;
             else
-                % -- if break trust
+                % -- if inaccurate
                 Allomega(ID, TRIAL) = nan;
                 Allomega(ID, TRIAL+1) = mean(omega);
             end
@@ -677,23 +677,23 @@ for TRIAL = 1:size(conditions,2)
 
         % -- read the EKF Velocity and turn rate data previously saved
         EKF_Vel_data = strcat('../data/FILTERED/', participantID, '/EKFVel_condition_', num2str(TRIAL),'.csv');
-        EKF_Vel = csvread(EKF_Vel_data);
-        TIME = 0:0.5:(size(EKF_Vel,1)*.5)-0.5;
+        EKF_Speed = csvread(EKF_Vel_data);
+        TIME = 0:0.5:(size(EKF_Speed,1)*.5)-0.5;
         t1 = size(time,1);
         t2 = size(TIME,2);
         rpiT = floor(t1/t2);
-        EKF_Vel = abs(EKF_Vel);
+        EKF_Speed = abs(EKF_Speed);
         Vel = abs(Vel); % -- we only want the positive value of the speed
 
         % -- save the mean speed
         if TRIAL < 4
             % -- for all trials before the last condition
             AllVel(ID, TRIAL) = mean(Vel);
-            AllEKFVel(ID, TRIAL) = mean(EKF_Vel);
+            AllEKFVel(ID, TRIAL) = mean(EKF_Speed);
         else
             % -- for the last condition
                 AllVel(ID, TRIAL) = mean(Vel(1:rpiT*ID_Data(ID, end),1));
-                AllEKFVel(ID, TRIAL) = mean(EKF_Vel(1:ID_Data(ID, end),1) );
+                AllEKFVel(ID, TRIAL) = mean(EKF_Speed(1:ID_Data(ID, end),1) );
         end
         
         % -- make the figures look nice
@@ -773,7 +773,7 @@ for TRIAL = 1:size(conditions,2)
 %         if TRIAL == 4
 %             if ID_conditions(ID) == 0 % -- keep trust
 %                 subplot(size(trials,2)+1,size(ID_List,1),Fig_suplot);
-%             else % -- break trust
+%             else % -- inaccurate
 %                 subplot(size(trials,2)+1,size(ID_List,1),Fig_suplot+size(ID_List,1));
 %             end
 %         end
@@ -793,7 +793,7 @@ for TRIAL = 1:size(conditions,2)
             AllEKFomega(ID, TRIAL) = mean(EKF_om(3:end, :));
         else
             % -- for the last condition, if keep trust
-                % -- if break trust
+                % -- if inaccurate
                 Allomega(ID, TRIAL) = mean(omega(1:rpiT*ID_Data(ID, end)));
                 AllEKFomega(ID, TRIAL) = mean(EKF_om(3:ID_Data(ID, end), :));
         end
@@ -1074,12 +1074,12 @@ for TRIAL = 1:size(trials,2)
             % -- if condition 4b
             if ID_Data(ID, 2) % -- if break condition condition met
                 for t = 1:size(X,1) % -- loop throughout the entire time
-                    if t >= ID_Data(ID,end) % -- if the timestep is on or past the break trust point, add the timesteps
+                    if t >= ID_Data(ID,end) % -- if the timestep is on or past the inaccurate point, add the timesteps
                         if X(t, 1) < thresh %&& Y(t,1) > thresh
                             timeStayingInPlace(TRIAL+1, ID) = timeStayingInPlace(TRIAL+1, ID) + 1;
                         end
                         totalTime(TRIAL+1,ID)=totalTime(TRIAL+1,ID)+1;
-                    else % -- if the timestep is prior to break trust point, add the time steps
+                    else % -- if the timestep is prior to inaccurate point, add the time steps
                         if X(t, 1) < thresh %&& Y(t,1) > thresh
                             timeStayingInPlace(TRIAL, ID) = timeStayingInPlace(TRIAL, ID) + 1;
                         end
@@ -1185,12 +1185,12 @@ for TRIAL = 1:size(trials,2)
             % -- if condition 4b
             if ID_Data(ID, 2) % -- if break condition condition met
                 for t = 1:size(X,1) % -- loop throughout the entire time
-                    if t >= ID_Data(ID,end) % -- if the timestep is on or past the break trust point, add the timesteps
+                    if t >= ID_Data(ID,end) % -- if the timestep is on or past the inaccurate point, add the timesteps
                         if X(t, 1) < thresh && Y(t,1) > thresh
                             timeTurningInPlace(TRIAL+1, ID) = timeTurningInPlace(TRIAL+1, ID) + 1;
                         end
                         totalTime(TRIAL+1,ID)=totalTime(TRIAL+1,ID)+1;
-                    else % -- if the timestep is prior to break trust point, add the time steps
+                    else % -- if the timestep is prior to inaccurate point, add the time steps
                         if X(t, 1) < thresh && Y(t,1) > thresh
                             timeTurningInPlace(TRIAL, ID) = timeTurningInPlace(TRIAL, ID) + 1;
                         end
@@ -1702,8 +1702,9 @@ for ii = 1:size(ID_Data, 1)
         
         % -- check if its condition 4
         if Condition == 4
-            % -- check if break trust
-            if ID_Data(ii, 2)
+            % -- check if inaccurate
+            if ID_Data(ii, 2) % it was inaccurate
+                % store the last n frames into a separate condition
                 RobotSpeed(ii, Condition+1) = mean(U_EKF(ID_Data(ii, end): end));
                 CommandedSpeed(ii, Condition+1) = mean(U_com(5*ID_Data(ii, end): end));
                 diff_CommandedSpeed=[0; diff(U_com(5*ID_Data(ii, end): end))];
@@ -1727,7 +1728,6 @@ for ii = 1:size(ID_Data, 1)
             CommandedSpeed(ii, Condition) = mean(U_com);
             diff_CommandedSpeed=[0; diff(U_com)];
             FreqStops(ii, Condition)=sum(diff_CommandedSpeed<0 & U_com==0)/numel(U_com);
-            
         end
     end
     
@@ -1773,7 +1773,7 @@ for ii = 1:size(ID_Data, 1)
         
         % -- check if its condition 4
         if Condition == 4
-            % -- check if break trust
+            % -- check if inaccurate
             if ID_Data(ii, 2)
                 RobotTurnrate(ii, Condition+1) = mean(U_EKF(ID_Data(ii, end): end));
                 CommandedTurnrate(ii, Condition+1) = mean(U_com(5*ID_Data(ii, end): end));
@@ -1901,12 +1901,12 @@ for TRIAL = 1:size(trials,2)
             % -- if condition 4b
             if ID_Data(ID, 2) % -- if break condition condition met
                 for t = 1:size(X,1) % -- loop throughout the entire time
-                    if t >= ID_Data(ID,end) % -- if the timestep is on or past the break trust point, add the timesteps
+                    if t >= ID_Data(ID,end) % -- if the timestep is on or past the inaccurate point, add the timesteps
                         if X(t, 1) < thresh && Y(t,1) < thresh % -- both speed and turn rate below threshold value
                             timeStayingStill(TRIAL+1, ID) = timeStayingStill(TRIAL+1, ID) + 1;
                         end
                         totalTime(TRIAL+1, ID)=totalTime(TRIAL+1, ID)+1;
-                    else % -- if the timestep is prior to break trust point, add the time steps
+                    else % -- if the timestep is prior to inaccurate point, add the time steps
                         if X(t, 1) < thresh && Y(t,1) < thresh
                             timeStayingStill(TRIAL, ID) = timeStayingStill(TRIAL, ID) + 1;
                         end
