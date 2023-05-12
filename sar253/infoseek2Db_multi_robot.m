@@ -169,9 +169,16 @@ for jj=1:param.nsim
         % -- only for the human teleoperated robot, initialize the target
         % -- particle distribution to be placed as a gaussian distribution
         % -- at the lower corner of the usable domain with a large variance
-        if r == 1 && param.bias
-           p(4:5,:,1,r) = [(param.L(2)*sqrt(2)/2)*cosd(45-30)+randn(1,param.N)*(.15*param.L(2));
-                           (param.L(2)*sqrt(2)/2)*sind(45-30)+randn(1,param.N)*(.15*param.L(2))]; 
+        if r == 1
+            % -- NEW*: 
+            % -- set the experimental trajectory data captured with the 
+            % -- Omron overhead tracking system for robot 1 only
+            p(1:3,:,1,r) = RobotExperimentDataSet();
+
+           if param.bias
+               p(4:5,:,1,r) = [(param.L(2)*sqrt(2)/2)*cosd(45-30)+randn(1,param.N)*(.15*param.L(2));
+                               (param.L(2)*sqrt(2)/2)*sind(45-30)+randn(1,param.N)*(.15*param.L(2))]; 
+           end
         end
         
         Xh(:,1,1,r)=mean(p(:,:,1,r),2);

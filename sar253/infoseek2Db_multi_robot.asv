@@ -21,16 +21,16 @@ if nargin < 1
     eta = .35; % ######### Changing eta value 
     N = 100; % Number of particles
     nsim = 2; % number of simulations when debug mode isn't enabled
-    closedloop = 1; % enable or disable opimization of mutual information
+    closedloop = 1; % enable or disable opimization of mutual rb_information
     debug = 1; % enable or disable debug mode
     r_robot = .3; % -- the radius of each agent
     agents = 2; % -- number of agents in the simulation
-    share_info = 1; % -- enable/disable sharing of information between robots
+    share_info = 1; % -- enable/disable sharing of rb_information between robots
     share_info_MI = 0;
     particle_subsample = 1; % -- flag to determine whether to subsample particles or not
     dn = 5; % -- the change in particles skipped (EX. with Time -> dt = 10)
     iter_num = 1;
-    saveIn = append("data/combination", num2str(iter_num));
+    saveIn = strcat("data/combination", num2str(iter_num));
     alpha = 1;
     % -- the disturbance in the particles jusitification:
     % -- 1. the robot itself can successfully localize itself great
@@ -52,7 +52,7 @@ if nargin < 1
     end
 end
 
-% -- capture the information sharing flag parameter
+% -- capture the rb_information sharing flag parameter
 og_share_info = param.share;
 
 % -- set up the matrix that will show which robot can see which neighbor
@@ -61,7 +61,7 @@ info_SI = zeros(param.agents, param.agents);
 info_MI = zeros(param.agents, param.agents);
 
 % -- location for the simulation
-location = append(saveIn, maps);
+location = strcat(saveIn, maps);
 
 % -- use edge detection to get all of the edges of the environment
 % -- get all coordinates of the edges to help with collisions
@@ -69,10 +69,11 @@ location = append(saveIn, maps);
 % -- column = x coordinate
 % -- scale the maps coordinates from pixel to meters!
 bw = edge(img(:,:,1),'sobel');
+[imh, imw]=size(img(:,:,1));
 [row, col] = find(bw == 1);
 fiducial = zeros(numel(row),2);
-fiducial(:,2) = row*(param.L/410);
-fiducial(:,1) = col*(param.L/410);
+fiducial(:,2) = row*(param.L(2)/imh);
+fiducial(:,1) = col*(param.L(1)/imw);
 
 % -- measurement model | bearing only measurement     
 hfun=@(X) wrapToPi(atan2((X(5,:)-X(2,:)), (X(4,:)-X(1,:)))-X(3,:));
@@ -81,12 +82,12 @@ hfun=@(X) wrapToPi(atan2((X(5,:)-X(2,:)), (X(4,:)-X(1,:)))-X(3,:));
 lfn = @(Z, Zr, p, bin_map, robot, param) ...
       lfn1(Z, Zr, p, hfun, bin_map, robot, param);
        
-% -- the likelihood function for optimizing mutual informtation
+% -- the likelihood function for optimizing mutual rb_informtation
 % -- around the human operated robot
 lfnMI = @(Z, Zsup, p, robot, bin_map) ...
         lfn_MI(Z, Zsup, p, hfun, robot, bin_map, param);
 
-% -- the optimize mutual information function
+% -- the optimize mutual rb_information function
 O_MI = @(k, p, wts, bin_map, Z, robot, Zr) ...
        optimize_MI(k, p, wts, lfn, lfnMI, bin_map, Z, ...
                    robot, Zr, param);
@@ -116,16 +117,16 @@ for jj=1:param.nsim
     % -- before we set up the location of the target, add some small disturbance
     % -- so that the target is not in the same spot for every simulation
 %     target_loc = [tx+randn, ty+randn];
-    X0 = robot_position(maps, target_loc, param.L); % -- initialize the position and orientation of the robot(s) and target
+    X0 = robot_position(maps, target_loc); % -- initialize the position and orientation of the robot(s) and target
     n=size(X0,1); % The state size
-    n = n+2; % -- state size is 7 for us now
+    n = n+2; % -- state size is 7 for us now (self, position of target, position of human)
     p=zeros(n,param.N,param.T,param.agents); % -- particles (n x N x T)
     wts=ones(1,param.N,1,param.agents); % -- particle filter weights
     Z = zeros(1,param.T,1,param.agents); % -- target bearing measurement
     Zr = Z; % -- human robot bearing measurement
     omega = Z; % -- omega values used every time step
     vel = omega; % -- velocity values used every time step
-    I = zeros(5,param.T,1,param.agents); % -- holds information regarding the mutual info
+    I = zeros(5,param.T,1,param.agents); % -- holds rb_information regarding the mutual rb_info
     
     % -- holds all the optimized velocity and omega data
     vel_data = zeros(1,param.T,1,param.agents);
@@ -145,23 +146,36 @@ for jj=1:param.nsim
         % -- make sure the last 4 dim a copy for the autonomous robots only
         % -- should be a common estimate
         p(1:3,:,1,r)=[X0(1,1,1,r)+randn(1,param.N)*w0;
-                    X0(2,1,1,r)+randn(1,param.N)*w0;
-                    X0(3,1,1,r)+randn(1,param.N)*w0]; 
+                      X0(2,1,1,r)+randn(1,param.N)*w0;
+                      X0(3,1,1,r)+randn(1,param.N)*w0]; 
                 
-        if r == 2
-           p(4:7,:,1,r:param.agents) = ones(4, param.N, 1, param.agents-1).* ...
-                                       [rand(1,param.N)*param.L;
-                                        rand(1,param.N)*param.L;
-                                        rand(1,param.N)*param.L;
-                                        rand(1,param.N)*param.L];
-        end
+%         if r == 1 % human operated robot
+%            p(4:7,:,1,r:param.agents) = ones(4, param.N, 1, param.agents).* ...
+%                                        [rand(1,param.N)*param.L(1);
+%                                         rand(1,param.N)*param.L(2);
+%                                         rand(1,param.N)*param.L(1);
+%                                         rand(1,param.N)*param.L(2)];
+%         end
+
+        % -- should assign each value separately -- SB
+%         if r == 1 % human operated robot
+           p(4:7,:,1,r) = ones(4, param.N, 1, 1).* ...
+                                       [rand(1,param.N)*param.L(1);
+                                        rand(1,param.N)*param.L(2);
+                                        rand(1,param.N)*param.L(1);
+                                        rand(1,param.N)*param.L(2)];
+%         end
                 
         % -- only for the human teleoperated robot, initialize the target
         % -- particle distribution to be placed as a gaussian distribution
         % -- at the lower corner of the usable domain with a large variance
         if r == 1 && param.bias
-           p(4:5,:,1,r) = [(param.L*sqrt(2)/2)*cosd(45-30)+randn(1,param.N)*(.15*param.L);
-                           (param.L*sqrt(2)/2)*sind(45-30)+randn(1,param.N)*(.15*param.L)]; 
+            % -- set the experimental trajectory data captured with the 
+            % -- Omron overhead tracking system for robot 1 only
+           if param.bias
+                p(4:5,:,1,r) = [(param.L(2)*sqrt(2)/2)*cosd(45-30)+randn(1,param.N)*(.15*param.L(2));
+                           (param.L(2)*sqrt(2)/2)*sind(45-30)+randn(1,param.N)*(.15*param.L(2))]; 
+           end
         end
         
         Xh(:,1,1,r)=mean(p(:,:,1,r),2);
@@ -178,14 +192,14 @@ for jj=1:param.nsim
     % -- begin simulating the condition
     for k = k0:kF
         
-        fprintf('Sim: %d, Time step: %d\n',jj,k); % -- display the time step number
+%         fprintf('Sim: %d, Time step: %d\n',jj,k); % -- display the time step number
         
         % -- loop for every robot in the environment
         for robot = 1:param.agents
             
             % -- check the distances between the robots
-            % -- if the parameter for sharing information was enabled
-            % -- we want the robots to share information between each other
+            % -- if the parameter for sharing rb_information was enabled
+            % -- we want the robots to share rb_information between each other
             % -- when they see one of their neighbors
             for rob = 2:param.agents
                 for neighbor = 2:param.agents
@@ -195,7 +209,7 @@ for jj=1:param.nsim
                                                           (Xs(2,k,1,neighbor)-Xs(2,k,1,rob))^2);
 
                         % -- if one robot sees another robot, enable sharing
-                        % -- information, if it doesn't see it, no sharing.
+                        % -- rb_information, if it doesn't see it, no sharing.
                         % -- as long as it does not interfere with the preset parameters
                         if r_distance(neighbor,rob) < 20*param.r_visible(rob)
                             share_info = 1;
@@ -209,7 +223,7 @@ for jj=1:param.nsim
             end
             
             % -- look at the matrix that shows which robot sees which
-            % -- used to determine sharing of information!
+            % -- used to determine sharing of rb_information!
             [Neighbors, ~] = find(info_SI(:,robot) == 1);
             
             kappa = 5;
@@ -235,7 +249,7 @@ for jj=1:param.nsim
                 % -- if the measurement taken by the robot is within the field of view
                 if abs(Z(:,k,1,robot)) < param.r_FOV(robot)/2
                     Z(:,k,1,robot) = Z(:,k,1,robot);
-                    if rij(robot,1) < .95*param.r_visible(robot) % -- must be closer to get a diffinitive answer
+                    if rij(robot,1) < .75*param.r_visible(robot) % -- must be closer to get a diffinitive answer
                         Num_target_found(jj) = 1; % -- save a yes to the sim number where target was found
                         time(jj) = k; % -- mark the time the target was found
                         result(jj) = 1; % -- the result was that the target was found
@@ -277,14 +291,14 @@ for jj=1:param.nsim
             % -- if the robot sees its neighbor, create an array that
             % -- stores the robot number it sees, the robot cannot
             % -- see itself and cannot communicate with the human robot
-            if robot ~= 1 && param.share
-                param.Neighbors(:,robot) = [robot;Neighbors];
-                param.Neighbors(:,robot) = sort(Neighbors);
-            end
+%             if robot ~= 1 && param.share
+%                 param.Neighbors(:,robot) = [robot;Neighbors];
+%                 param.Neighbors(:,robot) = sort(Neighbors);
+%             end
         end
         
         % -- we want to share the weights of the particles of the autonomous 
-        % -- robots only, sharing the information of both the target and human state
+        % -- robots only, sharing the rb_information of both the target and human state
         if param.share
             wts_share = ones(1, param.N, 1, param.agents);
             for robot = 1:param.agents
@@ -296,8 +310,8 @@ for jj=1:param.nsim
 %                                               Z(:,k,1,param.Neighbors(robot-1,robot)), Zr(:,k,1,param.Neighbors(robot-1,robot)), ...
 %                                               lfn, bin_map, param.Neighbors(robot-1,robot), param, maps);
                 [~, wts_share(:,:,1,robot)] = pf_update(p(:,:,k,robot), wts(:,:,1,robot), ...
-                                              Z(:,k,1,robot), Zr(:,k,1,robot), ...
-                                              lfn, bin_map, robot, param, maps);
+                                                        Z(:,k,1,robot), Zr(:,k,1,robot), ...
+                                                        lfn, bin_map, robot, param, maps);
                 % -- only for the human robot, we want to keep the particles
                 if robot == 1
                     wts(:,:,:,robot) = wts_share(:,:,1,robot);
@@ -308,7 +322,7 @@ for jj=1:param.nsim
         % -- take a product of the weights that were calculated 
         % -- (Eq 3.21 from Thesis) prod function
         for robot = 2:param.agents
-           wts(:,:,:,robot) =  prod(wts_share(:,:,:,2:3),4);
+           wts(:,:,:,robot) = prod(wts_share(:,:,:,2:param.agents),4);
         end
         
         % -- After running the robots to get their measurements of the 
@@ -326,7 +340,7 @@ for jj=1:param.nsim
 
             wts(:,:,:,robot)=wts(:,:,:,robot)./sum(wts(:,:,:,robot));
             neff=1/sum(wts(:,:,:,robot).^2);
-            if (neff <=  size(p,2))    
+            if (neff <= size(p,2))    
                 p(:,:,k,robot)=p(:,resample(wts(:,:,:,robot)),k,robot);
                 wts(:,:,:,robot)=ones(1,numel(wts(:,:,:,robot)))/numel(wts(:,:,:,robot));
             end 
@@ -338,13 +352,13 @@ for jj=1:param.nsim
             P(:,:,k,robot) = cov(p(:,:,k,robot)');
             
             % -- check if any of the robots left the domain
-            if Xs(1,k,1,robot) < 0 || Xs(2,k,1,robot) > param.L || Xs(1,k,1,robot) > param.L || Xs(2,k,1,robot) < 0
+            if Xs(1,k,1,robot) < 0 ||  Xs(1,k,1,robot) > param.L(1)  || Xs(2,k,1,robot) < 0 || Xs(2,k,1,robot) > param.L(2)
                 time(jj) = kF; % -- set the final time to the max time possible
                 result(jj) = 2; % -- Enable specified flag that solely represents that the robot left the domain
                 
                 % -- If a robot has left the domain, fill in the rest of
                 % -- the possible time with the current positions of the robot
-                for rob = 1:agents
+                for rob = 1:param.agents
                     Xs(:,k+1:kF,1,rob) = Xs(:,k,1,rob).*ones(7,kF-k);
                     Xh(:,k:kF,1,rob) = Xh(:,k-1,1,rob).*ones(7,kF-(k-1));
                 end
@@ -355,7 +369,7 @@ for jj=1:param.nsim
             end
                    
             if param.closedloop
-                % maximize mutual information
+                % maximize mutual rb_information
     %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, eta, hfun, om, r_visible);
     %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, om, lfn);
                  [omega(1,k,1,robot),vel(1,k,1,robot),I(:,k,1,robot)] = O_MI(k, p, wts, bin_map, Z(:,k,1,:), robot, Zr(:,k,1,:));
@@ -366,37 +380,49 @@ for jj=1:param.nsim
                 vel(1,k,1,robot)=param.vel0;
             end
             
-            % -- get the range and bearing information for every fiducial
+            % -- get the range and bearing rb_information for every fiducial
             % -- for every robot in the simulation
-            for marker = 1:size(fiducial,1)
-               info(marker,1) = sqrt((fiducial(marker,1)-Xs(1,k,1,robot))^2 ...
-                                    +(fiducial(marker,2)-Xs(2,k,1,robot))^2); 
-                                
-               info(marker,2) = wrapToPi(atan2((fiducial(marker,2)-Xs(2,k,1,robot)), ...
-                                       (fiducial(marker,1)-Xs(1,k,1,robot))) - Xs(3,k,1,robot));
-            end
+%             for marker = 1:size(fiducial,1)
+%                rb_info1(marker,1) = sqrt((fiducial(marker,1)-Xs(1,k,1,robot))^2 ...
+%                                     +(fiducial(marker,2)-Xs(2,k,1,robot))^2); 
+%                                 
+%                rb_info1(marker,2) = wrapToPi(atan2((fiducial(marker,2)-Xs(2,k,1,robot)), ...
+%                                        (fiducial(marker,1)-Xs(1,k,1,robot))) - Xs(3,k,1,robot));
+%             end
             
+            % speeding up -- SB
+            rb_info(:,1)=sqrt((fiducial(:,1)-Xs(1,k,1,robot)).^2+(fiducial(:,2)-Xs(2,k,1,robot)).^2);
+            rb_info(:,2)=wrapToPi(atan2(fiducial(:,2)-Xs(2,k,1,robot), fiducial(:,1)-Xs(1,k,1,robot)) - ...
+                                    Xs(3,k,1,robot));
+
             % -- look at the points that are only within the collision FOV
             % -- and visible range of the robot. Then find the smallest 
             % -- value in the range
-            pts = find(info(:,2) < pi/6 & info(:,2) > -pi/6 & info(:,1) < param.r_visible(robot));
+%             pts = find(rb_info(:,2) < pi/6 & rb_info(:,2) > -pi/6 & rb_info(:,1) < param.r_visible(robot));
+             % collision should be closer than visible range -- SB
+            pts = find(rb_info(:,2) < pi/6 & rb_info(:,2) > -pi/6 & rb_info(:,1) < param.r_visible(robot)/5);
             
             % -- If the range of the closest point of the wall is within 
             % -- 2/3 of the visible range of the robot, begin collision 
             % -- avoidance protocol
             if size(pts,1) > 0 
-                pts_interest = info(pts,:);
-                r_pt = min(pts_interest(:,1));
-                b_pt = find(pts_interest(:,1) == r_pt);
-                turn = pts_interest(b_pt,2);
-                omega(1,k,1,robot) = -param.kc*turn;
-                vel(1,k,1,robot) = .2;
+                pts_interest = rb_info(pts,:);
+                [~, idx_pt] = min(pts_interest(:,1));
+%                 b_pt = find(pts_interest(:,1) == r_pt);
+                pt_bearing = pts_interest(idx_pt,2);
+                if param.debug
+                    plot(fiducial(pts,1), fiducial(pts,2), 'rx');
+                end
+                % update the collision avoidance to be parallel to the wall
+                omega(1,k,1,robot) = -param.kc*(sign(pt_bearing)*pi/2-pt_bearing);
+                vel(1,k,1,robot) = vel(1,k,1,robot)/10; % SB updated
             end
             
             % -- collision avoidance of autonomous robots with human robot
             if Rr(robot,1) < .5*param.r_visible(robot) && robot ~= 1 && abs(Zr(:,k,1,robot)) < pi/4
-               omega(1,k,1,robot) = -param.kc*Zr(:,k,1,robot); 
-               vel(1,k,1,robot) = .2;
+               omega(1,k,1,robot) = -param.kc*(sign(Zr(:,k,1,robot))*pi/2-Zr(:,k,1,robot)); 
+%                omega(1,k,1,robot) = -param.kc*Zr(:,k,1,robot); 
+               vel(1,k,1,robot) = vel(1,k,1,robot)/10;
             end
 
             % -- simulate the motion of the robot with the determined
@@ -423,7 +449,7 @@ for jj=1:param.nsim
     end
     
     % -- after the simulation ended, save all the data into a single struct
-    % -- doing this will hold alot of information in a single variable
+    % -- doing this will hold alot of rb_information in a single variable
     simdata(jj).param = param; % -- save all the parameters used in the simulation
     simdata(jj).Xh = Xh; % -- estimate robot position
     simdata(jj).Xs = Xs; % -- simulated robot position
@@ -436,7 +462,7 @@ for jj=1:param.nsim
     simdata(jj).success = result(jj); % -- flags that state which sim found the target
     simdata(jj).Z = Z; % -- measurement of the target w.r.t robot
     simdata(jj).Zr = Zr; % -- measurement of the human robot w.r.t autonomous robot
-    simdata(jj).I = I; % -- save the mutual information values for target/human robot
+    simdata(jj).I = I; % -- save the mutual rb_information values for target/human robot
     simdata(jj).Which_robot = Which_robot; % -- save the robot number that found the target
 end
 
@@ -444,8 +470,8 @@ end
 % traj_plot(simdata, X0, N, nsim, eta, Num_target_found, time, dt, img, agents, ...
 %           location, og_share_info, og_share_info_MI, target_loc, alpha)
 
-% -- save all information into the newly created directory
-save(append(location, sprintf('_p=%d_nsim=%d_agents=%d.mat', param.N, param.nsim, param.agents)), ...
+% -- save all rb_information into the newly created directory
+save(strcat(location, sprintf('_p=%d_nsim=%d_agents=%d.mat', param.N, param.nsim, param.agents)), ...
      'simdata', 'img', '-v7.3');
 
 % save(sprintf('data/umap_particles=%d_nsim=%d_agents=%d.mat', N, nsim, agents), ...
@@ -473,7 +499,7 @@ wts_share = ones(1,np);
 if robot ~= 1
     for agent = robot % -- starting at agent 1, eventually looping through every robot
        for neighbor = 1:n_agents % -- looping through every neighbor that the agents sees
-          if row1(neighbor) ~= agent % -- if robot is not itself, begin sharing information
+          if row1(neighbor) ~= agent % -- if robot is not itself, begin sharing rb_information
              for agent_p = 1:np % -- loop through every particle of the agent
                  for neighbor_p = 1:np % -- loop through every particle of the neighbor
                      particles = [p(1:3,neighbor_p,1,row1(neighbor)); p(4:5,agent_p,1,agent)]; % -- use the agent's own target estimate and neighbors robot estimate
@@ -501,7 +527,7 @@ end
 function [omega, vel, I]=optimize_MI(k, p, wts, lfn, lfnMI, bin_map, Z, ...
                                      robot, Zr, param)
 
-% -- Store the mutual information values
+% -- Store the mutual rb_information values
 MIvals=zeros(numel(param.om),numel(param.v));
 MI_t = MIvals;
 MI_r = MI_t;
@@ -594,7 +620,7 @@ for oo=1:numel(param.om)
         Hzr = 0;
         Hztr = 0;
         
-        % -- Social information for the MI function ^^^
+        % -- Social rb_information for the MI function ^^^
         if robot ~= 1
             
             % ** if lfn(Zsup(:,ll),Z(:,:,1,robot),p(:,:,k+1,robot),bin_map) without the Z assignment
@@ -663,7 +689,7 @@ for oo=1:numel(param.om)
         
         if Hztr - Hzr > 0.01 || isnan(Hz) || isnan(Hzt) || Hzt - Hz > 0.01 || isnan(Hzr) || isnan(Hztr)
             keyboard
-            error('Mutual information cannot be less than 0');
+            error('Mutual rb_information cannot be less than 0');
         end
         
         % -- calculate the mutual in formation for each robot
@@ -693,7 +719,7 @@ for oo=1:numel(param.om)
     end
 end
 
-% -- we want to normalize the mutual information for the individual arrays
+% -- we want to normalize the mutual rb_information for the individual arrays
 % -- that represent the human robot and the target with themselves
 % [tval, trow] = max(MI_t);
 % [~, tcol] = max(tval);
@@ -703,7 +729,7 @@ end
 % [~, Rcol] = max(Rval);
 % MI_r = MI_r./MI_r(Rrow(Rcol),Rcol);
 
-% -- get the max value of mutual information
+% -- get the max value of mutual rb_information
 % -- get the velocity and omega values that correspond to the max value for MI
 if robot ~= 1
     MIvals = param.alpha.*MI_t + (1-param.alpha).*MI_r;
@@ -788,10 +814,10 @@ Y_limit = size(bin_map,1);
 % -- initialized particle weight = 0.
 for kk = 1:np
     % -- covert particle from meters to pixels for the map
-    X_target = round(p(4,kk).*(X_limit/param.L));
-    Y_target = round(p(5,kk).*(Y_limit/param.L));
-    X_human = round(p(6,kk).*(X_limit/param.L));
-    Y_human = round(p(7,kk).*(Y_limit/param.L));
+    X_target = round(p(4,kk).*(X_limit/param.L(1)));
+    Y_target = round(p(5,kk).*(Y_limit/param.L(2)));
+    X_human = round(p(6,kk).*(X_limit/param.L(1)));
+    Y_human = round(p(7,kk).*(Y_limit/param.L(2)));
 
     % -- check if the particle is within the outer boundary of the map
     if (X_target > 0 && Y_target > 0 && X_target < X_limit && Y_target < Y_limit ...
@@ -870,7 +896,7 @@ if robot ~= 1
     wts = wts.*wwts;
 end
 
-% -- whether or not to share information between robots
+% -- whether or not to share rb_information between robots
 % if share_info && robot ~= 1 && sum(row1) > 0
 %     wts_share = sharing_info(p, agents, Z, Zr, hfun, robot, row1);
 %     wts = wts.*wts_share;
@@ -891,8 +917,8 @@ Y_limit = size(bin_map,2);
 
 for kk = 1:np
     % -- covert particle from meters to pixels for the map
-    Xpos = round(p(4,kk).*(X_limit/param.L));
-    Ypos = round(p(5,kk).*(Y_limit/param.L));
+    Xpos = round(p(4,kk).*(X_limit/param.L(1)));
+    Ypos = round(p(5,kk).*(Y_limit/param.L(2)));
 
     % -- check if the particle is within the outer boundary of the map
     if Xpos > 0 && Ypos > 0 && Xpos < X_limit && Ypos < Y_limit
