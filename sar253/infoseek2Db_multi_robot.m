@@ -169,28 +169,38 @@ for jj=1:param.nsim
         % -- only for the human teleoperated robot, initialize the target
         % -- particle distribution to be placed as a gaussian distribution
         % -- at the lower corner of the usable domain with a large variance
-        if r == 1
+        if r == 1 && param.bias
             % -- NEW*: 
             % -- set the experimental trajectory data captured with the 
             % -- Omron overhead tracking system for robot 1 only
-            p(1:3,:,1,r) = RobotExperimentDataSet();
+            %p(1:3,:,1,r) = RobotExperimentDataSet();
 
-           if param.bias
+           %if param.bias
                p(4:5,:,1,r) = [(param.L(2)*sqrt(2)/2)*cosd(45-30)+randn(1,param.N)*(.15*param.L(2));
                                (param.L(2)*sqrt(2)/2)*sind(45-30)+randn(1,param.N)*(.15*param.L(2))]; 
-           end
+           %end
         end
         
         Xh(:,1,1,r)=mean(p(:,:,1,r),2);
-        Xs(1:5,1,1,r)=X0(:,:,1,r);
+        if r == 1
+            [Xs(1:3,:,1,r), ~, ~]=RobotExperimentDataSet();
+            Xs(4:5,1,1,r)=X0(4:5,:,1,r);
+        else
+            Xs(1:5,1,1,r)=X0(:,:,1,r);
+        end
 %         rij(r,1) = 20;
 %         Rr(r,1) = 20;
         r_distance(r,r) = 0;
     end
     
+    
     % beginning and ending setps for the filter
     k0 = 1;
-    kF = param.T;
+%     kF = param.T;
+
+    % -- NEW:
+    % -- get the total time of the robot Human Subject Trial
+    kF = size(Xs(1:3,:,1,1),2);
     
     % -- begin simulating the condition
     for k = k0:kF
@@ -330,7 +340,7 @@ for jj=1:param.nsim
         
         % -- After running the robots to get their measurements of the 
         % -- target and human teleoperated robot, update the particles
-        for robot = 1:param.agents
+        for robot = 2:param.agents
             
             % -- update the particle locations and their weights
 %             [p(:,:,k,robot), wts(:,:,1,robot)] = pf_update(p(:,:,k,robot), wts(:,:,1,robot), Z(:,k,1,robot), Zr(:,k,1,robot), lfn, bin_map, robot, param, maps);
@@ -361,7 +371,7 @@ for jj=1:param.nsim
                 
                 % -- If a robot has left the domain, fill in the rest of
                 % -- the possible time with the current positions of the robot
-                for rob = 1:param.agents
+                for rob = 2:param.agents
                     Xs(:,k+1:kF,1,rob) = Xs(:,k,1,rob).*ones(7,kF-k);
                     Xh(:,k:kF,1,rob) = Xh(:,k-1,1,rob).*ones(7,kF-(k-1));
                 end
@@ -408,7 +418,7 @@ for jj=1:param.nsim
             % -- If the range of the closest point of the wall is within 
             % -- 2/3 of the visible range of the robot, begin collision 
             % -- avoidance protocol
-            if size(pts,1) > 0 
+            if size(pts,1) > 0 && robot ~= 1
                 pts_interest = rb_info(pts,:);
                 [~, idx_pt] = min(pts_interest(:,1));
 %                 b_pt = find(pts_interest(:,1) == r_pt);
@@ -422,7 +432,7 @@ for jj=1:param.nsim
             end
             
             % -- collision avoidance of autonomous robots with human robot
-            if Rr(robot,1) < .5*param.r_visible(robot) && robot ~= 1 && abs(Zr(:,k,1,robot)) < pi/4
+            if Rr(robot,1) < .5*param.r_visible(robot) && robot ~= 1 && abs(Zr(:,k,1,robot)) < pi/4 && robot ~= 1
                omega(1,k,1,robot) = -param.kc*(sign(Zr(:,k,1,robot))*pi/2-Zr(:,k,1,robot)); 
 %                omega(1,k,1,robot) = -param.kc*Zr(:,k,1,robot); 
                vel(1,k,1,robot) = vel(1,k,1,robot)/10;
@@ -430,7 +440,11 @@ for jj=1:param.nsim
 
             % -- simulate the motion of the robot with the determined
             % -- omega and velocity values from optimize_MI function
-            Xs(:,k+1,1,robot)=rt2d(Xs(:,k,1,robot),vel(1,k,1,robot), omega(1,k,1,robot), param.dt);
+            if robot ~= 1
+                Xs(:,k+1,1,robot)=rt2d(Xs(:,k,1,robot),vel(1,k,1,robot), omega(1,k,1,robot), param.dt);
+            else
+                continue
+            end
             
             % -- predict
             mmdl1=@(x) rt2d(x, vel(1,k,1,robot), omega(1,k,1,robot), param.dt);

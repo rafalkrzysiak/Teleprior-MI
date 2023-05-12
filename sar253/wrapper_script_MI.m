@@ -8,11 +8,11 @@ function wrapper_script_MI
 % -- setup the variables that will be passed into the pf MI script
 rng(2);
 param.dt = 1; % -- timestep (s)
-param.T = 2500/param.dt; % -- max time (s)
+[~, param.T, tloc] = RobotExperimentDataSet(); %2500/param.dt; % -- max time (s)
 param.N = 1200; % -- number of particles in the simulation
 param.nsim = 1; % -- number of simulations per combination
 param.closedloop = 1; % -- flag for enabling/disabling MI
-param.debug = 0; % -- flag for enabling/disabling debug plots
+param.debug = 1; % -- flag for enabling/disabling debug plots
 agents = 3; % -- number of agents in the simulation including the human robot
 param.r_visible = 4*ones(1,agents); % -- visible range of the robots (m), human robot has slightly higher range
 param.r_FOV = 2*pi*ones(1,agents);
@@ -38,7 +38,8 @@ share_info = 1;
 %                     R*cosd(45+30), R*sind(45+30)];
 % target_locations = [R*cosd(45+30), R*sind(45+30)];                
 
-target_locations = [2 8];
+%target_locations = [2 2];
+target_locations = [tloc(1) tloc(2)];
 
 % -- the disturbance in the particles jusitification:
 % -- 1. the robot itself can successfully localize itself great
