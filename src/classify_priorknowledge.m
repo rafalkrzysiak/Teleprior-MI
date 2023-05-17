@@ -1,20 +1,24 @@
-clear variables
+
 %addpath /Users/sachit/Dropbox/EASeL/common/MYLIB/entropy
 
 %% Robot Speed
 clear variables
+dtTrack=1/2;
+dtCommand=1/10;
 ID_Data = csvread('IDList_Completed.csv',1);
 type='EKFVel';
 % type='ComSpeed';
-dT=10; % section of time to observe in frames
+obsvTime=30; % section of time to observe in seconds
+obsvFrames=obsvTime/dtTrack;
 conditions= {'xMxT', 'xMyT','yMxT','yMyT'};
 subjects=dir('../data/FILTERED/*');
 isub = [subjects(:).isdir];
 nameFolds = {subjects(isub).name}';
 nameFolds(ismember(nameFolds,{'.','..'})) = [];
 
+% concatenate data into each 
 for cond=1:4
-    speeddata{cond}=[];
+    dstr{cond}=[];
     for ii=1:size(nameFolds,1)
         append1=csvread(['../data/FILTERED/', ...
             nameFolds{ii}, '/', type, '_condition_', num2str(cond), '.csv']);
@@ -22,36 +26,85 @@ for cond=1:4
         if ID_Data(idx,2) && cond==4
             append1=append1(1:ID_Data(idx,end));
         end
-        speeddata{cond} =[speeddata{cond}; append1];
+        % create distribution after rejecting last 10% of the trial
+        data=append1(1:round(0.9*numel(append1)));
+        toremove=mod(numel(data),obsvFrames);
+        data1=data(1:end-toremove);
+        
+        % data operation, mean or sum, shouldn't matter
+        data=mean(reshape(data1, [], obsvFrames),2);
+        %data=sum(reshape(data1, [], obsvFrames),2)*dtTrack;
+
+        
+        dstr{cond}=[dstr{cond}, data'];
     end
 end
 
-support_speed=0:0.1:.5;
 figure(1);gcf;clf;
 for k=1:4
-    data = speeddata{k};
-    
-    toremove=mod(numel(data),dT);
-    data1=data(1:end-toremove);
-    
-    data=mean(reshape(data1, [], dT),2);
-    
-    
-    
-    subplot(2,2,k)
-    
-    [n,x]=hist(data,support_speed);
-    p_speed(:,k)= n/sum(n);
-    plot(x,p_speed(:,k))
-    set(gca,'ylim',[0,1])
-    xlabel('speed(m/s)')
-    ylabel('p')
-    legend(conditions{k})
+    data = dstr{k};
+    [n,x]=histcounts(data);
+    pdata{k}= n/sum(n);
+    edata{k}=x;
+    plot(edata{k}(1:end-1),pdata{k});
+    hold on;
 end
-figure(2);gcf;clf;
-plot(x,p_speed)
 set(gca,'ylim',[0,1])
 xlabel('speed(m/s)')
+ylabel('p')
+legend(conditions)
+
+%% Robot Distance Travelled
+clear variables
+dtTrack=1/2;
+dtCommand=1/10;
+ID_Data = csvread('IDList_Completed.csv',1);
+type='EKFtraj';
+obsvTime=25; % section of time to observe in seconds
+obsvFrames=obsvTime/dtTrack;
+conditions= {'xMxT', 'xMyT','yMxT','yMyT'};
+subjects=dir('../data/FILTERED/*');
+isub = [subjects(:).isdir];
+nameFolds = {subjects(isub).name}';
+nameFolds(ismember(nameFolds,{'.','..'})) = [];
+
+% concatenate data into each 
+for cond=1:4
+    dstr{cond}=[];
+    for ii=1:size(nameFolds,1)
+        append1=csvread(['../data/FILTERED/', ...
+            nameFolds{ii}, '/', type, '_condition_', num2str(cond), '.csv']);
+        idx=ID_Data(:,1)==str2double(nameFolds{ii});
+        append1=append1(1:2,:);
+        if ID_Data(idx,2) && cond==4
+            append1=append1(:,1:ID_Data(idx,end));
+        end
+        % create distribution after rejecting last 10% of the trial
+        data=append1(:,1:round(0.9*size(append1,2)));
+        toremove=mod(size(data,2)-1,obsvFrames); % -1 for diff
+        data1=data(:,1:end-toremove); 
+        
+        % data operation, mean or sum, shouldn't matter
+        data1=sqrt(sum(diff(data1,1,2).^2,1));
+        data=sum(reshape(data1, [], obsvFrames),2);
+        %data=sum(reshape(data1, [], obsvFrames),2)*dtTrack;
+
+        
+        dstr{cond}=[dstr{cond}, data'];
+    end
+end
+
+figure(1);gcf;clf;
+for k=1:4
+    data = dstr{k};
+    [n,x]=histcounts(data,0:1:5);
+    pdata{k}= n/sum(n);
+    edata{k}=x;
+    plot(edata{k}(1:end-1),pdata{k});
+    hold on;
+end
+set(gca,'ylim',[0,1])
+xlabel('distance (m)')
 ylabel('p')
 legend(conditions)
 
@@ -61,14 +114,14 @@ clear variables
 ID_Data = csvread('IDList_Completed.csv',1);
 type='EKFtraj';
 % type='ComSpeed';
-dT=30; % section of time to observe in frames
+obsvFrames=30; % section of time to observe in frames
 conditions= {'xMxT', 'xMyT','yMxT','yMyT'};
 subjects=dir('../data/FILTERED/*');
 isub = [subjects(:).isdir];
 nameFolds = {subjects(isub).name}';
 nameFolds(ismember(nameFolds,{'.','..'})) = [];
 
-for dT=50 %5:10:120
+for obsvFrames=50 %5:10:120
     for cond=1:4
         distdata{cond}=[];
         for ii=1:size(nameFolds,1)
@@ -79,36 +132,37 @@ for dT=50 %5:10:120
             if ID_Data(idx,2) && cond==4
                 append1=append1(:,1:ID_Data(idx,end));
             end
-            distdata{cond} =[distdata{cond}; sum(diff(append1,1,2).^2,1)'];
+%             append1=append1(:,1:round(size(append1,2)*.9));
+            distdata{cond} =[distdata{cond}; sqrt(sum(diff(append1,1,2).^2,1))'];
         end
     end
     
     
-    support_dist=0:0.1:1;
+    support_dist=0:.5:6;
     figure(1);gcf;clf;
     for k=1:4
         data = distdata{k};
         
-        toremove=mod(numel(data),dT);
+        toremove=mod(numel(data),obsvFrames);
         data1=data(1:end-toremove);
         
-        data=sum(reshape(data1, [], dT),2);
+        data=sum(reshape(data1, [], obsvFrames),2);
         
         
         
         subplot(2,2,k)
-        
+        pd=fitdist(data, 'Normal');
+        histfit(data);
         [n,x]=hist(data,support_dist);
         p_dist(:,k)= n/sum(n);
-        plot(x,p_dist(:,k))
-        set(gca,'ylim',[0,1])
+%         set(gca,'ylim',[0,.5])
         xlabel('distance (m)')
         ylabel('p')
         legend(conditions{k})
     end
     figure(2);gcf;clf;
     plot(x,p_dist)
-    set(gca,'ylim',[0,1])
+    set(gca,'ylim',[0,.5])
     xlabel('distance(m)')
     ylabel('p')
     
@@ -120,7 +174,7 @@ for dT=50 %5:10:120
         end
     end
     KLdist
-    fprintf('\ndT=%d, dist=%.2f\n', dT, mean(KLdist(KLdist~=0)))
+    fprintf('\n obsvFrames=%d, KL dist=%.2f\n', obsvFrames, mean(KLdist(KLdist~=0)))
     
     % Wasserstein distance
     WSdist=zeros(4);
@@ -130,15 +184,16 @@ for dT=50 %5:10:120
         end
     end
     WSdist
-    fprintf('\ndT=%d, dist=%.2f\n', dT, mean(WSdist))
+    fprintf('\n obsvFrames=%d, WS dist=%.2f\n', obsvFrames, mean(WSdist(WSdist~=0)))
 end
+save('./pdist.mat', 'p_dist', 'x');
 legend(conditions)
 
 %% Robot angle rotated
 clear variables
 ID_Data = csvread('IDList_Completed.csv',1);
 type='EKFtraj';
-dT=20; % section of time to observe in frames
+obsvTime=20; % section of time to observe in frames
 conditions= {'xMxT', 'xMyT','yMxT','yMyT'};
 subjects=dir('../data/FILTERED/*');
 isub = [subjects(:).isdir];
@@ -160,15 +215,15 @@ for cond=1:4
 end
 
 
-support_dist=0:0.2:4*pi;
+support_dist=0:1:4*pi;
 figure(1);gcf;clf;
 for k=1:4
     data = distdata{k};
     
-    toremove=mod(numel(data),dT);
+    toremove=mod(numel(data),obsvTime);
     data1=data(1:end-toremove);
     
-    data=sum(reshape(data1, [], dT),2);
+    data=sum(reshape(data1, [], obsvTime),2);
     
     
     
@@ -177,14 +232,14 @@ for k=1:4
     [n,x]=hist(data,support_dist);
     p_speed(:,k)= n/sum(n);
     plot(x,p_speed(:,k))
-    set(gca,'ylim',[0,1])
+    set(gca,'ylim',[0,.5])
     xlabel('angle (rad)')
     ylabel('p')
     legend(conditions{k})
 end
 figure(2);gcf;clf;
 plot(x,p_speed)
-set(gca,'ylim',[0,1])
+set(gca,'ylim',[0,.5])
 xlabel('angle (rad)')
 ylabel('p')
 legend(conditions)
@@ -196,7 +251,7 @@ ID_Data = csvread('IDList_Completed.csv',1);
 conditions= {'xMxT', 'xMyT','yMxT','yMyT'};
 type='EKFom';
 % type='ComTurnRate';
-dT=20; % section of time to observe in frames
+obsvTime=20; % section of time to observe in frames
 subjects=dir('../data/FILTERED/*');
 isub = [subjects(:).isdir];
 nameFolds = {subjects(isub).name}';
@@ -221,10 +276,10 @@ figure(1);gcf;clf;
 for k=1:4
     data = abs(trdata{k});
     
-    toremove=mod(numel(data),dT);
+    toremove=mod(numel(data),obsvTime);
     data1=data(1:end-toremove);
     
-    data=mean(reshape(data1, [], dT),2);
+    data=mean(reshape(data1, [], obsvTime),2);
     
     subplot(2,2,k)
     

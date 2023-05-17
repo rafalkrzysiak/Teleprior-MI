@@ -8,7 +8,8 @@ function wrapper_script_MI
 rng(2);
 
 % -- initialize the parameters of the simulation
-[param, maps, folder, bias, share_info, target_locations, agents] = ParamConfig();
+[param, maps, folder, bias, share_info, target_locations, agents, file_id] = ...
+    ParamConfig();
                
 % -- initialize the iteration/combination number
 % -- this will be used as a representation of the total number of 
@@ -44,6 +45,12 @@ for env = 1:size(maps,2) % -- looping through every environment
             % -- Remember: Robot 1 is the human robot
             % -- we do not want to loop through the alpha values!
             % -- alpha only affects the autonomous robots
+            
+            % I think we won't need alpha or bias for this setup so both
+            % can go. We can instead use the file id of the experiment that
+            % I have passed from RobotExperimentDataSet.m to name our
+            % output files. That way we will be able to match experiment to
+            % simulation
             if agents(robot) == 1
                 alpha = 1; % -- set the alpha to a 1D value only for 1 Robot
             else

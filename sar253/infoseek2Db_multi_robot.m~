@@ -389,16 +389,13 @@ for jj=1:param.nsim
                     % calculate d(k)=the distance moved (this can be done by
                     % simply adding the difference between successive
                     % locations)
-                    % load pdist.mat which has the probability
-                    % distributions for distance
-                    % later we'll expand to include everything
-                    %
+                    % 
                     % calculate the p(d(k)|xMxT), p(d(k)|yMyT) 
                     % next calculate p(xMxT|d(k))
                     % 
                     % since alpha in our setup means independence, we can
-                    % set alpha=p(yMyT|d(k)) or
-                    % set alpha=p(xMxT|d(k))
+                    % set alpha=p(yMyT|d(k)) if p(yMyT|d(k)) > p(xMxT|d(k))
+                    % implying that
                 
                 % maximize mutual rb_information
     %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, eta, hfun, om, r_visible);
