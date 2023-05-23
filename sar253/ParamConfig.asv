@@ -10,7 +10,7 @@ param.nsim = 1; % -- number of simulations per combination
 param.closedloop = 1; % -- flag for enabling/disabling MI
 param.debug = 1; % -- flag for enabling/disabling debug plots
 agents = 3; % -- number of agents in the simulation including the human robot
-param.r_visible = 1.5*ones(1,agents); % -- visible range of the robots (m), human robot has slightly higher range % 4 -> 2
+param.r_visible = 2*ones(1,agents); % -- visible range of the robots (m), human robot has slightly higher range % 4 -> 2
 param.r_FOV = 2*pi*ones(1,agents);
 param.r_FOV(1) = 70*pi/18; % -- human robot 70*pi/180 has FOV of 70 degrees, autonomous robots have 360 degrees
 param.eta = 0.1*ones(1,agents); % -- sensor noise, human robot will have half of auto robot, try a possible higher eta values ^^^^^
@@ -23,7 +23,7 @@ param.kc = 1.5;
 bias = [0]; % -- flag for enabling/disabling bias of the human operated robot
 param.norm = 1;
 share_info = 1;
-param.alphaBuffer = 15; % -- parameter that can be changed to account for how many timesteps needed to update alpha
+param.alphaBuffer = 15; % -- parameter that can be changed to account for how many timesteps 
 
 [~, param.L]=robot_position(maps(1), zeros(1,2));
 

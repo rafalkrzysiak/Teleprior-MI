@@ -103,6 +103,11 @@ result = time;
 % tx = target_loc(1);
 % ty = target_loc(2);
 
+% -- Load the pdist.mat file created from the analysis portion of the 
+% -- Human-subjects-experiment. We will be using this .mat file multiple
+% -- times, best to pull it prior to running the simulations
+pdist = load('pdist.mat');
+
 % -- loop through the number of simulations per combination
 for jj=1:param.nsim
     
@@ -201,6 +206,13 @@ for jj=1:param.nsim
     % -- NEW:
     % -- get the total time of the robot Human Subject Trial
     kF = size(Xs(1:3,:,1,1),2);
+
+    % -- create distance vectors for all *autonomous* robots
+    % -- this calculation will be used to influence the change in alpha
+    % -- For now, lets leave the dimension to be equal to total robots
+    % -- running in simulation, which will leave robot_1 with all zeros
+    d = zeros(kF, param.agents);
+    TotalDist = d;
     
     % -- begin simulating the condition
     for k = k0:kF
@@ -399,6 +411,17 @@ for jj=1:param.nsim
                     % since alpha in our setup means independence, we can
                     % set alpha=p(yMyT|d(k)) or
                     % set alpha=p(xMxT|d(k))
+                    
+                    % -- calculate the distance traveled between the
+                    % -- believed position of the teleoperated robot Xh(6:7)
+                    % -- and the believed position of the autonomous robot itself Xh(1:2)
+                    d(k, robot) = sqrt(sum((Xh(6:7,k,1,robot) - Xh(1:2,k,1,robot)).^2));
+                    
+                    % -- once the simulation has reached required number of
+                    % -- timesteps to update alpha, begin updating alpha
+                    if k > param.alphaBuffer
+                        TotalDist(k, robot) = sum(d(k-15:k, robot));
+                    end
                 
                 % maximize mutual rb_information
     %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, eta, hfun, om, r_visible);
@@ -451,7 +474,7 @@ for jj=1:param.nsim
             end
             
             % -- collision avoidance of autonomous robots with human robot
-            if Rr(robot,1) < .5*param.r_visible(robot) && robot ~= 1 && abs(Zr(:,k,1,robot)) < pi/4 && robot ~= 1
+            if Rr(robot,1) < 1.5*param.r_visible(robot) && robot ~= 1 && abs(Zr(:,k,1,robot)) < pi/4 && robot ~= 1
                omega(1,k,1,robot) = -param.kc*(sign(Zr(:,k,1,robot))*pi/2-Zr(:,k,1,robot)); 
 %                omega(1,k,1,robot) = -param.kc*Zr(:,k,1,robot); 
                vel(1,k,1,robot) = vel(1,k,1,robot)/10;
