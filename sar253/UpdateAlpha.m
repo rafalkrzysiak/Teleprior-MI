@@ -17,7 +17,7 @@ if k > 1
     % -- the param.alphaBuffer value is arbitrarly chosen for right now, 
     % -- possible more optimized value will replace in future
     if k > param.alphaBuffer
-        TotalDist(k, 1) = sum(d(k-15:k, 1));
+        TotalDist(k, 1) = sum(d(k-param.alphaBuffer:k, 1));
 
         % -- calculate p(d|xMxT) and p(d|yMyT)
         % -- discussed during zoom meeting 5/23/2023
