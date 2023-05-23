@@ -90,7 +90,7 @@ lfnMI = @(Z, Zsup, p, robot, bin_map) ...
 % -- the optimize mutual rb_information function
 O_MI = @(k, p, wts, bin_map, Z, robot, Zr, alpha) ...
        optimize_MI(k, p, wts, lfn, lfnMI, bin_map, Z, ...
-                   robot, Zr, alpha, param); % pass alpha here
+                   robot, Zr, param, alpha); % pass alpha here
 
 
 Num_target_found = zeros(param.nsim,1);
@@ -106,7 +106,7 @@ result = time;
 % -- Load the pdist.mat file created from the analysis portion of the 
 % -- Human-subjects-experiment. We will be using this .mat file multiple
 % -- times, best to pull it prior to running the simulations
-pdist = load('pdist.mat');
+Exp = load('pdist.mat');
 
 % -- loop through the number of simulations per combination
 for jj=1:param.nsim
@@ -207,11 +207,11 @@ for jj=1:param.nsim
     % -- get the total time of the robot Human Subject Trial
     kF = size(Xs(1:3,:,1,1),2);
 
-    % -- create distance vectors for all *autonomous* robots
+    % -- create distance vector shared for all *autonomous* robots
     % -- this calculation will be used to influence the change in alpha
     % -- For now, lets leave the dimension to be equal to total robots
     % -- running in simulation, which will leave robot_1 with all zeros
-    d = zeros(kF, param.agents);
+    d = zeros(kF, 1);
     TotalDist = d;
     
     % -- begin simulating the condition
@@ -411,17 +411,10 @@ for jj=1:param.nsim
                     % since alpha in our setup means independence, we can
                     % set alpha=p(yMyT|d(k)) or
                     % set alpha=p(xMxT|d(k))
-                    
-                    % -- calculate the distance traveled between the
-                    % -- believed position of the teleoperated robot Xh(6:7)
-                    % -- and the believed position of the autonomous robot itself Xh(1:2)
-                    d(k, robot) = sqrt(sum((Xh(6:7,k,1,robot) - Xh(1:2,k,1,robot)).^2));
-                    
-                    % -- once the simulation has reached required number of
-                    % -- timesteps to update alpha, begin updating alpha
-                    if k > param.alphaBuffer
-                        TotalDist(k, robot) = sum(d(k-15:k, robot));
-                    end
+                
+                % -- begin alpha caluclation based on distance traveled 
+                % -- by reference robot within the environment
+                alpha = UpdateAlpha(TotalDist, d, Exp.p_dist, Exp.x, k, param, Xh(:,:,1,robot));
                 
                 % maximize mutual rb_information
     %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, eta, hfun, om, r_visible);
@@ -455,7 +448,7 @@ for jj=1:param.nsim
             % -- value in the range
 %             pts = find(rb_info(:,2) < pi/6 & rb_info(:,2) > -pi/6 & rb_info(:,1) < param.r_visible(robot));
              % collision should be closer than visible range -- SB
-            pts = find(rb_info(:,2) < pi/6 & rb_info(:,2) > -pi/6 & rb_info(:,1) < param.r_visible(robot)/5);
+            pts = find(rb_info(:,2) < pi/6 & rb_info(:,2) > -pi/6 & rb_info(:,1) < param.r_visible(robot));
             
             % -- If the range of the closest point of the wall is within 
             % -- 2/3 of the visible range of the robot, begin collision 
@@ -474,8 +467,8 @@ for jj=1:param.nsim
             end
             
             % -- collision avoidance of autonomous robots with human robot
-            if Rr(robot,1) < 1.5*param.r_visible(robot) && robot ~= 1 && abs(Zr(:,k,1,robot)) < pi/4 && robot ~= 1
-               omega(1,k,1,robot) = -param.kc*(sign(Zr(:,k,1,robot))*pi/2-Zr(:,k,1,robot)); 
+            if Rr(robot,1) < 1*param.r_visible(robot) && robot ~= 1 && abs(Zr(:,k,1,robot)) < pi/4 && robot ~= 1
+               omega(1,k,1,robot) = -param.kc*(sign(Zr(:,k,1,robot))*pi/2 - Zr(:,k,1,robot)); 
 %                omega(1,k,1,robot) = -param.kc*Zr(:,k,1,robot); 
                vel(1,k,1,robot) = vel(1,k,1,robot)/10;
             end
@@ -497,7 +490,8 @@ for jj=1:param.nsim
         % -- whether or not to show the plots during the simulation
         if param.debug
             debug_plot(Xs(:,k,1,:), Xh(:,k,1,:), k, p(:,:,k,:), param, ...
-                       bin_map, fiducial, jj, X0, saveFrames, target_loc, I(:,:,1,:))
+                       bin_map, fiducial, jj, X0, saveFrames, target_loc, ...
+                       I(:,:,1,:), alpha)
         end
         
         % -- end the msimulation if the target was found

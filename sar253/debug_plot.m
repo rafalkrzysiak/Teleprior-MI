@@ -1,5 +1,5 @@
 function debug_plot(Xs, Xh, k, p, param, bin_map, fiducial, ...
-                    jj, X0, saveFrames, target_locations, I)
+                    jj, X0, saveFrames, target_locations, I, alpha)
 % This function is to be used as a debugging tool
 % a figure is displayed to show what is happening while the mutual
 % information code with a particle filter is running
