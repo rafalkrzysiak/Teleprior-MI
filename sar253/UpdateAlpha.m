@@ -29,7 +29,7 @@ if k > 1
 
         % -- update alpha 
         % -- we can play around with this calculation 
-        % -- TO DO: need to update to allow for more dynamic numerator 
+        % -- TO DO: 
         % -- 1. Need to make more dynamic numerator calculation, meaning
         % --    The alpha calculation depends on which condition we are running
         alpha = (pDxMxT * pxMxT)/(pDxMxT + pDyMyT);
