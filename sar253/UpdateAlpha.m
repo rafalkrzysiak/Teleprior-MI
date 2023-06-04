@@ -1,9 +1,12 @@
-function alpha = UpdateAlpha(TotalDist, d, pdist, x, k, param, Xh, alpha)
+function alpha = UpdateAlpha(d, pdist, x, k, param, alpha)
 % -- this function will serve to update alpha given the distance
 % -- traveled by the reference robot. Probabilities are calculated
 % -- using experimental data captured by the Omron lab teleoperation
 
 % alpha is the posterior which recursively gets updated every time step.
+
+% -- Tau was determined in post process
+tau = 50;
 
 % -- We need at minimum 2 timesteps to calculate the distance
 % -- traveled by reference robot. If the condition is not met,
@@ -25,13 +28,30 @@ function alpha = UpdateAlpha(TotalDist, d, pdist, x, k, param, Xh, alpha)
     % of the random vector X=[speed, turn rate, ...] so, we can set it here
     % and not treat it as a control design parameter. 
     % for example, set tau=50
-    if k > param.alphaBuffer
-        TotalDist_k = sum(d(k-param.alphaBuffer:k, 1)); % d(k-tau:k,1)...
+    % -- needed a buffer at the beginning of the alpha/totaldist calculation
+    % -- the believed location of the reference robot jumps meters in timesteps [1 3]
+    % -- 3 was added to avoid the massive jump in distance which created a
+    % -- Nan value for pDxMxT_k and pDyMyT_k using the interp1 function
+    if k > tau+3
+        TotalDist_k = sum(d(k-tau:k, 1)); % d(k-tau:k,1)...
 
         % -- calculate p(d|xMxT) and p(d|yMyT)
         % -- discussed during zoom meeting 5/23/2023
-        pDxMxT_k = interp1(x, pdist(:,1), TotalDist_k);
-        pDyMyT_k = interp1(x, pdist(:,4), TotalDist_k);
+        if TotalDist_k < max(x)
+            pDxMxT_k = interp1(x, pdist(:,1), TotalDist_k);
+            pDyMyT_k = interp1(x, pdist(:,4), TotalDist_k);
+        else
+            pDxMxT_k = 0.00001;
+            pDyMyT_k = 0.00001;
+        end
+
+        % % -- avoid zero probabilities
+        % p_k = pDxMxT_k + pDyMyT_k;
+        % if ~p_k
+        %     pDxMxT_k = 0.001;
+        %     pDyMyT_k = 0.001;
+        % end
+
         % -- update alpha 
         % -- we can play around with this calculation 
         % -- TO DO: 

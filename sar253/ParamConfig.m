@@ -23,7 +23,6 @@ param.kc = 1.5;
 bias = [0]; % -- flag for enabling/disabling bias of the human operated robot
 param.norm = 1;
 share_info = 1;
-param.alphaBuffer = 15; % -- parameter that can be changed to account for how many timesteps needed to update alpha
 param.alphaBegin = 0.5; 
 
 [~, param.L]=robot_position(maps(1), zeros(1,2));

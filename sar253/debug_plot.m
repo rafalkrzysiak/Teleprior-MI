@@ -39,7 +39,7 @@ for agent = 1:param.agents
        figure(10); clf; 
     end
     
-    % -- create the giure and subplots for each robot
+    % -- create the figure and subplots for each robot
     figure(10); gcf;
     subplot(1, param.agents, agent);
     
@@ -137,6 +137,14 @@ end
 % -- display the time step number on the x-axis, and refresh the plot
 xlabel(k);
 
+% -- plot the alpha over time
+figure(3);gcf; clf;
+hold on;
+plot(1:1:k, alpha(1:k,1), 'k-', 'linewidth', 2);
+title('Alpha value over time', 'FontSize', 16);
+xlabel('Time (s)', 'FontSize', 16);
+ylabel('Alpha', 'FontSize', 16);
+ylim([0 1]);
 
 drawnow;
 % -- save the figures as a frame to later create videos
