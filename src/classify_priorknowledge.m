@@ -138,7 +138,7 @@ for obsvFrames=50 %5:10:120
     end
     
     
-    support_dist=0:0.5:6;
+    support_dist=0:0.5:8;
     figure(1);gcf;clf;
     for k=1:4
         data = distdata{k};

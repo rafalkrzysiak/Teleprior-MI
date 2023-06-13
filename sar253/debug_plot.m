@@ -1,5 +1,6 @@
 function debug_plot(Xs, Xh, k, p, param, bin_map, fiducial, ...
-                    jj, X0, saveFrames, target_locations, I, alpha)
+                    jj, X0, saveFrames, target_locations, I, ...
+                    alpha, TotalDist, pDxMxT, pDyMyT)
 % This function is to be used as a debugging tool
 % a figure is displayed to show what is happening while the mutual
 % information code with a particle filter is running
@@ -141,10 +142,67 @@ xlabel(k);
 figure(3);gcf; clf;
 hold on;
 plot(1:1:k, alpha(1:k,1), 'k-', 'linewidth', 2);
-title('Alpha value over time', 'FontSize', 16);
+title(sprintf('Alpha: %0.5f', alpha(k,1)), 'FontSize', 16);
 xlabel('Time (s)', 'FontSize', 16);
 ylabel('Alpha', 'FontSize', 16);
 ylim([0 1]);
+
+figure(40); gcf; clf;
+subplot(1,3,1);
+for kk = 1:param.agents
+
+    if kk ~=1
+        
+        hold on;
+        plot(Xs(1,1,1,1),  Xs(2,1,1,1), 'k.',  'markersize', 28); hold on;
+        plot(Xh(6,1,1,kk), Xh(7,1,1,kk), self_ref_color(kk),  'markersize', 26, 'linewidth', 3)
+        xlabel('X location (m)', 'FontSize', 16);
+        ylabel('Y location (m)', 'FontSize', 16);
+        title('True position vs estimate');
+    
+    end
+    axis square;
+end
+
+subplot(1,3,2);
+for kk = 1:param.agents
+    if kk ~=1
+        
+        difx(k,kk) = Xh(6,1,1,kk) - Xs(1,1,1,1);
+        dify(k,kk) = Xh(7,1,1,kk) - Xs(2,1,1,1);
+        hold on; plot(0, 0, 'ko', 'markersize', 26, 'linewidth', 3)
+        hold on; plot(difx(k,kk), dify(k,kk), self_ref_color(kk), 'markersize', 26, 'linewidth', 3);
+        axis([-7 7 -7 7]);
+        xlabel('X Position diff', 'FontSize', 16);
+        ylabel('Y Position diff', 'FontSize', 16); 
+        title(sprintf("Time: %d", k), 'fontsize', 18);
+        legend('Ideal');
+        axis square;
+    end
+end
+
+subplot(1,3,3);
+for kk = 1:param.agents
+    if kk ~=1
+        hold on;
+        plot(1:1:k, TotalDist(1:k,1,kk), self_l_color(kk), 'LineWidth', 2)
+        xlabel('Time (s)', 'FontSize', 16);
+        ylabel('Total distance', 'FontSize', 16); 
+        title('Total distance (50 frame bins)', 'fontsize', 18);
+        axis square;
+    end
+end
+legend('robot 1', 'robot 2');
+
+figure(50); gcf; clf;
+plot(1:1:k, pDxMxT(1:k,1), 'k-', 'LineWidth', 2);
+hold on; plot(1:1:k, pDyMyT(1:k,1), 'r-', 'LineWidth', 2);
+legend('pDxMxT', 'pDyMyT', 'FontSize', 16);
+xlabel('Time (s)', 'FontSize', 16);
+ylabel('p', 'FontSize', 16);
+title(sprintf("pDxMxT: %0.5f, pDyMyT:%0.5f", pDxMxT(k,1), pDyMyT(k,1)), 'fontsize', 16);
+axis square;
+axis([0 k 0 1]);
 
 drawnow;
 % -- save the figures as a frame to later create videos

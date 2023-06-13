@@ -1,4 +1,4 @@
-function alpha = UpdateAlpha(d, pdist, x, k, param, alpha)
+function [alpha, TotalDist_k, pDxMxT_k, pDyMyT_k] = UpdateAlpha(d, pdist, x, k, param, alpha)
 % -- this function will serve to update alpha given the distance
 % -- traveled by the reference robot. Probabilities are calculated
 % -- using experimental data captured by the Omron lab teleoperation
@@ -44,6 +44,15 @@ tau = 50;
             pDxMxT_k = 0.00001;
             pDyMyT_k = 0.00001;
         end
+        
+        % -- avoid zero probabilities
+        if ~pDxMxT_k
+            pDxMxT_k = 0.00001;
+        end
+
+        if ~pDyMyT_k
+            pDyMyT_k = 0.00001;
+        end
 
         % % -- avoid zero probabilities
         % p_k = pDxMxT_k + pDyMyT_k;
@@ -64,9 +73,16 @@ tau = 50;
         % this goes out of the if condition because we set it to 0.5 since
         % we cannot calculate it
         alpha = param.alphaBegin;
-
+        TotalDist_k = 0;
+        pDxMxT_k = 0.00001;
+        pDyMyT_k = 0.00001;
     end
-    
+
+% -- make sure that alpha is not too far into 0
+% -- If alpha is zero, alpha will never recover above zero
+if alpha < 0.01
+    alpha = 0.01;
+end
 
 
     

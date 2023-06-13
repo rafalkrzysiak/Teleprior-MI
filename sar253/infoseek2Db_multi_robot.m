@@ -106,7 +106,7 @@ result = time;
 % -- Load the pdist.mat file created from the analysis portion of the 
 % -- Human-subjects-experiment. We will be using this .mat file multiple
 % -- times, best to pull it prior to running the simulations
-Exp = load('pdist.mat');
+Exp = load('../src/pdist.mat');
 
 % -- loop through the number of simulations per combination
 for jj=1:param.nsim
@@ -212,8 +212,10 @@ for jj=1:param.nsim
     % -- For now, lets leave the dimension to be equal to total robots
     % -- running in simulation, which will leave robot_1 with all zeros
     d = zeros(kF, 1);
-    TotalDist = d;
+    TotalDist = zeros(kF, 1, 2);
     alpha = d;
+    pDxMxT = d;
+    pDyMyT = d;
 
     % -- set the alpha to be what it was in the beginning 
     alpha(1,1) = param.alphaBegin;
@@ -418,14 +420,15 @@ for jj=1:param.nsim
                 % -- make sure that we have 2 times ran before we try and
                 % -- calculate the distance that the reference robot has moved
                 if k > 2
-                    d(k, 1) = sqrt(sum((Xh(6:7,k-1,1,robot) - Xh(6:7,k-2,1,robot)).^2));
+%                     d(k, 1) = sqrt(sum((Xh(6:7,k,1,robot) - Xh(6:7,k-1,1,robot)).^2));
+                    d(k, 1) = sqrt(sum((Xs(1:2,k,1,1) - Xs(1:2,k-1,1,1)).^2));
                 else
                     d(k, 1) = 0;
                 end
                 
                 % -- begin alpha caluclation based on distance traveled 
                 % -- by reference robot within the environment
-                alpha(k+1,1) = UpdateAlpha(d, Exp.p_dist, Exp.x, k, param, alpha(k,1));
+                [alpha(k+1,1), TotalDist(k, 1, robot), pDxMxT(k+1,1), pDyMyT(k+1,1)] = UpdateAlpha(d, Exp.p_dist, Exp.x, k, param, alpha(k,1));
                 
                 % maximize mutual rb_information
     %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, eta, hfun, om, r_visible);
@@ -502,7 +505,7 @@ for jj=1:param.nsim
         if param.debug
             debug_plot(Xs(:,k,1,:), Xh(:,k,1,:), k, p(:,:,k,:), param, ...
                        bin_map, fiducial, jj, X0, saveFrames, target_loc, ...
-                       I(:,:,1,:), alpha)
+                       I(:,:,1,:), alpha, TotalDist, pDxMxT, pDyMyT)
         end
         
         % -- end the msimulation if the target was found
