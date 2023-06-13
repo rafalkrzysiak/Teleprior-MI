@@ -66,7 +66,7 @@ tau = 50;
         % -- TO DO: 
         % -- 1. Need to make more dynamic numerator calculation, meaning
         % --    The alpha calculation depends on which condition we are running
-        alpha = (pDxMxT_k * alpha)/(pDxMxT_k + pDyMyT_k);
+        alpha = (pDxMxT_k * alpha)/(pDxMxT_k*alpha + pDyMyT_k*(1-alpha));
         
     else
         % -- Temporary
