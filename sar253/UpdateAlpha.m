@@ -1,12 +1,12 @@
-function [alpha, TotalDist_k, pDxMxT_k, pDyMyT_k] = UpdateAlpha(d, pdist, x, k, param, alpha)
+function [alpha, TotalDist_k, pDxMxT_k, pDyMyT_k] = UpdateAlpha(d, pdist, x, k, param, tau, alpha)
 % -- this function will serve to update alpha given the distance
 % -- traveled by the reference robot. Probabilities are calculated
 % -- using experimental data captured by the Omron lab teleoperation
 
 % alpha is the posterior which recursively gets updated every time step.
 
-% -- Tau was determined in post process
-tau = 50;
+% -- Tau was determined in post process (pass tau)
+% tau = 50;
 
 % -- We need at minimum 2 timesteps to calculate the distance
 % -- traveled by reference robot. If the condition is not met,
@@ -44,7 +44,7 @@ tau = 50;
             pDxMxT_k = 0.00001;
             pDyMyT_k = 0.00001;
         end
-        
+
         % -- avoid zero probabilities
         if ~pDxMxT_k
             pDxMxT_k = 0.00001;
