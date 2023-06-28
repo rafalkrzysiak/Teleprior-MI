@@ -1,5 +1,5 @@
 function infoseek2Db_multi_robot(param, img, saveIn, maps, ...
-                                saveFrames, target_loc)
+                                saveFrames, target_loc, exp_id, exp_cond)
 
 % preset values when not running this script from another script
 if nargin < 1
@@ -106,7 +106,9 @@ result = time;
 % -- Load the pdist.mat file created from the analysis portion of the 
 % -- Human-subjects-experiment. We will be using this .mat file multiple
 % -- times, best to pull it prior to running the simulations
-Exp = load('../src/pdist.mat');
+Exp = load('../src/pdist_tau=15s.mat');
+
+% -- Pull list of 
 
 % -- loop through the number of simulations per combination
 for jj=1:param.nsim
@@ -188,7 +190,7 @@ for jj=1:param.nsim
         
         Xh(:,1,1,r)=mean(p(:,:,1,r),2);
         if r == 1
-            [Xs(1:3,:,1,r), ~, ~]=RobotExperimentDataSet();
+            [Xs(1:3,:,1,r), ~, ~]=RobotExperimentDataSet(exp_id, exp_cond);
             Xs(4:5,1,1,r)=X0(4:5,:,1,r);
         else
             Xs(1:5,1,1,r)=X0(:,:,1,r);
@@ -428,13 +430,13 @@ for jj=1:param.nsim
                 
                 % -- begin alpha caluclation based on distance traveled 
                 % -- by reference robot within the environment
-                [alpha(k+1,1), TotalDist(k, 1, robot), pDxMxT(k+1,1), pDyMyT(k+1,1)] = UpdateAlpha(d, Exp.p_dist, Exp.x, k, param, alpha(k,1));
+                [alpha(k+1,1), TotalDist(k, 1, robot), pDxMxT(k+1,1), pDyMyT(k+1,1)] = UpdateAlpha(d, Exp.p_dist, Exp.x_dist, k, param, alpha(k,1), exp_cond);
                 
                 % maximize mutual rb_information
     %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, eta, hfun, om, r_visible);
     %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, om, lfn);
                  [omega(1,k,1,robot),vel(1,k,1,robot),I(:,k,1,robot)] = ...
-                     O_MI(k, p, wts, bin_map, Z(:,k,1,:), robot, Zr(:,k,1,:), alpha);
+                     O_MI(k, p, wts, bin_map, Z(:,k,1,:), robot, Zr(:,k,1,:), alpha(k+1,1));
             else
                 % 1 or -1 with equal probability
                 omega(1,k,1,robot)=param.omega0+0.1*randn; 
@@ -800,7 +802,8 @@ end
 % -- get the max value of mutual rb_information
 % -- get the velocity and omega values that correspond to the max value for MI
 if robot ~= 1
-    MIvals = param.alpha.*MI_t + (1-param.alpha).*MI_r;
+    %MIvals = param.alpha.*MI_t + (1-param.alpha).*MI_r;
+    MIvals = alpha*MI_t + (1-alpha)*MI_r;
 else
     MIvals = MI_t;
 end

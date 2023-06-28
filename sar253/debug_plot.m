@@ -175,7 +175,7 @@ for kk = 1:param.agents
         axis([-7 7 -7 7]);
         xlabel('X Position diff', 'FontSize', 16);
         ylabel('Y Position diff', 'FontSize', 16); 
-        title(sprintf("Time: %d", k), 'fontsize', 18);
+        title(sprintf("Timestep: %d", k), 'fontsize', 18);
         legend('Ideal');
         axis square;
     end
@@ -188,7 +188,7 @@ for kk = 1:param.agents
         plot(1:1:k, TotalDist(1:k,1,kk), self_l_color(kk), 'LineWidth', 2)
         xlabel('Time (s)', 'FontSize', 16);
         ylabel('Total distance', 'FontSize', 16); 
-        title('Total distance (50 frame bins)', 'fontsize', 18);
+        title('Total distance', 'fontsize', 18);
         axis square;
     end
 end
@@ -198,7 +198,7 @@ figure(50); gcf; clf;
 plot(1:1:k, pDxMxT(1:k,1), 'k-', 'LineWidth', 2);
 hold on; plot(1:1:k, pDyMyT(1:k,1), 'r-', 'LineWidth', 2);
 legend('pDxMxT', 'pDyMyT', 'FontSize', 16);
-xlabel('Time (s)', 'FontSize', 16);
+xlabel('Timestep', 'FontSize', 16);
 ylabel('p', 'FontSize', 16);
 title(sprintf("pDxMxT: %0.5f, pDyMyT:%0.5f", pDxMxT(k,1), pDyMyT(k,1)), 'fontsize', 16);
 axis square;

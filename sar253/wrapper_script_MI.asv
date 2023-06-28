@@ -4,61 +4,30 @@ function wrapper_script_MI
 % -- Calling the Matlab script infoseek2Db_multi_robot.m
 % -- Written by: Rafal Krzysiak
 
-
 % -- setup the variables that will be passed into the pf MI script
 rng(2);
-param.dt = 1; % -- timestep (s)
-[~, param.T] = RobotExperimentDataSet(); %2500/param.dt; % -- max time (s)
-param.N = 1200; % -- number of particles in the simulation
-param.nsim = 1; % -- number of simulations per combination
-param.closedloop = 1; % -- flag for enabling/disabling MI
-param.debug = 1; % -- flag for enabling/disabling debug plots
-agents = 3; % -- number of agents in the simulation including the human robot
-param.r_visible = 4*ones(1,agents); % -- visible range of the robots (m), human robot has slightly higher range
-param.r_FOV = 2*pi*ones(1,agents);
-param.r_FOV(1) = 70*pi/18; % -- human robot 70*pi/180 has FOV of 70 degrees, autonomous robots have 360 degrees
-param.eta = 0.1*ones(1,agents); % -- sensor noise, human robot will have half of auto robot, try a possible higher eta values ^^^^^
-param.r_robot = .15; % --  the radius of the robot (m)
-% maps = ["plain_map", "u_map", "complex_map", "OmronLab"]; % -- image file names
-maps = ["OmronLab"]; % -- image file names
-folder = "maps/"; % -- folder name where maps are held
-param.loc_sigma = 1; % -- spread of the location particles
-param.kc = 1.5;
-bias = [0]; % -- flag for enabling/disabling bias of the human operated robot
-param.norm = 1;
-share_info = 1;
 
-[~, param.L]=robot_position(maps(1), zeros(1,2));
+% -- get the list of participants
+ids = ls("data/FILTERED"); % -- get all in the folder
+ids = ids(3:end-1,1:4); % -- reformat to only have the numbers
 
-% -- locations where the target can be located
-% R = param.L(2)*sqrt(2)/2; %L/4*(sqrt(2)/2+3);
-
-% target_locations = [R*cosd(45-30), R*sind(45-30); 
-%                     R*cosd(45), R*sind(45); 
-%                     R*cosd(45+30), R*sind(45+30)];
-% target_locations = [R*cosd(45+30), R*sind(45+30)];                
-
-target_locations = [2 8];
-
-% -- the disturbance in the particles jusitification:
-% -- 1. the robot itself can successfully localize itself great
-% -- 2. the target has a small amount of jitter, it might move ever so slightly
-% -- 3. no robot knows the speed of the human robot, it is 50% of the max
-% --    possible velocity speed of the creates platform
-param.w = diag([.1, .1, .01, .05, .05, .4, .4]); % -- disturbance
-
-% -- Robot and Target dynamics
-param.v=linspace(0,.833,3);
-param.om=linspace(-.25,.25,3);
-param.omega0 = randn*.15;
-param.vel0 =.1+rand*.5;
+% -- initialize the parameters of the simulation
+% [param, maps, folder, bias, share_info, target_locations, agents, file_id] = ...
+%     ParamConfig();
                
 % -- initialize the iteration/combination number
 % -- this will be used as a representation of the total number of 
 % -- combinations done for the simulation
 iter_num = 1;
 
-tic
+maps = "OmronLab";
+folder = "maps/";
+share_info = 0;
+agents = 3;
+bias = 0;
+target_locations = [0,0];
+
+tic % -- start timer to determine computational time
 for env = 1:size(maps,2) % -- looping through every environment
     path = convertStringsToChars(strcat(folder, maps(env), ".jpg")); % -- strcat the folder and image name
     img = imread(path); % -- read the image into Matlab
@@ -80,13 +49,19 @@ for env = 1:size(maps,2) % -- looping through every environment
             mkdir(robot_folder);
             
             % -- store the number of agents to be simulated in the params struct
-            param.agents = agents(robot);
+%             param.agents = agents(robot);
 
             % -- Special Clause:
             % -- if we are only simulating one robot in the environment
             % -- Remember: Robot 1 is the human robot
             % -- we do not want to loop through the alpha values!
             % -- alpha only affects the autonomous robots
+            
+            % I think we won't need alpha or bias for this setup so both
+            % can go. We can instead use the file id of the experiment that
+            % I have passed from RobotExperimentDataSet.m to name our
+            % output files. That way we will be able to match experiment to
+            % simulation
             if agents(robot) == 1
                 alpha = 1; % -- set the alpha to a 1D value only for 1 Robot
             else
@@ -97,8 +72,8 @@ for env = 1:size(maps,2) % -- looping through every environment
             for a = 1:size(alpha,2)
 
                 % -- create a folder for the alpha value within the map/robots folder
-                alpha_folder = strcat(robot_folder, "alpha_", num2str(alpha(a)), "/");
-                mkdir(alpha_folder);
+                %alpha_folder = strcat(robot_folder, "alpha_", num2str(alpha(a)), "/");
+                %mkdir(alpha_folder);
                 
                 % -- store the alpha value in the params struct
                 param.alpha = alpha(a);
@@ -106,8 +81,8 @@ for env = 1:size(maps,2) % -- looping through every environment
                 for b = 1:size(bias,2) % -- loop through different target locations in the map
 
                     % -- bias folder
-                    bias_folder = strcat(alpha_folder, "bias_", num2str(bias(b)), "/");
-                    mkdir(bias_folder);
+                    %bias_folder = strcat(alpha_folder, "bias_", num2str(bias(b)), "/");
+                    %mkdir(bias_folder);
                     
                     % -- store the bias in the params struct
                     param.bias = bias(b);
@@ -117,20 +92,33 @@ for env = 1:size(maps,2) % -- looping through every environment
 
                     for t_pos = 1:size(target_locations,1)
 
-                        % -- display the combination of the simulation
-                        fprintf('iter:%d', iter_num);
-                        disp(maps(env)); fprintf('SI:%d, robot:%d, alpha:%.1f, bias:%d, target_position:%d', ...
-                            share_info(SI), agents(robot), alpha(a), bias(b), target_position);
+                        for participant = 1:size(ids, 1)
+                            for exp_cond = 1:2
 
-                        % -- create a new directory to hold all information about the simulation
-                        saveIn = strcat(bias_folder, "target_position", num2str(target_position), "/");
-                        saveFrames = strcat(saveIn, "frames/");
-                        directory = mkdir(saveIn);
-                        frames = mkdir(saveFrames);
+                                % -- initialize the parameters of the simulation
+                                [param, maps, folder, bias, share_info, target_locations, agents, file_id] = ...
+                                    ParamConfig(ids(participant, :), exp_cond);
 
-                        % -- call the mutual inforation pf simulation matlab script
-                        infoseek2Db_multi_robot(param, img, saveIn, maps(env), ...
-                                                saveFrames, target_locations(t_pos,:));
+                                % -- store the number of agents to be simulated in the params struct
+                                param.agents = agents(robot);
+
+                                % -- display the combination of the simulation
+                                fprintf('iter:%d', iter_num);
+                                disp(maps(env)); fprintf('Participant:%s, condition:%d', ...
+                                                         ids(participant,:), exp_cond);
+        
+                                % -- create a new directory to hold all information about the simulation
+                                saveIn = strcat(robot_folder, ids(participant), "/condition_", num2str(exp_cond), "/");
+                                saveFrames = strcat(saveIn, "frames/");
+                                directory = mkdir(saveIn);
+                                frames = mkdir(saveFrames);
+        
+                                % -- call the mutual inforation pf simulation matlab script
+                                infoseek2Db_multi_robot(param, img, saveIn, maps(env), ...
+                                                        saveFrames, target_locations(t_pos,:),...
+                                                        ids(participant,:), exp_cond);
+                            end
+                        end
 
                         % -- step the iteration/combination number to the next one
                         % -- as well as the target position number

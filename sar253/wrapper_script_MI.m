@@ -7,14 +7,26 @@ function wrapper_script_MI
 % -- setup the variables that will be passed into the pf MI script
 rng(2);
 
+% -- get the list of participants
+ids = ls("data/FILTERED"); % -- get all in the folder
+ids = ids(3:end-1,1:4); % -- reformat to only have the numbers
+
 % -- initialize the parameters of the simulation
-[param, maps, folder, bias, share_info, target_locations, agents, file_id] = ...
-    ParamConfig();
+% [param, maps, folder, bias, share_info, target_locations, agents, file_id] = ...
+%     ParamConfig();
                
 % -- initialize the iteration/combination number
 % -- this will be used as a representation of the total number of 
 % -- combinations done for the simulation
 iter_num = 1;
+
+maps = "OmronLab";
+folder = "maps/";
+share_info = 0;
+agents = 3;
+bias = 0;
+target_locations = [0,0];
+conds = [1, 4];
 
 tic % -- start timer to determine computational time
 for env = 1:size(maps,2) % -- looping through every environment
@@ -38,7 +50,7 @@ for env = 1:size(maps,2) % -- looping through every environment
             mkdir(robot_folder);
             
             % -- store the number of agents to be simulated in the params struct
-            param.agents = agents(robot);
+%             param.agents = agents(robot);
 
             % -- Special Clause:
             % -- if we are only simulating one robot in the environment
@@ -61,8 +73,8 @@ for env = 1:size(maps,2) % -- looping through every environment
             for a = 1:size(alpha,2)
 
                 % -- create a folder for the alpha value within the map/robots folder
-                alpha_folder = strcat(robot_folder, "alpha_", num2str(alpha(a)), "/");
-                mkdir(alpha_folder);
+                %alpha_folder = strcat(robot_folder, "alpha_", num2str(alpha(a)), "/");
+                %mkdir(alpha_folder);
                 
                 % -- store the alpha value in the params struct
                 param.alpha = alpha(a);
@@ -70,8 +82,8 @@ for env = 1:size(maps,2) % -- looping through every environment
                 for b = 1:size(bias,2) % -- loop through different target locations in the map
 
                     % -- bias folder
-                    bias_folder = strcat(alpha_folder, "bias_", num2str(bias(b)), "/");
-                    mkdir(bias_folder);
+                    %bias_folder = strcat(alpha_folder, "bias_", num2str(bias(b)), "/");
+                    %mkdir(bias_folder);
                     
                     % -- store the bias in the params struct
                     param.bias = bias(b);
@@ -81,20 +93,32 @@ for env = 1:size(maps,2) % -- looping through every environment
 
                     for t_pos = 1:size(target_locations,1)
 
-                        % -- display the combination of the simulation
-                        fprintf('iter:%d', iter_num);
-                        disp(maps(env)); fprintf('SI:%d, robot:%d, alpha:%.1f, bias:%d, target_position:%d', ...
-                            share_info(SI), agents(robot), alpha(a), bias(b), target_position);
+                        for participant = 1:size(ids, 1)
+                            for exp_cond = size(conds, 1)
 
-                        % -- create a new directory to hold all information about the simulation
-                        saveIn = strcat(bias_folder, "target_position", num2str(target_position), "/");
-                        saveFrames = strcat(saveIn, "frames/");
-                        directory = mkdir(saveIn);
-                        frames = mkdir(saveFrames);
+                                % -- initialize the parameters of the simulation
+                                [param, maps, folder, bias, share_info, target_locations, agents, file_id] = ...
+                                    ParamConfig(ids(participant, :), conds(exp_cond));
 
-                        % -- call the mutual inforation pf simulation matlab script
-                        infoseek2Db_multi_robot(param, img, saveIn, maps(env), ...
-                                                saveFrames, target_locations(t_pos,:));
+                                % -- store the number of agents to be simulated in the params struct
+                                param.agents = agents(robot);
+
+                                % -- display information about the simulation
+                                fprintf('Map:%s \nParticipant:%s, condition:%d\n', ...
+                                                         maps(env), ids(participant,:), conds(exp_cond));
+        
+                                % -- create a new directory to hold all information about the simulation
+                                saveIn = strcat(robot_folder, ids(participant,:), "/condition_", num2str(exp_cond), "/");
+                                saveFrames = strcat(saveIn, "frames/");
+                                directory = mkdir(saveIn);
+                                frames = mkdir(saveFrames);
+        
+                                % -- call the mutual inforation pf simulation matlab script
+                                infoseek2Db_multi_robot(param, img, saveIn, maps(env), ...
+                                                        saveFrames, target_locations(t_pos,:),...
+                                                        ids(participant,:), exp_cond);
+                            end
+                        end
 
                         % -- step the iteration/combination number to the next one
                         % -- as well as the target position number

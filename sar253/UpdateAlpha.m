@@ -1,4 +1,4 @@
-function [alpha, TotalDist_k, pDxMxT_k, pDyMyT_k] = UpdateAlpha(d, pdist, x, k, param, tau, alpha)
+function [alpha, TotalDist_k, pDxMxT_k, pDyMyT_k] = UpdateAlpha(d, pdist, x, k, param, alpha, exp_cond)
 % -- this function will serve to update alpha given the distance
 % -- traveled by the reference robot. Probabilities are calculated
 % -- using experimental data captured by the Omron lab teleoperation
@@ -32,6 +32,7 @@ function [alpha, TotalDist_k, pDxMxT_k, pDyMyT_k] = UpdateAlpha(d, pdist, x, k, 
     % -- the believed location of the reference robot jumps meters in timesteps [1 3]
     % -- 3 was added to avoid the massive jump in distance which created a
     % -- Nan value for pDxMxT_k and pDyMyT_k using the interp1 function
+    tau = 2*param.tau;
     if k > tau+3
         TotalDist_k = sum(d(k-tau:k, 1)); % d(k-tau:k,1)...
 
@@ -66,7 +67,12 @@ function [alpha, TotalDist_k, pDxMxT_k, pDyMyT_k] = UpdateAlpha(d, pdist, x, k, 
         % -- TO DO: 
         % -- 1. Need to make more dynamic numerator calculation, meaning
         % --    The alpha calculation depends on which condition we are running
-        alpha = (pDxMxT_k * alpha)/(pDxMxT_k*alpha + pDyMyT_k*(1-alpha));
+
+        if exp_cond == 1
+            alpha = (pDxMxT_k * alpha)/(pDxMxT_k*alpha + pDyMyT_k*(1-alpha));
+        else
+            alpha = (pDyMyT_k * alpha)/(pDyMyT_k*alpha + pDxMxT_k*(1-alpha));
+        end
         
     else
         % -- Temporary
