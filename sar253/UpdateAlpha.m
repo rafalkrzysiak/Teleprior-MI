@@ -68,11 +68,8 @@ function [alpha, TotalDist_k, pDxMxT_k, pDyMyT_k] = UpdateAlpha(d, pdist, x, k, 
         % -- 1. Need to make more dynamic numerator calculation, meaning
         % --    The alpha calculation depends on which condition we are running
 
-        if exp_cond == 1
-            alpha = (pDxMxT_k * alpha)/(pDxMxT_k*alpha + pDyMyT_k*(1-alpha));
-        else
-            alpha = (pDyMyT_k * alpha)/(pDyMyT_k*alpha + pDxMxT_k*(1-alpha));
-        end
+        alpha = (pDxMxT_k * alpha)/(pDxMxT_k*alpha + pDyMyT_k*(1-alpha));
+        %alpha = (pDyMyT_k * alpha)/(pDyMyT_k*alpha + pDxMxT_k*(1-alpha));
         
     else
         % -- Temporary
