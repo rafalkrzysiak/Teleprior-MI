@@ -46,6 +46,14 @@ function [alpha, TotalDist_k, pDxMxT_k, pDyMyT_k] = UpdateAlpha(d, pdist, x, k, 
             pDyMyT_k = 0.00001;
         end
 
+        if isnan(pDxMxT_k)
+            pDxMxT_k = 0.00001;
+        end
+
+        if isnan(pDyMyT_k)
+            pDyMyT_k = 0.00001;
+        end
+
         % -- avoid zero probabilities
         if ~pDxMxT_k
             pDxMxT_k = 0.00001;
