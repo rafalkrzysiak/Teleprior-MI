@@ -1,5 +1,5 @@
 function infoseek2Db_multi_robot(param, img, saveIn, maps, ...
-                                saveFrames, target_loc, exp_id, exp_cond)
+                                saveFrames, target_loc, exp_id, condition)
 
 % preset values when not running this script from another script
 if nargin < 1
@@ -190,7 +190,10 @@ for jj=1:param.nsim
         
         Xh(:,1,1,r)=mean(p(:,:,1,r),2);
         if r == 1
-            [Xs(1:3,:,1,r), ~, ~]=RobotExperimentDataSet(exp_id, exp_cond);
+            if condition == 2
+                condition = 4;
+            end
+            [Xs(1:3,:,1,r), ~, ~]=RobotExperimentDataSet(exp_id, condition);
             Xs(4:5,1,1,r)=X0(4:5,:,1,r);
         else
             Xs(1:5,1,1,r)=X0(:,:,1,r);
@@ -430,7 +433,7 @@ for jj=1:param.nsim
                 
                 % -- begin alpha caluclation based on distance traveled 
                 % -- by reference robot within the environment
-                [alpha(k+1,1), TotalDist(k, 1, robot), pDxMxT(k+1,1), pDyMyT(k+1,1)] = UpdateAlpha(d, Exp.p_dist, Exp.x_dist, k, param, alpha(k,1), exp_cond);
+                [alpha(k+1,1), TotalDist(k, 1, robot), pDxMxT(k+1,1), pDyMyT(k+1,1)] = UpdateAlpha(d, Exp.p_dist, Exp.x_dist, k, param, alpha(k,1), condition);
                 
                 % maximize mutual rb_information
     %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, eta, hfun, om, r_visible);

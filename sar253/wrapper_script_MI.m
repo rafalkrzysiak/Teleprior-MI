@@ -94,7 +94,7 @@ for env = 1:size(maps,2) % -- looping through every environment
                     for t_pos = 1:size(target_locations,1)
 
                         for participant = 1:size(ids, 1)
-                            for exp_cond = size(conds, 1)
+                            for exp_cond = 1:size(conds, 2)
 
                                 % -- initialize the parameters of the simulation
                                 [param, maps, folder, bias, share_info, target_locations, agents, file_id] = ...
@@ -108,7 +108,7 @@ for env = 1:size(maps,2) % -- looping through every environment
                                                          maps(env), ids(participant,:), conds(exp_cond));
         
                                 % -- create a new directory to hold all information about the simulation
-                                saveIn = strcat(robot_folder, ids(participant,:), "/condition_", num2str(exp_cond), "/");
+                                saveIn = strcat(robot_folder, ids(participant,:), "/condition_", num2str(conds(exp_cond)), "/");
                                 saveFrames = strcat(saveIn, "frames/");
                                 directory = mkdir(saveIn);
                                 frames = mkdir(saveFrames);

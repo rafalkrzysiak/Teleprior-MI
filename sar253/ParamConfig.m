@@ -1,10 +1,10 @@
-function [param, maps, folder, bias, share_info, target_locations, agents, file_id] = ParamConfig(exp_id, exp_cond)
+function [param, maps, folder, bias, share_info, target_locations, agents, file_id] = ParamConfig(exp_id, cond)
 
 % -- This function will serve to contain all parameters to operate
 % -- the mutual information based control Search and rescue simulation
 
-param.dt = 1; % -- timestep (s)
-[~, param.T, tloc, file_id] = RobotExperimentDataSet(exp_id, exp_cond); %2500/param.dt; % -- max time (s)
+param.dt = 0.5; % -- timestep (s)
+[~, param.T, tloc, file_id] = RobotExperimentDataSet(exp_id, cond); %2500/param.dt; % -- max time (s)
 param.N = 1200; % -- number of particles in the simulation
 param.nsim = 1; % -- number of simulations per combination
 param.closedloop = 1; % -- flag for enabling/disabling MI

@@ -1,10 +1,10 @@
-function [xs, tf, tloc, file_id] = RobotExperimentDataSet(exp_id, exp_cond)
+function [xs, tf, tloc, file_id] = RobotExperimentDataSet(exp_id, condition)
 % -- NEW:
 % -- This function will serve to pull trajectory data captured by the 
 % -- overhead tracking system developed for the Omron Lab
 addpath(strcat('data/FILTERED/', exp_id, '/'));
 id=exp_id;
-cond=num2str(exp_cond);
+cond=num2str(condition);
 loc = ['data', filesep, 'FILTERED', filesep, id,...
     filesep, 'EKFtraj_condition_', cond, '.csv'];
 

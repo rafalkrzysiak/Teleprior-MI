@@ -26,6 +26,7 @@ share_info = 0;
 agents = 3;
 bias = 0;
 target_locations = [0,0];
+conds = [1, 4];
 
 tic % -- start timer to determine computational time
 for env = 1:size(maps,2) % -- looping through every environment
@@ -93,22 +94,21 @@ for env = 1:size(maps,2) % -- looping through every environment
                     for t_pos = 1:size(target_locations,1)
 
                         for participant = 1:size(ids, 1)
-                            for exp_cond = 1:2
+                            for exp_cond = 1:size(conds, 2)
 
                                 % -- initialize the parameters of the simulation
                                 [param, maps, folder, bias, share_info, target_locations, agents, file_id] = ...
-                                    ParamConfig(ids(participant, :), exp_cond);
+                                    ParamConfig(ids(participant, :), conds(exp_cond));
 
                                 % -- store the number of agents to be simulated in the params struct
                                 param.agents = agents(robot);
 
-                                % -- display the combination of the simulation
-                                fprintf('iter:%d', iter_num);
-                                disp(maps(env)); fprintf('Participant:%s, condition:%d', ...
-                                                         ids(participant,:), exp_cond);
+                                % -- display information about the simulation
+                                fprintf('Map:%s \nParticipant:%s, condition:%d\n', ...
+                                                         maps(env), ids(participant,:), conds(exp_cond));
         
                                 % -- create a new directory to hold all information about the simulation
-                                saveIn = strcat(robot_folder, ids(participant), "/condition_", num2str(exp_cond), "/");
+                                saveIn = strcat(robot_folder, ids(participant,:), "/condition_", num2str(conds(exp_cond)), "/");
                                 saveFrames = strcat(saveIn, "frames/");
                                 directory = mkdir(saveIn);
                                 frames = mkdir(saveFrames);
