@@ -29,6 +29,7 @@ target_locations = [0,0];
 conds = [1, 4];
 
 tic % -- start timer to determine computational time
+
 for env = 1:size(maps,2) % -- looping through every environment
     path = convertStringsToChars(strcat(folder, maps(env), ".jpg")); % -- strcat the folder and image name
     img = imread(path); % -- read the image into Matlab

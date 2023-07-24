@@ -6,7 +6,7 @@ function [param, maps, folder, bias, share_info, target_locations, agents, file_
 param.dt = 0.5; % -- timestep (s)
 [~, param.T, tloc, file_id] = RobotExperimentDataSet(exp_id, cond); %2500/param.dt; % -- max time (s)
 param.N = 1200; % -- number of particles in the simulation
-param.nsim = 1; % -- number of simulations per combination
+param.nsim = 10; % -- number of simulations per combination
 param.closedloop = 1; % -- flag for enabling/disabling MI
 param.debug = 0; % -- flag for enabling/disabling debug plots
 agents = 3; % -- number of agents in the simulation including the human robot
