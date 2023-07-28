@@ -1,6 +1,6 @@
 % this script creates distributions of features of robot movement such as average speed,
 % distance moved, turn rate etc. over a short period of time based on the
-% experimental condition. 
+% experimental condition.
 % it then computes the KL distance between the distributions to determine
 % if the feature is good enough to be used as a classifier of prior
 % knowledge. ideally we'd like short time (to enable real-time detection)
@@ -14,281 +14,109 @@ dtTrack=1/2;
 dtCommand=1/10;
 ID_Data = csvread('IDList_Completed.csv',1);
 conditions= {'xMxT', 'xMyT','yMxT','yMyT'};
-subjects=dir('../data/FILTERED/*');
-isub = [subjects(:).isdir];
-nameFolds = {subjects(isub).name}';
-nameFolds(ismember(nameFolds,{'.','..'})) = [];
-obsvTime=15; % seconds
+features={'speed', 'distance', 'turn rate', 'angle', 'freezing'};
+obsvTime=5:5:45;
 
-kldist14=zeros(1,5);
-wsdist14=zeros(1,5);
+kldist14=zeros(numel(obsvTime),5);
+wsdist14=zeros(numel(obsvTime),5);
 
-figure(1); gcf; clf;
-dstr_speed=extract_speed_data(obsvTime, ID_Data, ...
-    dtTrack, dtCommand, nameFolds); % speed
-subplot(2,3,1);
-[p_speed, x_speed, kldist14(1)]=calc_pdf(dstr_speed, ...
+for ii=1:numel(obsvTime)
+    
+    figure(1); gcf; clf;
+    dstr_speed=extract_speed_data(obsvTime(ii), ID_Data, ...
+        dtTrack, dtCommand); % speed
+    subplot(2,3,1);
+    [p_speed, x_speed]=calc_pdf(dstr_speed, ...
         'average speed (m/s)', conditions);
-
-dstr_dist=extract_dist_data(obsvTime, ID_Data, ...
-    dtTrack, dtCommand, nameFolds); % distance
-subplot(2,3,2);
-[p_dist, x_dist, kldist14(2)]=calc_pdf(dstr_dist,  ...
-    'distance (m)', conditions);
-
-dstr_tr=extract_turnrate_data(obsvTime, ID_Data, ...
-    dtTrack, dtCommand, nameFolds); % distance
-subplot(2,3,3);
-[p_tr, x_tr, kldist14(3)]=calc_pdf(dstr_tr, ...
-    'average turn rate (rad/s)', conditions);
-
-dstr_angle=extract_angle_data(obsvTime, ID_Data, ...
-    dtTrack, dtCommand, nameFolds); % distance
-subplot(2,3,4);
-[p_angle, x_angle, kldist14(4)]=calc_pdf(dstr_angle,  ...
-    'angle turned (rad)', conditions);
-
-dstr_freeze=extract_freezing_data(obsvTime, ID_Data, ...
-    dtTrack, dtCommand, nameFolds); % distance
-subplot(2,3,5);
-[p_frz, x_frz, kldist14(5)]=calc_pdf(dstr_freeze, ...
-    'time staying still (fraction)', conditions);
-
-sum(kldist14)
-
-save(sprintf('pdist_tau=%ds.mat', obsvTime), 'p_dist', 'x_dist');
-
-function [pdata, x, kldist14, wsdist14]=calc_pdf(dstr, xlbl, conditions)
-% this function calculates the pdf and KL divergence
+    [kldist14(ii,1),wsdist14(ii,1)]=calc_pdf_dist(p_speed, x_speed);
     
-    alldata=[dstr{:}];
-    edges=linspace(min(alldata), max(alldata), 10);
-
-    % calculate probabilities
-    for k=1:4
-        data = dstr{k};
-        [n,x]=histcounts(data, edges);
-        pdata(:,k)= n/sum(n);
-    end
-
-    % Wasserstein distance
-    WSdist=zeros(4);
-    for ii=[1,4]
-        for jj=ii+1:4
-            WSdist(ii,jj)=ws_distance(pdata(:,ii), pdata(:,jj));
-        end
-    end
-    WSdist
-    wsdist14=WSdist(1,4);
+    dstr_dist=extract_dist_data(obsvTime(ii), ID_Data, ...
+        dtTrack, dtCommand); % distance
+    subplot(2,3,2);
+    [p_dist, x_dist]=calc_pdf(dstr_dist,  ...
+        'distance (m)', conditions);
+    [kldist14(ii,2),wsdist14(ii,2)]=calc_pdf_dist(p_dist, x_dist);
     
-    % KL Divergence
-    KLdist=zeros(4);
-    for ii=1:4
-        for jj=ii+1:4
-            KLdist(ii,jj)=kldiv(pdata(:,ii), pdata(:,jj));
-        end
-    end
-    KLdist
-    kldist14=KLdist(1,4);
+    dstr_tr=extract_turnrate_data(obsvTime(ii), ID_Data, ...
+        dtTrack, dtCommand); % distance
+    subplot(2,3,3);
+    [p_tr, x_tr]=calc_pdf(dstr_tr, ...
+        'average turn rate (rad/s)', conditions);
+    [kldist14(ii,3), wsdist14(ii,3)]=calc_pdf_dist(p_tr, x_tr);
     
-    % plot everything
-    gca; cla;
-    for k=[1,4]
-        plot(x(1:end-1),pdata(:,k), 'linewidth', 2);
-        hold on;
-    end
-    grid on;
-    set(gca,'ylim',[0,1])
-    set(gca, 'fontsize', 16);
-    xlabel(xlbl)
-    ylabel('p')
-    title(sprintf('Wass.=%.2f, KL=%.2f', ...
-            wsdist14, kldist14));
-    legend(conditions([1,4]))
-    drawnow;
+    dstr_angle=extract_angle_data(obsvTime(ii), ID_Data, ...
+        dtTrack, dtCommand); % distance
+    subplot(2,3,4);
+    [p_angle, x_angle]=calc_pdf(dstr_angle,  ...
+        'angle turned (rad)', conditions);
+    [kldist14(ii,4), wsdist14(ii,4)]=calc_pdf_dist(p_angle, x_angle);
     
-    x=x(1:end-1); % because we need equal edges and p values
+    dstr_freeze=extract_freezing_data(obsvTime(ii), ID_Data, ...
+        dtTrack, dtCommand); % distance
+    subplot(2,3,5);
+    [p_frz, x_frz]=calc_pdf(dstr_freeze, ...
+        'time staying still (fraction)', conditions);
+    [kldist14(ii,5), wsdist14(ii,5)]=calc_pdf_dist(p_frz, x_frz);
+    
+    print('-dpng', ...
+        sprintf('../doc/plots/pdistr_%ds.png', obsvTime(ii)))
 end
 
-function dstr=extract_speed_data(obsvTime,ID_Data, ...
-    dtTrack, dtCommand,nameFolds)
+figure(2); gcf;clf;
+subplot(1,2,1);
+plot(obsvTime, kldist14, 'linewidth', 2);
+set(gca, 'fontsize', 16);
+xlabel('observation time (s)');
+ylabel('KL distance');
+legend(features)
 
-    obsvFrames=obsvTime/dtTrack;
-    type='EKFVel';
-    % concatenate data into each 
-    for cond=1:4
-        dstr{cond}=[];
-        for ii=1:size(nameFolds,1)
-            append1=csvread(['../data/FILTERED/', ...
-                nameFolds{ii}, '/', type, '_condition_', num2str(cond), '.csv']);
-            idx=ID_Data(:,1)==str2double(nameFolds{ii});
-            [r,c]=size(append1);
-            % to keep everything consistent
-            if r>c, append1=append1'; end 
-            if ID_Data(idx,2) && cond==4
-                append1=append1(:,1:ID_Data(idx,end));
-            end
-            % create distribution after rejecting last 10% of the trial
-            data=append1(:,1:round(0.9*size(append1,2)));
-            toremove=mod(size(data,2),obsvFrames);
-            data1=data(:,1:end-toremove);
+subplot(1,2,2);
+plot(obsvTime, wsdist14, 'linewidth', 2);
+set(gca, 'fontsize', 16);
+xlabel('observation time (s)');
+ylabel('WS distance');
+legend(features)
 
-            % data operation
-            data1=data1; % use data as is
-            data=mean(reshape(data1, [], obsvFrames),2);
 
-            dstr{cond}=[dstr{cond}, data'];
-        end
+% uncomment after running once and setting obsvTime to the one that gives
+% the best estimate
+% save(sprintf('pdist_tau=%ds.mat', obsvTime), 'p_dist', 'x_dist');
+
+
+
+function [kldist14, wsdist14]=calc_pdf_dist(pdata, x)
+
+% Wasserstein distance
+WSdist=zeros(4);
+for ii=[1,4]
+    for jj=ii+1:4
+        WSdist(ii,jj)=ws_distance(pdata(:,ii), pdata(:,jj));
     end
 end
 
+wsdist14=WSdist(1,4);
 
-function dstr=extract_dist_data(obsvTime,ID_Data, ...
-    dtTrack, dtCommand,nameFolds)
-
-    obsvFrames=obsvTime/dtTrack;
-    type='EKFtraj';
-    % concatenate data into each 
-    for cond=1:4
-        dstr{cond}=[];
-        for ii=1:size(nameFolds,1)
-            append1=csvread(['../data/FILTERED/', ...
-                nameFolds{ii}, '/', type, '_condition_', num2str(cond), '.csv']);
-            idx=ID_Data(:,1)==str2double(nameFolds{ii});
-            [r,c]=size(append1);
-            % to keep everything consistent
-            if r>c, append1=append1'; end 
-            append1=append1(1:2,:);
-            if ID_Data(idx,2) && cond==4
-                append1=append1(:,1:ID_Data(idx,end));
-            end
-            % create distribution after rejecting last 10% of the trial
-            data=append1(:,1:round(0.9*size(append1,2)));
-            toremove=mod(size(data,2)-1,obsvFrames); % because of diff
-            data1=data(:,1:end-toremove); 
-
-            % data operation
-            data1=sqrt(sum(diff(data1,1,2).^2,1)); % use data as is
-            data=sum(reshape(data1, [], obsvFrames),2);
-
-            dstr{cond}=[dstr{cond}, data'];
-        end
+% KL Divergence
+KLdist=zeros(4);
+for ii=1:4
+    for jj=ii+1:4
+        KLdist(ii,jj)=kldiv(pdata(:,ii), pdata(:,jj));
     end
 end
+KLdist
+kldist14=KLdist(1,4);
 
-function dstr=extract_turnrate_data(obsvTime,ID_Data, ...
-    dtTrack, dtCommand,nameFolds)
+title(sprintf('WD=%.3f, KLD=%.2f', ...
+    wsdist14, kldist14), 'fontweight', 'normal');
 
-    obsvFrames=obsvTime/dtTrack;
-    type='EKFom';
-    % concatenate data into each 
-    for cond=1:4
-        dstr{cond}=[];
-        for ii=1:size(nameFolds,1)
-            append1=csvread(['../data/FILTERED/', ...
-                nameFolds{ii}, '/', type, '_condition_', num2str(cond), '.csv']);
-            idx=ID_Data(:,1)==str2double(nameFolds{ii});
-            [r,c]=size(append1);
-            % to keep everything consistent
-            if r>c, append1=append1'; end 
-            if ID_Data(idx,2) && cond==4
-                append1=append1(:,1:ID_Data(idx,end));
-            end
-            % create distribution after rejecting last 10% of the trial
-            data=append1(:,1:round(0.9*size(append1,2)));
-            toremove=mod(size(data,2),obsvFrames); % because of diff
-            data1=abs(data(:,1:end-toremove)); 
-
-            % data operation
-            data=mean(reshape(data1, [], obsvFrames),2);
-
-            dstr{cond}=[dstr{cond}, data'];
-        end
-    end
 end
 
-function dstr=extract_angle_data(obsvTime,ID_Data, ...
-    dtTrack, dtCommand,nameFolds)
 
-    obsvFrames=obsvTime/dtTrack;
-    type='EKFtraj';
-    % concatenate data into each 
-    for cond=1:4
-        dstr{cond}=[];
-        for ii=1:size(nameFolds,1)
-            append1=csvread(['../data/FILTERED/', ...
-                nameFolds{ii}, '/', type, '_condition_', num2str(cond), '.csv']);
-            idx=ID_Data(:,1)==str2double(nameFolds{ii});
-            [r,c]=size(append1);
-            % to keep everything consistent
-            if r>c, append1=append1'; end 
-            append1=append1(3,:);
-            if ID_Data(idx,2) && cond==4
-                append1=append1(:,1:ID_Data(idx,end));
-            end
-            % create distribution after rejecting last 10% of the trial
-            data=append1(:,1:round(0.9*size(append1,2)));
-            toremove=mod(size(data,2)-1,obsvFrames); % because of diff
-            data1=data(:,1:end-toremove); 
 
-            % data operation
-            data1=abs(asin(sin(diff(data1,1,2)))); 
-            data=sum(reshape(data1, [], obsvFrames),2);
 
-            dstr{cond}=[dstr{cond}, data'];
-        end
-    end
-end
 
-function dstr=extract_freezing_data(obsvTime,ID_Data, ...
-    dtTrack, dtCommand,nameFolds)
 
-    obsvFrames=obsvTime/dtTrack;
-    type1='EKFVel'; type2='EKFom';
-    % concatenate data into each 
-    for cond=1:4
-        dstr{cond}=[];
-        for ii=1:size(nameFolds,1)
-            % speed
-            append1=csvread(['../data/FILTERED/', ...
-                nameFolds{ii}, '/', type1, '_condition_', num2str(cond), '.csv']);
-            idx=ID_Data(:,1)==str2double(nameFolds{ii});
-            [r,c]=size(append1);
-            % to keep everything consistent
-            if r>c, append1=append1'; end 
-            if ID_Data(idx,2) && cond==4
-                append1=append1(:,1:ID_Data(idx,end));
-            end
-            % create distribution after rejecting last 10% of the trial
-            data=append1(:,1:round(0.9*size(append1,2)));
-            toremove=mod(size(data,2),obsvFrames);
-            data1=data(:,1:end-toremove);
 
-            % data operation
-            speed_data=reshape(data1, [], obsvFrames);
-            
-            
-            % turn rate
-            append2=csvread(['../data/FILTERED/', ...
-                nameFolds{ii}, '/', type2, '_condition_', num2str(cond), '.csv']);
-            idx=ID_Data(:,1)==str2double(nameFolds{ii});
-            [r,c]=size(append2);
-            % to keep everything consistent
-            if r>c, append2=append2'; end 
-            if ID_Data(idx,2) && cond==4
-                append2=append2(:,1:ID_Data(idx,end));
-            end
-            % create distribution after rejecting last 10% of the trial
-            data=append2(:,1:round(0.9*size(append1,2)));
-            toremove=mod(size(data,2),obsvFrames);
-            data2=abs(data(:,1:end-toremove));
 
-            % data operation
-            tr_data=reshape(data2, [], obsvFrames);
 
-            freezing_fraction=sum(speed_data<0.1 & tr_data<0.1,2)/obsvFrames;
-            dstr{cond}=[dstr{cond}, freezing_fraction'];
-        end
-    end
-end
 

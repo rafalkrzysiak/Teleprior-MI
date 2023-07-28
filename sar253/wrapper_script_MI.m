@@ -5,11 +5,30 @@ function wrapper_script_MI
 % -- Written by: Rafal Krzysiak
 
 % -- setup the variables that will be passed into the pf MI script
-rng(2);
+% rng(2); Seed only if debugging
 
 % -- get the list of participants
-ids = ls("data/FILTERED"); % -- get all in the folder
-ids = ids(3:end-1,1:4); % -- reformat to only have the numbers
+% ids = ls("../data/FILTERED"); % -- get all in the folder
+% ids = ids(3:end-1,1:4); % -- reformat to only have the numbers
+
+addpath ../src
+ID_Data=csvread('../src/IDList_Completed.csv',1,0);
+
+% here we create the test/train scenario 
+% use 26 randomly selected ids to create pdistr and xdistr and run it on 3
+% remaining ones only
+numSubjects=size(ID_Data,1);
+idsall=randperm(numSubjects);
+
+num_train=floor(0.9*numSubjects);
+
+ids_train=ID_Data(idsall(1:num_train),:);
+ids_test=ID_Data(idsall(num_train+1:numSubjects),:);
+
+% tau should be param.tau but for that paramconfig should be called outside
+% the for loop--can we do that?
+tau=20;
+[pdstr, xdstr]=calc_pdf_feature(tau, ids_train);
 
 % -- initialize the parameters of the simulation
 % [param, maps, folder, bias, share_info, target_locations, agents, file_id] = ...
@@ -94,22 +113,22 @@ for env = 1:size(maps,2) % -- looping through every environment
 
                     for t_pos = 1:size(target_locations,1)
 
-                        for participant = 1:size(ids, 1)
+                        for participant = 1:size(ids_test, 1)
                             for exp_cond = 1:size(conds, 2)
 
                                 % -- initialize the parameters of the simulation
                                 [param, maps, folder, bias, share_info, target_locations, agents, file_id] = ...
-                                    ParamConfig(ids(participant, :), conds(exp_cond));
+                                    ParamConfig(num2str(ids_test(participant, 1)), conds(exp_cond));
 
                                 % -- store the number of agents to be simulated in the params struct
                                 param.agents = agents(robot);
 
                                 % -- display information about the simulation
                                 fprintf('Map:%s \nParticipant:%s, condition:%d\n', ...
-                                                         maps(env), ids(participant,:), conds(exp_cond));
+                                                         maps(env), num2str(ids_test(participant,1)), conds(exp_cond));
         
                                 % -- create a new directory to hold all information about the simulation
-                                saveIn = strcat(robot_folder, ids(participant,:), "/condition_", num2str(conds(exp_cond)), "/");
+                                saveIn = strcat(robot_folder, num2str(ids_test(participant,1)), "/condition_", num2str(conds(exp_cond)), "/");
                                 saveFrames = strcat(saveIn, "frames/");
                                 directory = mkdir(saveIn);
                                 frames = mkdir(saveFrames);
@@ -117,7 +136,7 @@ for env = 1:size(maps,2) % -- looping through every environment
                                 % -- call the mutual inforation pf simulation matlab script
                                 infoseek2Db_multi_robot(param, img, saveIn, maps(env), ...
                                                         saveFrames, target_locations(t_pos,:),...
-                                                        ids(participant,:), exp_cond);
+                                                        num2str(ids_test(participant,1)), exp_cond);
                             end
                         end
 

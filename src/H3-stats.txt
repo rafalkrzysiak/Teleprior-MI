@@ -11,12 +11,19 @@ tbl_data =
     {'Error'  }    {[18.4286]}    {[26]}
     {'Total'  }    {[     28]}    {[41]}
 
-  Columns 4 through 6
+  Columns 4 through 5
 
-    {'MS'      }    {'Chi-sq'  }    {'Prob>Chi-sq'}
-    {[  4.7857]}    {[  9.5714]}    {[     0.0083]}
-    {[  0.7088]}    {0×0 double}    {0×0 double   }
-    {0×0 double}    {0×0 double}    {0×0 double   }
+    {'MS'      }    {'Chi-sq'  }
+    {[  4.7857]}    {[  9.5714]}
+    {[  0.7088]}    {0×0 double}
+    {0×0 double}    {0×0 double}
+
+  Column 6
+
+    {'Prob>Chi-sq'}
+    {[     0.0083]}
+    {0×0 double   }
+    {0×0 double   }
 
 
 res_data =
@@ -46,12 +53,19 @@ tbl_data =
     {'Error'  }    {[    27]}    {[26]}
     {'Total'  }    {[    28]}    {[41]}
 
-  Columns 4 through 6
+  Columns 4 through 5
 
-    {'MS'      }    {'Chi-sq'  }    {'Prob>Chi-sq'}
-    {[  0.5000]}    {[  1.0000]}    {[     0.6065]}
-    {[  1.0385]}    {0×0 double}    {0×0 double   }
-    {0×0 double}    {0×0 double}    {0×0 double   }
+    {'MS'      }    {'Chi-sq'  }
+    {[  0.5000]}    {[  1.0000]}
+    {[  1.0385]}    {0×0 double}
+    {0×0 double}    {0×0 double}
+
+  Column 6
+
+    {'Prob>Chi-sq'}
+    {[     0.6065]}
+    {0×0 double   }
+    {0×0 double   }
 
 [Commanded speed (m/s)] 
 
@@ -66,12 +80,19 @@ tbl_data =
     {'Error'  }    {[    25]}    {[26]}
     {'Total'  }    {[    28]}    {[41]}
 
-  Columns 4 through 6
+  Columns 4 through 5
 
-    {'MS'      }    {'Chi-sq'  }    {'Prob>Chi-sq'}
-    {[  1.5000]}    {[  3.0000]}    {[     0.2231]}
-    {[  0.9615]}    {0×0 double}    {0×0 double   }
-    {0×0 double}    {0×0 double}    {0×0 double   }
+    {'MS'      }    {'Chi-sq'  }
+    {[  1.5000]}    {[  3.0000]}
+    {[  0.9615]}    {0×0 double}
+    {0×0 double}    {0×0 double}
+
+  Column 6
+
+    {'Prob>Chi-sq'}
+    {[     0.2231]}
+    {0×0 double   }
+    {0×0 double   }
 
 [Commanded turn rate (rad/s)] 
 
@@ -86,27 +107,34 @@ tbl_data =
     {'Error'  }    {[19.8571]}    {[26]}
     {'Total'  }    {[     28]}    {[41]}
 
-  Columns 4 through 6
+  Columns 4 through 5
 
-    {'MS'      }    {'Chi-sq'  }    {'Prob>Chi-sq'}
-    {[  4.0714]}    {[  8.1429]}    {[     0.0171]}
-    {[  0.7637]}    {0×0 double}    {0×0 double   }
-    {0×0 double}    {0×0 double}    {0×0 double   }
+    {'MS'      }    {'Chi-sq'  }
+    {[  4.0714]}    {[  8.1429]}
+    {[  0.7637]}    {0×0 double}
+    {0×0 double}    {0×0 double}
+
+  Column 6
+
+    {'Prob>Chi-sq'}
+    {[     0.0171]}
+    {0×0 double   }
+    {0×0 double   }
 
 
 res_data =
 
-  Columns 1 through 5
+  Columns 1 through 4
 
-    1.0000    2.0000   -0.4763    0.4286    1.3334
-    1.0000    3.0000   -1.5477   -0.6429    0.2620
-    2.0000    3.0000   -1.9763   -1.0714   -0.1666
+    1.0000    2.0000   -0.4763    0.4286
+    1.0000    3.0000   -1.5477   -0.6429
+    2.0000    3.0000   -1.9763   -1.0714
 
-  Column 6
+  Columns 5 through 6
 
-    0.7705
-    0.2669
-    0.0138
+    1.3334    0.7705
+    0.2620    0.2669
+   -0.1666    0.0138
 
 [Fraction time spent staying in place] 
 
@@ -114,34 +142,41 @@ tbl_data =
 
   4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
 
-  Columns 1 through 4
+  Columns 1 through 3
 
-    {'Source' }    {'SS'}    {'df'}    {'MS'      }
-    {'Columns'}    {[ 7]}    {[ 2]}    {[  3.5000]}
-    {'Error'  }    {[21]}    {[26]}    {[  0.8077]}
-    {'Total'  }    {[28]}    {[41]}    {0×0 double}
+    {'Source' }    {'SS'}    {'df'}
+    {'Columns'}    {[ 7]}    {[ 2]}
+    {'Error'  }    {[21]}    {[26]}
+    {'Total'  }    {[28]}    {[41]}
 
-  Columns 5 through 6
+  Columns 4 through 5
 
-    {'Chi-sq'  }    {'Prob>Chi-sq'}
-    {[       7]}    {[     0.0302]}
-    {0×0 double}    {0×0 double   }
-    {0×0 double}    {0×0 double   }
+    {'MS'      }    {'Chi-sq'  }
+    {[  3.5000]}    {[       7]}
+    {[  0.8077]}    {0×0 double}
+    {0×0 double}    {0×0 double}
+
+  Column 6
+
+    {'Prob>Chi-sq'}
+    {[     0.0302]}
+    {0×0 double   }
+    {0×0 double   }
 
 
 res_data =
 
-  Columns 1 through 5
+  Columns 1 through 4
 
-    1.0000    2.0000    0.0952    1.0000    1.9048
-    1.0000    3.0000   -0.4048    0.5000    1.4048
-    2.0000    3.0000   -1.4048   -0.5000    0.4048
+    1.0000    2.0000    0.0952    1.0000
+    1.0000    3.0000   -0.4048    0.5000
+    2.0000    3.0000   -1.4048   -0.5000
 
-  Column 6
+  Columns 5 through 6
 
-    0.0245
-    0.5576
-    0.5576
+    1.9048    0.0245
+    1.4048    0.5576
+    0.4048    0.5576
 
 [Fraction time spent turning in place] 
 
@@ -149,19 +184,26 @@ tbl_data =
 
   4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
 
-  Columns 1 through 4
+  Columns 1 through 3
 
-    {'Source' }    {'SS'}    {'df'}    {'MS'      }
-    {'Columns'}    {[ 3]}    {[ 2]}    {[  1.5000]}
-    {'Error'  }    {[25]}    {[26]}    {[  0.9615]}
-    {'Total'  }    {[28]}    {[41]}    {0×0 double}
+    {'Source' }    {'SS'}    {'df'}
+    {'Columns'}    {[ 3]}    {[ 2]}
+    {'Error'  }    {[25]}    {[26]}
+    {'Total'  }    {[28]}    {[41]}
 
-  Columns 5 through 6
+  Columns 4 through 5
 
-    {'Chi-sq'  }    {'Prob>Chi-sq'}
-    {[       3]}    {[     0.2231]}
-    {0×0 double}    {0×0 double   }
-    {0×0 double}    {0×0 double   }
+    {'MS'      }    {'Chi-sq'  }
+    {[  1.5000]}    {[       3]}
+    {[  0.9615]}    {0×0 double}
+    {0×0 double}    {0×0 double}
+
+  Column 6
+
+    {'Prob>Chi-sq'}
+    {[     0.2231]}
+    {0×0 double   }
+    {0×0 double   }
 
 [Fraction time spent staying still] 
 
@@ -176,10 +218,17 @@ tbl_data =
     {'Error'  }    {[26.1429]}    {[26]}
     {'Total'  }    {[     28]}    {[41]}
 
-  Columns 4 through 6
+  Columns 4 through 5
 
-    {'MS'      }    {'Chi-sq'  }    {'Prob>Chi-sq'}
-    {[  0.9286]}    {[  1.8571]}    {[     0.3951]}
-    {[  1.0055]}    {0×0 double}    {0×0 double   }
-    {0×0 double}    {0×0 double}    {0×0 double   }
+    {'MS'      }    {'Chi-sq'  }
+    {[  0.9286]}    {[  1.8571]}
+    {[  1.0055]}    {0×0 double}
+    {0×0 double}    {0×0 double}
+
+  Column 6
+
+    {'Prob>Chi-sq'}
+    {[     0.3951]}
+    {0×0 double   }
+    {0×0 double   }
 

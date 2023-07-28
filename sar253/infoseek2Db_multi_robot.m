@@ -1,5 +1,6 @@
 function infoseek2Db_multi_robot(param, img, saveIn, maps, ...
-                                saveFrames, target_loc, exp_id, condition)
+                                saveFrames, target_loc, exp_id, condition, ...
+                                pdstr, xdstr)
 
 % preset values when not running this script from another script
 if nargin < 1
@@ -106,7 +107,9 @@ result = time;
 % -- Load the pdist.mat file created from the analysis portion of the 
 % -- Human-subjects-experiment. We will be using this .mat file multiple
 % -- times, best to pull it prior to running the simulations
-Exp = load('../src/pdist_tau=15s.mat');
+% instead of calling this here, pass this directly from the wrapper script
+% commenting this line below and passing Exp as argument -SB
+% Exp = load('../src/pdist_tau=15s.mat');
 
 % -- Pull list of 
 
@@ -433,8 +436,21 @@ for jj=1:param.nsim
                 
                 % -- begin alpha caluclation based on distance traveled 
                 % -- by reference robot within the environment
-                [alpha(k+1,1), TotalDist(k, 1, robot), pDxMxT(k+1,1), pDyMyT(k+1,1)] = UpdateAlpha(d, Exp.p_dist, Exp.x_dist, k, param, alpha(k,1), condition);
-                
+                % feature is distance but could be anything e.g. turn rate,
+                % fraction of time spent staying in place, which is why we
+                % update the function to work on features instead of
+                % distance
+                if k > 2*param.tau+3
+                    feature_k = sum(d(k-2*param.tau:k, 1));
+
+                    [alpha(k+1,1), pDxMxT(k+1,1), pDyMyT(k+1,1)] = ...
+                        UpdateAlpha(feature_k, pdistr, xdistr, alpha(k,1));
+                else
+                    % move this out of UpdateAlpha
+                    alpha(k+1,1)=param.alphaBegin;
+                    pDxMxT(k+1,1)=0.00001;
+                    pDyMyT(k+1,1)=0.00001;
+                end
                 % maximize mutual rb_information
     %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, eta, hfun, om, r_visible);
     %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, om, lfn);
