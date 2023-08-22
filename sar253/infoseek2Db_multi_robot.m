@@ -193,9 +193,6 @@ for jj=1:param.nsim
         
         Xh(:,1,1,r)=mean(p(:,:,1,r),2);
         if r == 1
-            if condition == 2
-                condition = 4;
-            end
             [Xs(1:3,:,1,r), ~, ~]=RobotExperimentDataSet(exp_id, condition);
             Xs(4:5,1,1,r)=X0(4:5,:,1,r);
         else
@@ -444,7 +441,7 @@ for jj=1:param.nsim
                     feature_k = sum(d(k-2*param.tau:k, 1));
 
                     [alpha(k+1,1), pDxMxT(k+1,1), pDyMyT(k+1,1)] = ...
-                        UpdateAlpha(feature_k, pdistr, xdistr, alpha(k,1));
+                        UpdateAlpha(feature_k, pdstr, xdstr, alpha(k,1));
                 else
                     % move this out of UpdateAlpha
                     alpha(k+1,1)=param.alphaBegin;
@@ -462,7 +459,7 @@ for jj=1:param.nsim
 
                 vel(1,k,1,robot)=param.vel0;
             end
-            
+            te
             % -- get the range and bearing rb_information for every fiducial
             % -- for every robot in the simulation
 %             for marker = 1:size(fiducial,1)

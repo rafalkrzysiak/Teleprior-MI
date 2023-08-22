@@ -10,20 +10,17 @@ function PostProcessSimExperiment()
 clear all variables
 
 % -- import the data saved
-SimExp = ImportAllData();
+%SimExp = ImportAllData();
 
-% -- plot which robot found the missing target
-% PlotWhoFoundTarget(SimExp);
+% -- plot which robot found the missing target 
+%PlotWhoFoundTarget(SimExp);
+PlotWhoFoundTarget_testSet();
 
 % -- plot all trajectories 
-PlotAllTraj(SimExp)
-<<<<<<< HEAD
+%PlotAllTraj(SimExp)
 
 % -- plot all the timeseries alpha values
 % PlotTransientAlpha(SimExp);
-=======
->>>>>>> parent of 36ac426 (Data captured)
-
 end
 
 function SimExp = ImportAllData()
@@ -86,6 +83,158 @@ for cond = 1:Nc
     ax = gca; 
     ax.FontSize = 16;
 end
+
+end
+
+function PlotWhoFoundTarget_testSet()
+
+% -- define the conditions tested
+conditions = ["condition_1",...
+              "condition_2",...
+              "condition_3",...
+              "condition_4"];
+
+% -- define the mat file name used for all participants
+Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
+
+% -- pull list of test folders within test folder
+parentDir = "data/test";
+parentDir_RW = "data/RandomWalk";
+files = dir(parentDir);
+RW_files = dir(parentDir_RW);
+
+% -- initialize the counter
+i = 1; 
+
+% -- begin looping through each test folder
+for test = 1:size(files, 1)
+
+    % -- make sure that we capture a number not '.' or '..'
+    if (files(test).name ~= "." && files(test).name ~= "..")
+        
+        % -- within the test number folder, get the participant numbers
+        subDir = strcat(parentDir, "/", files(test).name);
+        participant_folders = dir(subDir);
+        
+        % -- begin looping through all the participant folders
+        for participant = 1:size(participant_folders, 1)
+            % -- make sure that we capture a number not '.' or '..'
+            if (participant_folders(participant).name ~= "." && participant_folders(participant).name ~= "..")
+            
+                % -- create participant directory
+                partDir = strcat(subDir,"/",participant_folders(participant).name);
+    
+                % -- begin looping through all conditions tested
+                for cond = 1:size(conditions, 2)
+    
+                    % -- create condition directory
+                    condDir = strcat(partDir, "/", conditions(cond));
+                    condFile = strcat(condDir, "/", Matfile);
+    
+                    % -- read the data captured for the test
+                    TestData = load(condFile);
+                    WhichRobot(cond, i) = TestData.simdata.Which_robot;
+    
+                end
+                i = i + 1;
+            end
+        end
+    end
+end
+
+
+% -- begin looping through each test folder
+for RWtest = 1:size(RW_files, 1)
+
+    % -- make sure that we capture a number not '.' or '..'
+    if (RW_files(RWtest).name ~= "." && RW_files(RWtest).name ~= "..")
+        
+        % -- within the test number folder, get the participant numbers
+        RWsubDir = strcat(parentDir_RW, "/", RW_files(RWtest).name);
+        RWparticipant_folders = dir(RWsubDir);
+        
+        % -- begin looping through all the participant folders
+        for RWparticipant = 1:size(RWparticipant_folders, 1)
+            % -- make sure that we capture a number not '.' or '..'
+            if (RWparticipant_folders(RWparticipant).name ~= "." && RWparticipant_folders(RWparticipant).name ~= "..")
+            
+                % -- create participant directory
+                RWpartDir = strcat(RWsubDir,"/",RWparticipant_folders(RWparticipant).name);
+    
+                % -- begin looping through all conditions tested
+                for cond = 1:size(conditions, 2)
+    
+                    % -- create condition directory
+                    RWcondDir = strcat(RWpartDir, "/", conditions(cond));
+                    RWcondFile = strcat(RWcondDir, "/", Matfile);
+    
+                    % -- read the data captured for the test
+                    RWTestData = load(RWcondFile);
+                    RWWhichRobot(cond, i) = RWTestData.simdata.Which_robot;
+    
+                end
+                i = i + 1;
+            end
+        end
+    end
+end
+
+
+% -- store the data in a temperary and clean variables
+X = [1, 2];
+RWY1 = [sum(RWWhichRobot(1,:) == 0), sum(RWWhichRobot(1,:) == 2) + sum(RWWhichRobot(1,:) == 3)];
+RWY2 = [sum(RWWhichRobot(2,:) == 0), sum(RWWhichRobot(2,:) == 2) + sum(RWWhichRobot(2,:) == 3)];
+RWY3 = [sum(RWWhichRobot(3,:) == 0), sum(RWWhichRobot(3,:) == 2) + sum(RWWhichRobot(3,:) == 3)];
+RWY4 = [sum(RWWhichRobot(4,:) == 0), sum(RWWhichRobot(4,:) == 2) + sum(RWWhichRobot(4,:) == 3)];
+
+% -- create figure
+figure(1); clf; gcf;
+
+% -- plot bar graph and make it look nice
+subplot(2,2,1); bar(X, Y1);
+text(1:length(X),Y1',num2str(Y1'),'vert','bottom','horiz','center','FontSize',16);
+xlabel("Robot");
+ylabel({"Number of times target";"was found by robot"});
+title("Condition: 1");
+
+% -- set figure parameters
+ax = gca; 
+ax.FontSize = 16;
+xticklabels({'Ref robot','auto robot'});
+
+subplot(2,2,2); bar(X, Y2);
+text(1:length(X),Y2',num2str(Y2'),'vert','bottom','horiz','center','FontSize',16);
+xlabel("Robot");
+ylabel({"Number of times target";"was found by robot"});
+title("Condition: 2");
+
+% -- set figure parameters
+ax = gca; 
+ax.FontSize = 16;
+xticklabels({'Ref robot','auto robot'});
+
+
+subplot(2,2,3); bar(X, Y3);
+text(1:length(X),Y3',num2str(Y3'),'vert','bottom','horiz','center','FontSize',16);
+xlabel("Robot");
+ylabel({"Number of times target";"was found by robot"});
+title("Condition: 3");
+
+% -- set figure parameters
+ax = gca; 
+ax.FontSize = 16;
+xticklabels({'Ref robot','auto robot'});
+
+subplot(2,2,4); bar(X, Y4);
+text(1:length(X),Y4',num2str(Y4'),'vert','bottom','horiz','center','FontSize',16);
+xlabel("Robot");
+ylabel({"Number of times target";"was found by robot"});
+title("Condition: 4");
+
+% -- set figure parameters
+ax = gca; 
+ax.FontSize = 16;
+xticklabels({'Ref robot','auto robot'});
 
 end
 

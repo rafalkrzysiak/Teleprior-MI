@@ -6,8 +6,8 @@ function [param, maps, folder, bias, share_info, target_locations, agents, file_
 param.dt = 0.5; % -- timestep (s)
 [~, param.T, tloc, file_id] = RobotExperimentDataSet(exp_id, cond); %2500/param.dt; % -- max time (s)
 param.N = 1200; % -- number of particles in the simulation
-param.nsim = 10; % -- number of simulations per combination
-param.closedloop = 1; % -- flag for enabling/disabling MI
+param.nsim = 1; % -- number of simulations per combination
+param.closedloop = 0; % -- flag for enabling/disabling MI
 param.debug = 0; % -- flag for enabling/disabling debug plots
 agents = 3; % -- number of agents in the simulation including the human robot
 param.r_visible = 1.5*ones(1,agents); % -- visible range of the robots (m), human robot has slightly higher range % 4 -> 2
@@ -24,9 +24,10 @@ bias = [0]; % -- flag for enabling/disabling bias of the human operated robot
 param.norm = 1;
 share_info = 1;
 param.alphaBegin = 0.5; 
-param.tau = 15;
+param.tau = 20;
 param.share = 1;
 param.bias = 0;
+param.agents = 3; % -- define the total number of robots to be in the domain
 
 [~, param.L]=robot_position(maps(1), zeros(1,2));
 
