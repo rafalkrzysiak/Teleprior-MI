@@ -144,48 +144,48 @@ end
 
 
 % -- begin looping through each test folder
-for RWtest = 1:size(RW_files, 1)
-
-    % -- make sure that we capture a number not '.' or '..'
-    if (RW_files(RWtest).name ~= "." && RW_files(RWtest).name ~= "..")
-        
-        % -- within the test number folder, get the participant numbers
-        RWsubDir = strcat(parentDir_RW, "/", RW_files(RWtest).name);
-        RWparticipant_folders = dir(RWsubDir);
-        
-        % -- begin looping through all the participant folders
-        for RWparticipant = 1:size(RWparticipant_folders, 1)
-            % -- make sure that we capture a number not '.' or '..'
-            if (RWparticipant_folders(RWparticipant).name ~= "." && RWparticipant_folders(RWparticipant).name ~= "..")
-            
-                % -- create participant directory
-                RWpartDir = strcat(RWsubDir,"/",RWparticipant_folders(RWparticipant).name);
-    
-                % -- begin looping through all conditions tested
-                for cond = 1:size(conditions, 2)
-    
-                    % -- create condition directory
-                    RWcondDir = strcat(RWpartDir, "/", conditions(cond));
-                    RWcondFile = strcat(RWcondDir, "/", Matfile);
-    
-                    % -- read the data captured for the test
-                    RWTestData = load(RWcondFile);
-                    RWWhichRobot(cond, i) = RWTestData.simdata.Which_robot;
-    
-                end
-                i = i + 1;
-            end
-        end
-    end
-end
-
-
+% for RWtest = 1:size(RW_files, 1)
+% 
+%     % -- make sure that we capture a number not '.' or '..'
+%     if (RW_files(RWtest).name ~= "." && RW_files(RWtest).name ~= "..")
+%         
+%         % -- within the test number folder, get the participant numbers
+%         RWsubDir = strcat(parentDir_RW, "/", RW_files(RWtest).name);
+%         RWparticipant_folders = dir(RWsubDir);
+%         
+%         % -- begin looping through all the participant folders
+%         for RWparticipant = 1:size(RWparticipant_folders, 1)
+%             % -- make sure that we capture a number not '.' or '..'
+%             if (RWparticipant_folders(RWparticipant).name ~= "." && RWparticipant_folders(RWparticipant).name ~= "..")
+%             
+%                 % -- create participant directory
+%                 RWpartDir = strcat(RWsubDir,"/",RWparticipant_folders(RWparticipant).name);
+%     
+%                 % -- begin looping through all conditions tested
+%                 for cond = 1:size(conditions, 2)
+%     
+%                     % -- create condition directory
+%                     RWcondDir = strcat(RWpartDir, "/", conditions(cond));
+%                     RWcondFile = strcat(RWcondDir, "/", Matfile);
+%     
+%                     % -- read the data captured for the test
+%                     RWTestData = load(RWcondFile);
+%                     RWWhichRobot(cond, i) = RWTestData.simdata.Which_robot;
+%     
+%                 end
+%                 i = i + 1;
+%             end
+%         end
+%     end
+% end
+% 
+% 
 % -- store the data in a temperary and clean variables
 X = [1, 2];
-RWY1 = [sum(RWWhichRobot(1,:) == 0), sum(RWWhichRobot(1,:) == 2) + sum(RWWhichRobot(1,:) == 3)];
-RWY2 = [sum(RWWhichRobot(2,:) == 0), sum(RWWhichRobot(2,:) == 2) + sum(RWWhichRobot(2,:) == 3)];
-RWY3 = [sum(RWWhichRobot(3,:) == 0), sum(RWWhichRobot(3,:) == 2) + sum(RWWhichRobot(3,:) == 3)];
-RWY4 = [sum(RWWhichRobot(4,:) == 0), sum(RWWhichRobot(4,:) == 2) + sum(RWWhichRobot(4,:) == 3)];
+Y1 = [sum(WhichRobot(1,:) == 0), sum(WhichRobot(1,:) == 2) + sum(WhichRobot(1,:) == 3)];
+Y2 = [sum(WhichRobot(2,:) == 0), sum(WhichRobot(2,:) == 2) + sum(WhichRobot(2,:) == 3)];
+Y3 = [sum(WhichRobot(3,:) == 0), sum(WhichRobot(3,:) == 2) + sum(WhichRobot(3,:) == 3)];
+Y4 = [sum(WhichRobot(4,:) == 0), sum(WhichRobot(4,:) == 2) + sum(WhichRobot(4,:) == 3)];
 
 % -- create figure
 figure(1); clf; gcf;
