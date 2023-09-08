@@ -455,7 +455,7 @@ for jj=1:param.nsim
                      O_MI(k, p, wts, bin_map, Z(:,k,1,:), robot, Zr(:,k,1,:), alpha(k+1,1));
             else
                 % 1 or -1 with equal probability
-                omega(1,k,1,robot)=-0.25+0.5*rand; %param.omega0+0.1*randn; 
+                omega(1,k,1,robot)=0.5*rand-0.25; %param.omega0+0.1*randn; 
 
                 vel(1,k,1,robot)=param.vel0;
             end

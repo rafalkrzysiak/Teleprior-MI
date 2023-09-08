@@ -28,7 +28,7 @@ elseif maps == "OmronLab"
 %     X0(:,:,1,1) = [10 4 pi/2 target_loc(1) target_loc(2)]'; % complex_map
      X0(:,:,1,1) = [8 4 -pi+rand*2*pi target_loc(1) target_loc(2)]'; % complex_map
      X0(:,:,1,2) = [7 4 -pi+rand*2*pi target_loc(1) target_loc(2)]'; % complex_map
-     X0(:,:,1,3) = [5 4 -pi+rand*2*pi target_loc(1) target_loc(2)]'; % complex_map
+     X0(:,:,1,3) = [9 4 -pi+rand*2*pi target_loc(1) target_loc(2)]'; % complex_map
      X0(:,:,1,4) = [12 4 -pi+rand*2*pi target_loc(1) target_loc(2)]'; % complex_map
      X0(:,:,1,5) = [8 4 -pi+rand*2*pi target_loc(1) target_loc(2)]'; % complex_map
 end

@@ -53,5 +53,5 @@ param.w = diag([.1, .1, .01, .05, .05, .4, .4]); % -- disturbance
 param.v=linspace(0,.833,3);
 param.om=linspace(-.25,.25,3);
 param.omega0 = randn*.15;
-param.vel0 =.2+rand*.1;
+param.vel0 =0.1215+rand*0.05;
 end
