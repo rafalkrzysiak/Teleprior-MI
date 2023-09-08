@@ -17,12 +17,14 @@ clear all variables
 % PlotWhoFoundTarget_testSet();
 
 % -- plot all trajectories 
-%PlotAllTraj(SimExp)
-% PlotTrajTestDataSet()
-PlotRWControls()
+%PlotAllTraj(SimExp);
+% PlotTrajTestDataSet();
+% PlotRWControls();
+ControlInputMapped();
 
 % -- plot all the timeseries alpha values
 % PlotTransientAlpha(SimExp);
+% GetAverageVelocityExp();
 end
 
 function SimExp = ImportAllData()
@@ -738,4 +740,153 @@ for i = 1:Np
 end
 
 end
+
+function ControlInputMapped()
+
+% -- define the conditions tested
+conditions = ["condition_1",...
+              "condition_2",...
+              "condition_3",...
+              "condition_4"];
+
+% -- define the mat file name used for all participants
+Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
+
+% -- pull list of test folders within test folder
+parentDir_RW = "data/RandomWalk";
+RW_files = dir(parentDir_RW);
+
+% -- define the domain size
+L= [18 9];
+
+
+% -- begin looping through each test folder
+for RWtest = 1:size(RW_files, 1)
+
+    % -- make sure that we capture a number not '.' or '..'
+    if (RW_files(RWtest).name ~= "." && RW_files(RWtest).name ~= "..")
+        
+        % -- within the test number folder, get the participant numbers
+        RWsubDir = strcat(parentDir_RW, "/", RW_files(RWtest).name);
+        RWparticipant_folders = dir(RWsubDir);
+        
+        % -- begin looping through all the participant folders
+        for RWparticipant = 1:size(RWparticipant_folders, 1)
+            % -- make sure that we capture a number not '.' or '..'
+            if (RWparticipant_folders(RWparticipant).name ~= "." && RWparticipant_folders(RWparticipant).name ~= "..")
+            
+                % -- create participant directory
+                RWpartDir = strcat(RWsubDir,"/",RWparticipant_folders(RWparticipant).name);
+    
+                % -- begin looping through all conditions tested
+                for cond = 1:size(conditions, 2)
+    
+                    % -- create condition directory
+                    RWcondDir = strcat(RWpartDir, "/", conditions(cond));
+                    RWcondFile = strcat(RWcondDir, "/", Matfile);
+    
+                    % -- read the data captured for the test
+                    RWTestData = load(RWcondFile);
+                    
+                    % -- create the figure
+                    figure(1); clf; gcf;
+                    
+
+                    % -- loop through the simulation
+                    for k = 1:RWTestData.simdata.time
+                        % -- display the Omron Lab map
+                        subplot(2,2,[1,2]);
+                        hold on; imagesc([0 L(1)],[0 L(2)], RWTestData.img); 
+                        set(gca,'ydir','reverse');
+                        axis image;
+
+                        % -- plot the position of the robots in the domain
+                        hold on; plot(RWTestData.simdata.Xs(1,k,1,1), RWTestData.simdata.Xs(2,k,1,1), ...
+                                      'k.', MarkerSize=36); % -- ref robot position
+                        hold on; plot(RWTestData.simdata.Xs(1,k,1,2), RWTestData.simdata.Xs(2,k,1,2), ...
+                                      'r.', MarkerSize=36); % -- Auto 1 robot position
+                        hold on; plot(RWTestData.simdata.Xs(1,k,1,3), RWTestData.simdata.Xs(2,k,1,3), ...
+                                      'g.', MarkerSize=36); % -- Auto 2 robot position
+
+                        % -- In the next subplot, plot the velocities of the robots over time
+                        subplot(2,2,3);
+                        hold on; plot(RWTestData.simdata.vel(1,1:k,1,1), ...
+                                      'k-', LineWidth=2); % -- ref robot velocity
+                        hold on; plot(RWTestData.simdata.vel(1,1:k,1,2), ...
+                                      'r-', LineWidth=2); % -- Auto 1 robot velocity
+                        hold on; plot(RWTestData.simdata.vel(1,1:k,1,3), ...
+                                      'g-', LineWidth=2); % -- Auto 2 robot velocity
+                        xlabel('Time step');
+                        ylabel('Velocity (m/s)');
+
+                        % -- In the next subplot, plot the turn rates of the robots over time
+                        subplot(2,2,4);
+                        hold on; plot(RWTestData.simdata.omega(1,1:k,1,1), ...
+                                      'k-', LineWidth=2); % -- ref robot turn rate
+                        hold on; plot(RWTestData.simdata.omega(1,1:k,1,2), ...
+                                      'r-', LineWidth=2); % -- Auto 1 robot turn rate
+                        hold on; plot(RWTestData.simdata.omega(1,1:k,1,3), ...
+                                      'g-', LineWidth=2); % -- Auto 2 robot turn rate
+
+                        xlabel('Time step');
+                        ylabel('Turn rate (rad/s)');
+                        pause(0.1);
+                    end
+                
+                end
+                i = i + 1;
+            end
+        end
+    end
+end
+end
+
+function GetAverageVelocityExp()
+
+% -- Define folder locations where data is kept
+loc = "data/FILTERED/";
+
+% -- get the ID list
+ID_Data=csvread('../src/IDList_Completed.csv',1,0);
+
+% -- define the Velocity file name for each condition
+condfiles = ["/EKFVel_condition_1.csv",...
+             "/EKFVel_condition_2.csv",...
+             "/EKFVel_condition_3.csv",...
+             "/EKFVel_condition_4.csv"];
+
+% -- create 1D array to contain all velocity data for all participants
+% -- and conditions ran during the experiment
+Velocity = zeros(1, size(condfiles, 2)*size(ID_Data,1));
+
+i = 1; % -- counter
+
+% -- loop through all participants
+for participant = 1:size(ID_Data,1)
+    % -- loop through each condition
+    for cond = 1:size(condfiles, 2)
+        % -- create str that points to the csv file where data is stored
+        VelFile = strcat(loc, num2str(ID_Data(participant,1)), condfiles(cond));
+
+        % -- pull the data
+        VelData = csvread(VelFile);
+
+        % -- collect the averaged out veloctiy data
+        Velocity(i) = mean(VelData);
+
+        i = i + 1;
+    end
+end
+
+% -- get the total average velocity data
+TotalMeanVel = mean(Velocity);
+
+% -- plot the average teleoperated velocity distributions
+%figure(1); clf; gcf;
+
+%scatter(Velocity);
+
+
+end
+
 
