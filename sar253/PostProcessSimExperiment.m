@@ -759,12 +759,15 @@ RW_files = dir(parentDir_RW);
 % -- define the domain size
 L= [18 9];
 
+self_color = ["k", "r", "g"];
+r_pos = ["k.", "r.", "g."];
+r_vel = ["k-", "r-", "g-"];
 
 % -- begin looping through each test folder
 for RWtest = 1:size(RW_files, 1)
 
     % -- make sure that we capture a number not '.' or '..'
-    if (RW_files(RWtest).name ~= "." && RW_files(RWtest).name ~= "..")
+    if (RW_files(RWtest).name ~= "." && RW_files(RWtest).name ~= ".." && RW_files(RWtest).name ~= ".DS_Store")
         
         % -- within the test number folder, get the participant numbers
         RWsubDir = strcat(parentDir_RW, "/", RW_files(RWtest).name);
@@ -773,7 +776,7 @@ for RWtest = 1:size(RW_files, 1)
         % -- begin looping through all the participant folders
         for RWparticipant = 1:size(RWparticipant_folders, 1)
             % -- make sure that we capture a number not '.' or '..'
-            if (RWparticipant_folders(RWparticipant).name ~= "." && RWparticipant_folders(RWparticipant).name ~= "..")
+            if (RWparticipant_folders(RWparticipant).name ~= "." && RWparticipant_folders(RWparticipant).name ~= ".." && RWparticipant_folders(RWparticipant).name ~= ".DS_Store")
             
                 % -- create participant directory
                 RWpartDir = strcat(RWsubDir,"/",RWparticipant_folders(RWparticipant).name);
@@ -790,7 +793,6 @@ for RWtest = 1:size(RW_files, 1)
                     
                     % -- create the figure
                     figure(1); clf; gcf;
-                    
 
                     % -- loop through the simulation
                     for k = 1:RWTestData.simdata.time
@@ -799,37 +801,59 @@ for RWtest = 1:size(RW_files, 1)
                         hold on; imagesc([0 L(1)],[0 L(2)], RWTestData.img); 
                         set(gca,'ydir','reverse');
                         axis image;
+                        xlim([0 L(1)]);
+                        ylim([0 L(2)]);
 
-                        % -- plot the position of the robots in the domain
-                        hold on; plot(RWTestData.simdata.Xs(1,k,1,1), RWTestData.simdata.Xs(2,k,1,1), ...
-                                      'k.', MarkerSize=36); % -- ref robot position
-                        hold on; plot(RWTestData.simdata.Xs(1,k,1,2), RWTestData.simdata.Xs(2,k,1,2), ...
-                                      'r.', MarkerSize=36); % -- Auto 1 robot position
-                        hold on; plot(RWTestData.simdata.Xs(1,k,1,3), RWTestData.simdata.Xs(2,k,1,3), ...
-                                      'g.', MarkerSize=36); % -- Auto 2 robot position
-
-                        % -- In the next subplot, plot the velocities of the robots over time
-                        subplot(2,2,3);
-                        hold on; plot(RWTestData.simdata.vel(1,1:k,1,1), ...
-                                      'k-', LineWidth=2); % -- ref robot velocity
-                        hold on; plot(RWTestData.simdata.vel(1,1:k,1,2), ...
-                                      'r-', LineWidth=2); % -- Auto 1 robot velocity
-                        hold on; plot(RWTestData.simdata.vel(1,1:k,1,3), ...
-                                      'g-', LineWidth=2); % -- Auto 2 robot velocity
-                        xlabel('Time step');
-                        ylabel('Velocity (m/s)');
-
-                        % -- In the next subplot, plot the turn rates of the robots over time
-                        subplot(2,2,4);
-                        hold on; plot(RWTestData.simdata.omega(1,1:k,1,1), ...
-                                      'k-', LineWidth=2); % -- ref robot turn rate
-                        hold on; plot(RWTestData.simdata.omega(1,1:k,1,2), ...
-                                      'r-', LineWidth=2); % -- Auto 1 robot turn rate
-                        hold on; plot(RWTestData.simdata.omega(1,1:k,1,3), ...
-                                      'g-', LineWidth=2); % -- Auto 2 robot turn rate
-
-                        xlabel('Time step');
-                        ylabel('Turn rate (rad/s)');
+                        % -- plot the target location
+                        plot(RWTestData.simdata.Xs(4,1,1,1), RWTestData.simdata.Xs(5,1,1,1),...
+                                      "ms", MarkerSize=16, LineWidth=3);
+                        
+                        for r = 1:3
+                            subplot(2,2,[1,2]);
+                            % -- plot the position of the robots in the domain
+                            hold on; plot(RWTestData.simdata.Xs(1,k,1,r), RWTestData.simdata.Xs(2,k,1,r), ...
+                                          r_pos(r), MarkerSize=36); % -- ref robot position
+%                             hold on; plot(RWTestData.simdata.Xs(1,k,1,2), RWTestData.simdata.Xs(2,k,1,2), ...
+%                                           'r.', MarkerSize=36); % -- Auto 1 robot position
+%                             hold on; plot(RWTestData.simdata.Xs(1,k,1,3), RWTestData.simdata.Xs(2,k,1,3), ...
+%                                           'g.', MarkerSize=36); % -- Auto 2 robot position
+                            % -- plot the orientation vector
+                            line([RWTestData.simdata.Xs(1,k,1,r),...
+                                  RWTestData.simdata.Xs(1,k,1,r) + 3*cos(RWTestData.simdata.Xs(3,k,1,r)) ],...
+                                 [RWTestData.simdata.Xs(2,k,1,r), ...
+                                  RWTestData.simdata.Xs(2,k,1,r)+3*sin(RWTestData.simdata.Xs(3,k,1,r)) ],...
+                                 'color',self_color(r),'linestyle','-');
+                            ax = gca; 
+                            ax.FontSize = 18;
+    
+                            % -- In the next subplot, plot the velocities of the robots over time
+                            subplot(2,2,3);
+                            hold on; plot(RWTestData.simdata.vel(1,1:k,1,r), ...
+                                          r_vel(r), LineWidth=2); % -- ref robot velocity
+%                             hold on; plot(RWTestData.simdata.vel(1,1:k,1,2), ...
+%                                           'r-', LineWidth=2); % -- Auto 1 robot velocity
+%                             hold on; plot(RWTestData.simdata.vel(1,1:k,1,3), ...
+%                                           'g-', LineWidth=2); % -- Auto 2 robot velocity
+                            xlabel('Time step');
+                            ylabel('Velocity (m/s)');
+                            ax = gca; 
+                            ax.FontSize = 18;
+    
+                            % -- In the next subplot, plot the turn rates of the robots over time
+                            subplot(2,2,4);
+                            hold on; plot(RWTestData.simdata.omega(1,1:k,1,r), ...
+                                          r_vel(r), LineWidth=2); % -- ref robot turn rate
+%                             hold on; plot(RWTestData.simdata.omega(1,1:k,1,2), ...
+%                                           'r-', LineWidth=2); % -- Auto 1 robot turn rate
+%                             hold on; plot(RWTestData.simdata.omega(1,1:k,1,3), ...
+%                                           'g-', LineWidth=2); % -- Auto 2 robot turn rate
+                        
+                            xlabel('Time step');
+                            ylabel('Turn rate (rad/s)');
+                        end
+                        ax = gca; 
+                        ax.FontSize = 18;
+                        drawnow;
                         pause(0.1);
                     end
                 
