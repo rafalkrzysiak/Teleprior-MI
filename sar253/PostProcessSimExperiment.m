@@ -14,13 +14,13 @@ clear all variables
 
 % -- plot which robot found the missing target 
 %PlotWhoFoundTarget(SimExp);
-% PlotWhoFoundTarget_testSet();
+PlotWhoFoundTarget_testSet();
 
 % -- plot all trajectories 
 %PlotAllTraj(SimExp);
 % PlotTrajTestDataSet();
 % PlotRWControls();
-ControlInputMapped();
+% ControlInputMapped();
 
 % -- plot all the timeseries alpha values
 % PlotTransientAlpha(SimExp);
@@ -384,7 +384,7 @@ i = 1;
 for test = 1:size(files, 1)
 
     % -- make sure that we capture a number not '.' or '..'
-    if (files(test).name ~= "." && files(test).name ~= "..")
+    if (files(test).name ~= "." && files(test).name ~= ".." && files(test).name ~= ".DS_Store")
         
         % -- within the test number folder, get the participant numbers
         subDir = strcat(parentDir, "/", files(test).name);
@@ -393,7 +393,7 @@ for test = 1:size(files, 1)
         % -- begin looping through all the participant folders
         for participant = 1:size(participant_folders, 1)
             % -- make sure that we capture a number not '.' or '..'
-            if (participant_folders(participant).name ~= "." && participant_folders(participant).name ~= "..")
+            if (participant_folders(participant).name ~= "." && participant_folders(participant).name ~= ".." && participant_folders(participant).name ~= ".DS_Store")
             
                 % -- create participant directory
                 partDir = strcat(subDir,"/",participant_folders(participant).name);
