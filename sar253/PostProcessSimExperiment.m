@@ -14,11 +14,11 @@ clear all variables
 
 % -- plot which robot found the missing target 
 %PlotWhoFoundTarget(SimExp);
-% PlotWhoFoundTarget_testSet();
+PlotWhoFoundTarget_testSet();
 
 % -- plot all trajectories 
 %PlotAllTraj(SimExp);
-PlotTrajTestDataSet();
+% PlotTrajTestDataSet();
 % PlotRWControls();
 % ControlInputMapped();
 
@@ -578,6 +578,7 @@ subplot(2,2,1); bar(X, [Y1,RWY1]);
 text(1:length(X),[Y1,RWY1]',num2str([Y1,RWY1]'),'vert','bottom','horiz','center','FontSize',16);
 ylabel({"Number of times target";"was found by robot"});
 title("Condition: 1");
+ylim([0 600]);
 
 % -- set figure parameters
 ax = gca; 
@@ -589,6 +590,7 @@ subplot(2,2,2); bar(X, [Y2,RWY2]);
 text(1:length(X),[Y2,RWY2]',num2str([Y2,RWY2]'),'vert','bottom','horiz','center','FontSize',16);
 ylabel({"Number of times target";"was found by robot"});
 title("Condition: 2");
+ylim([0 600]);
 
 % -- set figure parameters
 ax = gca; 
@@ -600,6 +602,7 @@ subplot(2,2,3); bar(X, [Y3,RWY3]);
 text(1:length(X),[Y3,RWY3]',num2str([Y3,RWY3]'),'vert','bottom','horiz','center','FontSize',16);
 ylabel({"Number of times target";"was found by robot"});
 title("Condition: 3");
+ylim([0 600]);
 
 % -- set figure parameters
 ax = gca; 
@@ -611,6 +614,7 @@ subplot(2,2,4); bar(X, [Y4,RWY4]);
 text(1:length(X),[Y4,RWY4]',num2str([Y4,RWY4]'),'vert','bottom','horiz','center','FontSize',16);
 ylabel({"Number of times target";"was found by robot"});
 title("Condition: 4");
+ylim([0 600]);
 
 % -- set figure parameters
 ax = gca; 
