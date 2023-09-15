@@ -94,7 +94,7 @@ for ii=[1,4]
     end
 end
 
-wsdist14=WSdist(1,4);
+wsdist14=WSdist(1,3);
 
 % KL Divergence
 KLdist=zeros(4);
