@@ -21,9 +21,9 @@ ID_Data=csvread('../src/IDList_Completed.csv',1,0);
 conds = [1, 2, 3, 4];
 
 tic % -- start timer to determine computational time
-test_size = 50;
+test_size = 200;
 
-for test = 36:test_size % -- looping through every environment
+for test = 51:test_size % -- looping through every environment
 
     % here we create the test/train scenario 
     % use 26 randomly selected ids to create pdistr and xdistr and run it on 3
