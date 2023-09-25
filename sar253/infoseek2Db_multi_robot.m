@@ -448,6 +448,8 @@ for jj=1:param.nsim
                     pDxMxT(k+1,1)=0.00001;
                     pDyMyT(k+1,1)=0.00001;
                 end
+                % -- set alpha to be constant value
+                %alpha(k+1,1) = 0.0;
                 % maximize mutual rb_information
     %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, eta, hfun, om, r_visible);
     %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, om, lfn);
@@ -1036,9 +1038,9 @@ end
 
 function X = rt2d(X, v, omega, dt)
 % robot
+X(3,1) = X(3,1) + omega*dt;
 X(1,1) = X(1,1) + v*cos(X(3,1))*dt;
 X(2,1) = X(2,1) + v*sin(X(3,1))*dt;
-X(3,1) = X(3,1) + omega*dt;
 
 % target
 X(4,1) = X(4,1);

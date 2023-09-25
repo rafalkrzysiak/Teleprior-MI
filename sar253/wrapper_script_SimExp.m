@@ -23,7 +23,7 @@ conds = [1, 2, 3, 4];
 tic % -- start timer to determine computational time
 test_size = 200;
 
-for test = 51:test_size % -- looping through every environment
+for test = 1:test_size % -- looping through every environment
 
     % here we create the test/train scenario 
     % use 26 randomly selected ids to create pdistr and xdistr and run it on 3
@@ -46,7 +46,7 @@ for test = 51:test_size % -- looping through every environment
     img = imbinarize(img); % -- binarize the image
     
     % -- create a folder that correspond to the environment
-    test_folder = strcat("data/RandomWalk/",sprintf('%05d',test),"/");
+    test_folder = strcat("data/test/",sprintf('%05d',test),"/");
     mkdir(test_folder);
 
     for participant = 1:size(ids_test, 1)
