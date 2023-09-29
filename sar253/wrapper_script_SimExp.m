@@ -46,7 +46,7 @@ for test = 1:test_size % -- looping through every environment
     img = imbinarize(img); % -- binarize the image
     
     % -- create a folder that correspond to the environment
-    test_folder = strcat("data/test/",sprintf('%05d',test),"/");
+    test_folder = strcat("data/RandomWalk/",sprintf('%05d',test),"/");
     mkdir(test_folder);
 
     for participant = 1:size(ids_test, 1)
