@@ -372,8 +372,8 @@ conditions = ["condition_1",...
 Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
 
 % -- pull list of test folders within test folder
-parentDir = "data/test";
-parentDir_RW = "data/RandomWalk";
+parentDir = "data/Backup/test";
+parentDir_RW = "data/Backup/RandomWalk";
 files = dir(parentDir);
 RW_files = dir(parentDir_RW);
 
