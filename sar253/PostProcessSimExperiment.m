@@ -14,11 +14,11 @@ clear all variables
 
 % -- plot which robot found the missing target 
 %PlotWhoFoundTarget(SimExp);
-PlotWhoFoundTarget_testSet();
+% PlotWhoFoundTarget_testSet();
 
 % -- plot all trajectories 
 %PlotAllTraj(SimExp);
-% PlotTrajTestDataSet();
+PlotTrajTestDataSet();
 % PlotRWControls();
 % ControlInputMapped();
 
