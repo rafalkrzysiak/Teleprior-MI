@@ -449,7 +449,7 @@ for jj=1:param.nsim
                     pDyMyT(k+1,1)=0.00001;
                 end
                 % -- set alpha to be constant value
-                %alpha(k+1,1) = 0.0;
+                alpha(k+1,1) = 1.0;
                 % maximize mutual rb_information
     %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, eta, hfun, om, r_visible);
     %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, om, lfn);
