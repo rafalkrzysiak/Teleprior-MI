@@ -669,13 +669,23 @@ function PercentTargetFound(testset)
 figure(2); clf; gcf;
 
 % -- populate figure
-plot(0:1:4, [testset.Y1(1,2); testset.RWY1(1,2); testset.Y10(1,2); testset.Y11(1,2)], ...
-     'sm', 'MarkerSize', 18);
+plot(0:1:3, [testset.Y1(1,2); testset.RWY1(1,2); testset.Y10(1,2); testset.Y11(1,2)], ...
+     'sm', 'MarkerSize', 18, 'LineWidth', 2); hold on;
+plot(0:1:3, [testset.Y2(1,2); testset.RWY2(1,2); testset.Y20(1,2); testset.Y21(1,2)], ...
+     'or', 'MarkerSize', 18, 'LineWidth', 2); hold on;
+plot(0:1:3, [testset.Y3(1,2); testset.RWY3(1,2); testset.Y30(1,2); testset.Y31(1,2)], ...
+     '^b', 'MarkerSize', 18, 'LineWidth', 2); hold on;
+plot(0:1:3, [testset.Y4(1,2); testset.RWY4(1,2); testset.Y40(1,2); testset.Y41(1,2)], ...
+     'kx', 'MarkerSize', 18, 'LineWidth', 2);
 
 % -- legend
-legend('No Map, No Target');
+legend('No Map, No Target',...
+       'No Map, Yes Target',...
+       'Yes Map, No Target',...
+       'Yes Map, Yes Target');
 
 % -- make figure look nice
+ylabel("Percent time target found by autonomous robots");
 ax = gca; 
 ax.FontSize = 18;
 xticklabels({'a(f)', 'RW', 'a=0', 'a=1'});
