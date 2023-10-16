@@ -14,11 +14,11 @@ clear all variables
 
 % -- plot which robot found the missing target 
 %PlotWhoFoundTarget(SimExp);
-% PlotWhoFoundTarget_testSet();
+PlotWhoFoundTarget_testSet();
 
 % -- plot all trajectories 
 %PlotAllTraj(SimExp);
-PlotTrajTestDataSet();
+% PlotTrajTestDataSet();
 % PlotRWControls();
 % ControlInputMapped();
 
@@ -372,10 +372,15 @@ conditions = ["condition_1",...
 Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
 
 % -- pull list of test folders within test folder
-parentDir = "data/Backup/test";
-parentDir_RW = "data/Backup/RandomWalk";
+parentDir = "data/test";
+parentDir_RW = "data/RandomWalk";
+parentDir0 = "data/alpha_0";
+parentDir1 = "data/alpha_1";
+
 files = dir(parentDir);
 RW_files = dir(parentDir_RW);
+files0 = dir(parentDir0);
+files1 = dir(parentDir1);
 
 % -- initialize the counter
 i = 1; 
@@ -453,21 +458,109 @@ for RWtest = 1:size(RW_files, 1)
     end
 end
 
+i = 1;
+% -- begin looping through each test folder
+for test0 = 1:size(files0, 1)
+
+    % -- make sure that we capture a number not '.' or '..'
+    if (files0(test0).name ~= "." && files0(test0).name ~= ".." && files0(test0).name ~= ".DS_Store")
+        
+        % -- within the test number folder, get the participant numbers
+        subDir0 = strcat(parentDir0, "/", files0(test0).name);
+        participant_folders0 = dir(subDir0);
+        
+        % -- begin looping through all the participant folders
+        for participant0 = 1:size(participant_folders0, 1)
+            % -- make sure that we capture a number not '.' or '..'
+            if (participant_folders0(participant0).name ~= "." && participant_folders0(participant0).name ~= ".." && participant_folders(participant).name ~= ".DS_Store")
+            
+                % -- create participant directory
+                partDir0 = strcat(subDir0,"/",participant_folders0(participant0).name);
+    
+                % -- begin looping through all conditions tested
+                for cond = 1:size(conditions, 2)
+    
+                    % -- create condition directory
+                    condDir0 = strcat(partDir0, "/", conditions(cond));
+                    condFile0 = strcat(condDir0, "/", Matfile);
+    
+                    % -- read the data captured for the test
+                    TestData = load(condFile0);
+                    WhichRobot0(cond, i) = TestData.simdata.Which_robot;
+    
+                end
+                i = i + 1;
+            end
+        end
+    end
+end
+
+i = 1;
+% -- begin looping through each test folder
+for test1 = 1:size(files1, 1)
+
+    % -- make sure that we capture a number not '.' or '..'
+    if (files1(test1).name ~= "." && files1(test1).name ~= ".." && files1(test1).name ~= ".DS_Store")
+        
+        % -- within the test number folder, get the participant numbers
+        subDir1 = strcat(parentDir1, "/", files1(test1).name);
+        participant_folders1 = dir(subDir1);
+        
+        % -- begin looping through all the participant folders
+        for participant1 = 1:size(participant_folders1, 1)
+            % -- make sure that we capture a number not '.' or '..'
+            if (participant_folders1(participant1).name ~= "." && participant_folders1(participant1).name ~= ".." && participant_folders(participant).name ~= ".DS_Store")
+            
+                % -- create participant directory
+                partDir1 = strcat(subDir1,"/",participant_folders1(participant1).name);
+    
+                % -- begin looping through all conditions tested
+                for cond = 1:size(conditions, 2)
+    
+                    % -- create condition directory
+                    condDir1 = strcat(partDir1, "/", conditions(cond));
+                    condFile1 = strcat(condDir1, "/", Matfile);
+    
+                    % -- read the data captured for the test
+                    TestData = load(condFile1);
+                    WhichRobot1(cond, i) = TestData.simdata.Which_robot;
+    
+                end
+                i = i + 1;
+            end
+        end
+    end
+end
+
+NumTest = 600;
 
 % -- store the data in a temperary and clean variables
 X = [1, 2];
-Y1 = [sum(WhichRobot(1,:) == 0), sum(WhichRobot(1,:) == 2) + sum(WhichRobot(1,:) == 3)];
-Y2 = [sum(WhichRobot(2,:) == 0), sum(WhichRobot(2,:) == 2) + sum(WhichRobot(2,:) == 3)];
-Y3 = [sum(WhichRobot(3,:) == 0), sum(WhichRobot(3,:) == 2) + sum(WhichRobot(3,:) == 3)];
-Y4 = [sum(WhichRobot(4,:) == 0), sum(WhichRobot(4,:) == 2) + sum(WhichRobot(4,:) == 3)];
+testset.Y1 = [sum(WhichRobot(1,:) == 0), sum(WhichRobot(1,:) == 2) + sum(WhichRobot(1,:) == 3)]./NumTest;
+testset.Y2 = [sum(WhichRobot(2,:) == 0), sum(WhichRobot(2,:) == 2) + sum(WhichRobot(2,:) == 3)]./NumTest;
+testset.Y3 = [sum(WhichRobot(3,:) == 0), sum(WhichRobot(3,:) == 2) + sum(WhichRobot(3,:) == 3)]./NumTest;
+testset.Y4 = [sum(WhichRobot(4,:) == 0), sum(WhichRobot(4,:) == 2) + sum(WhichRobot(4,:) == 3)]./NumTest;
 
-RWY1 = [sum(RWWhichRobot(1,:) == 0), sum(RWWhichRobot(1,:) == 2) + sum(RWWhichRobot(1,:) == 3)];
-RWY2 = [sum(RWWhichRobot(2,:) == 0), sum(RWWhichRobot(2,:) == 2) + sum(RWWhichRobot(2,:) == 3)];
-RWY3 = [sum(RWWhichRobot(3,:) == 0), sum(RWWhichRobot(3,:) == 2) + sum(RWWhichRobot(3,:) == 3)];
-RWY4 = [sum(RWWhichRobot(4,:) == 0), sum(RWWhichRobot(4,:) == 2) + sum(RWWhichRobot(4,:) == 3)];
+testset.RWY1 = [sum(RWWhichRobot(1,:) == 0), sum(RWWhichRobot(1,:) == 2) + sum(RWWhichRobot(1,:) == 3)]./NumTest;
+testset.RWY2 = [sum(RWWhichRobot(2,:) == 0), sum(RWWhichRobot(2,:) == 2) + sum(RWWhichRobot(2,:) == 3)]./NumTest;
+testset.RWY3 = [sum(RWWhichRobot(3,:) == 0), sum(RWWhichRobot(3,:) == 2) + sum(RWWhichRobot(3,:) == 3)]./NumTest;
+testset.RWY4 = [sum(RWWhichRobot(4,:) == 0), sum(RWWhichRobot(4,:) == 2) + sum(RWWhichRobot(4,:) == 3)]./NumTest;
+
+testset.Y10 = [sum(WhichRobot0(1,:) == 0), sum(WhichRobot0(1,:) == 2) + sum(WhichRobot0(1,:) == 3)]./NumTest;
+testset.Y20 = [sum(WhichRobot0(2,:) == 0), sum(WhichRobot0(2,:) == 2) + sum(WhichRobot0(2,:) == 3)]./NumTest;
+testset.Y30 = [sum(WhichRobot0(3,:) == 0), sum(WhichRobot0(3,:) == 2) + sum(WhichRobot0(3,:) == 3)]./NumTest;
+testset.Y40 = [sum(WhichRobot0(4,:) == 0), sum(WhichRobot0(4,:) == 2) + sum(WhichRobot0(4,:) == 3)]./NumTest;
+
+testset.Y11 = [sum(WhichRobot1(1,:) == 0), sum(WhichRobot1(1,:) == 2) + sum(WhichRobot1(1,:) == 3)]./NumTest;
+testset.Y21 = [sum(WhichRobot1(2,:) == 0), sum(WhichRobot1(2,:) == 2) + sum(WhichRobot1(2,:) == 3)]./NumTest;
+testset.Y31 = [sum(WhichRobot1(3,:) == 0), sum(WhichRobot1(3,:) == 2) + sum(WhichRobot1(3,:) == 3)]./NumTest;
+testset.Y41 = [sum(WhichRobot1(4,:) == 0), sum(WhichRobot1(4,:) == 2) + sum(WhichRobot1(4,:) == 3)]./NumTest;
+
+% -- function that input all test data captured
+PercentTargetFound(testset);
 
 % -- create figure
-figure(1); clf; gcf;
+ figure(1); clf; gcf;
 
 % -- plot bar graph and make it look nice
 subplot(2,2,1); bar(X, Y1);
@@ -566,6 +659,26 @@ xticklabels({'Ref robot','auto robot'});
 
 SingleFigBarPlot(Y1, RWY1, Y2, RWY2, Y3, RWY3, Y4, RWY4);
 
+end
+
+function PercentTargetFound(testset)
+% -- remember, each variable stored in the struct is [1 x 2]
+% -- [# times target found by human, # times target found by autonomous robot]
+
+% -- create single figure
+figure(2); clf; gcf;
+
+% -- populate figure
+plot(0:1:4, [testset.Y1(1,2); testset.RWY1(1,2); testset.Y10(1,2); testset.Y11(1,2)], ...
+     'sm', 'MarkerSize', 18);
+
+% -- legend
+legend('No Map, No Target');
+
+% -- make figure look nice
+ax = gca; 
+ax.FontSize = 18;
+xticklabels({'a(f)', 'RW', 'a=0', 'a=1'});
 end
 
 function SingleFigBarPlot(Y1, RWY1, Y2, RWY2, Y3, RWY3, Y4, RWY4)
