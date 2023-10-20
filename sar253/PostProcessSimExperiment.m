@@ -14,7 +14,8 @@ clear all variables
 
 % -- plot which robot found the missing target 
 %PlotWhoFoundTarget(SimExp);
-PlotWhoFoundTarget_testSet();
+%PlotWhoFoundTarget_testSet();
+TimeGained();
 
 % -- plot all trajectories 
 %PlotAllTraj(SimExp);
@@ -360,6 +361,340 @@ end
 
 end
 
+function TimeGained()
+
+% -- define the conditions tested
+conditions = ["condition_1",...
+              "condition_2",...
+              "condition_3",...
+              "condition_4"];
+
+% -- define the mat file name used for all participants
+Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
+
+% -- pull list of test folders within test folder
+parentDir = "data/test";
+parentDir_RW = "data/RandomWalk";
+parentDir0 = "data/alpha_0";
+parentDir1 = "data/alpha_1";
+
+files = dir(parentDir);
+RW_files = dir(parentDir_RW);
+files0 = dir(parentDir0);
+files1 = dir(parentDir1);
+
+timeArray = csvread('TimeToFind.csv');
+IDs = csvread('IDList_Completed.csv', 1);
+
+% -- initialize the counter
+i = 1; 
+
+testTime = zeros(600, 4);
+RWtestTime = testTime;
+testTime0 = testTime;
+testTime1 = testTime;
+condCount = ones(1,4);
+
+timecount = 0;
+
+% -- begin looping through each test folder
+for test = 1:size(files, 1)
+
+    % -- make sure that we capture a number not '.' or '..'
+    if (files(test).name ~= "." && files(test).name ~= ".." && files(test).name ~= ".DS_Store")
+        
+        % -- within the test number folder, get the participant numbers
+        subDir = strcat(parentDir, "/", files(test).name);
+        participant_folders = dir(subDir);
+        
+        % -- begin looping through all the participant folders
+        for participant = 1:size(participant_folders, 1)
+            % -- make sure that we capture a number not '.' or '..'
+            if (participant_folders(participant).name ~= "." && participant_folders(participant).name ~= ".." && participant_folders(participant).name ~= ".DS_Store")
+            
+                % -- create participant directory
+                partDir = strcat(subDir,"/",participant_folders(participant).name);
+    
+                % -- begin looping through all conditions tested
+                for cond = 1:size(conditions, 2)
+    
+                    % -- create condition directory
+                    condDir = strcat(partDir, "/", conditions(cond));
+                    condFile = strcat(condDir, "/", Matfile);
+    
+                    % -- read the data captured for the test
+                    TestData = load(condFile);
+                    
+                    % -- check if the autonomous robot found the target
+                    if TestData.simdata.Which_robot ~= 0
+                        % -- compare the ID looking at with the list
+                        % -- to get the original time ran
+                        for id = 1:size(IDs, 1)
+                            if num2str(IDs(id)) == participant_folders(participant).name
+                                % -- get the time difference and store it
+                                if cond ~= 4
+                                    testTime(condCount(1,cond), cond) = abs(timeArray(id, cond) - TestData.simdata.time);
+                                else
+                                    testTime(condCount(1,cond), cond) = abs(timeArray(id, cond) + timeArray(id, cond+1) - TestData.simdata.time);
+                                end
+                                timecount = timecount + 1;
+                                break;
+                            end
+                        end
+                    end
+                condCount(1,cond) = condCount(1,cond) + 1;
+                end
+                i = i + 1;
+            end
+        end
+    end
+end
+
+meanTimeArrayComp = [mean(testTime(testTime(:,1) ~= 0, 1)), ...
+                     mean(testTime(testTime(:,2) ~= 0, 2)), ...
+                     mean(testTime(testTime(:,3) ~= 0, 3)), ...
+                     mean(testTime(testTime(:,4) ~= 0, 4))];
+stdTimeArrayComp = [std(testTime(testTime(:,1) ~= 0, 1)), ...
+                    std(testTime(testTime(:,2) ~= 0, 2)), ...
+                    std(testTime(testTime(:,3) ~= 0, 3)), ...
+                    std(testTime(testTime(:,4) ~= 0, 4))];
+
+RWtimecount = 0;
+condCount = ones(1, 4);
+
+i = 1;
+% -- begin looping through each test folder
+for RWtest = 1:size(RW_files, 1)
+
+    % -- make sure that we capture a number not '.' or '..'
+    if (RW_files(RWtest).name ~= "." && RW_files(RWtest).name ~= ".." && RW_files(RWtest).name ~= ".DS_Store")
+        
+        % -- within the test number folder, get the participant numbers
+        RWsubDir = strcat(parentDir_RW, "/", RW_files(RWtest).name);
+        RWparticipant_folders = dir(RWsubDir);
+        
+        % -- begin looping through all the participant folders
+        for RWparticipant = 1:size(RWparticipant_folders, 1)
+            % -- make sure that we capture a number not '.' or '..'
+            if (RWparticipant_folders(RWparticipant).name ~= "." && RWparticipant_folders(RWparticipant).name ~= ".." && RWparticipant_folders(RWparticipant).name ~= ".DS_Store")
+            
+                % -- create participant directory
+                RWpartDir = strcat(RWsubDir,"/",RWparticipant_folders(RWparticipant).name);
+    
+                % -- begin looping through all conditions tested
+                for cond = 1:size(conditions, 2)
+    
+                    % -- create condition directory
+                    RWcondDir = strcat(RWpartDir, "/", conditions(cond));
+                    RWcondFile = strcat(RWcondDir, "/", Matfile);
+    
+                    % -- read the data captured for the test
+                    RWTestData = load(RWcondFile);
+
+                    % -- check if the autonomous robot found the target
+                    if RWTestData.simdata.Which_robot ~= 0
+                        % -- compare the ID looking at with the list
+                        % -- to get the original time ran
+                        for id = 1:size(IDs, 1)
+                            if num2str(IDs(id)) == RWparticipant_folders(RWparticipant).name
+                                % -- get the time difference and store it
+                                if cond ~= 4
+                                    RWtestTime(condCount(1,cond), cond) =  abs(timeArray(id, cond) - RWTestData.simdata.time);
+                                else
+                                    RWtestTime(condCount(1,cond), cond) = abs(timeArray(id, cond)+timeArray(id, cond+1) - RWTestData.simdata.time);
+                                end
+                                RWtimecount = RWtimecount + 1;
+                                break;
+                            end
+                        end
+                    end
+                    condCount(1,cond) = condCount(1,cond) + 1;
+                end
+                i = i + 1;
+            end
+        end
+    end
+end
+
+RWmeanTimeArrayComp = [mean(RWtestTime(RWtestTime(:,1) ~= 0, 1)), ...
+                     mean(RWtestTime(RWtestTime(:,2) ~= 0, 2)), ...
+                     mean(RWtestTime(RWtestTime(:,3) ~= 0, 3)), ...
+                     mean(RWtestTime(RWtestTime(:,4) ~= 0, 4))];
+RWstdTimeArrayComp = [std(RWtestTime(RWtestTime(:,1) ~= 0, 1)), ...
+                    std(RWtestTime(RWtestTime(:,2) ~= 0, 2)), ...
+                    std(RWtestTime(RWtestTime(:,3) ~= 0, 3)), ...
+                    std(RWtestTime(RWtestTime(:,4) ~= 0, 4))];
+
+timecount0 = 0;
+condCount = ones(1, 4);
+
+i = 1;
+% -- begin looping through each test folder
+for test0 = 1:size(files0, 1)
+
+    % -- make sure that we capture a number not '.' or '..'
+    if (files0(test0).name ~= "." && files0(test0).name ~= ".." && files0(test0).name ~= ".DS_Store")
+        
+        % -- within the test number folder, get the participant numbers
+        subDir0 = strcat(parentDir0, "/", files0(test0).name);
+        participant_folders0 = dir(subDir0);
+        
+        % -- begin looping through all the participant folders
+        for participant0 = 1:size(participant_folders0, 1)
+            % -- make sure that we capture a number not '.' or '..'
+            if (participant_folders0(participant0).name ~= "." && participant_folders0(participant0).name ~= ".." && participant_folders(participant).name ~= ".DS_Store")
+            
+                % -- create participant directory
+                partDir0 = strcat(subDir0,"/",participant_folders0(participant0).name);
+    
+                % -- begin looping through all conditions tested
+                for cond = 1:size(conditions, 2)
+    
+                    % -- create condition directory
+                    condDir0 = strcat(partDir0, "/", conditions(cond));
+                    condFile0 = strcat(condDir0, "/", Matfile);
+    
+                    % -- read the data captured for the test
+                    TestData = load(condFile0);
+
+                    % -- check if the autonomous robot found the target
+                    if TestData.simdata.Which_robot ~= 0
+                        % -- compare the ID looking at with the list
+                        % -- to get the original time ran
+                        for id = 1:size(IDs, 1)
+                            if num2str(IDs(id)) == participant_folders0(participant0).name
+                                % -- get the time difference and store it
+                                if cond ~= 4
+                                    testTime0(condCount(1,cond), cond) = abs(timeArray(id, cond) - TestData.simdata.time);
+                                else
+                                    testTime0(condCount(1,cond), cond) = abs(timeArray(id, cond)+timeArray(id, cond+1) - TestData.simdata.time);
+                                end
+                                timecount0 = timecount0 + 1;
+                                break;
+                            end
+                        end
+                    end
+                    condCount(1,cond) = condCount(1,cond) + 1;
+                end
+                i = i + 1;
+            end
+        end
+    end
+end
+
+meanTimeArrayComp0 = [mean(testTime0(testTime0(:,1) ~= 0, 1)), ...
+                     mean(testTime0(testTime0(:,2) ~= 0, 2)), ...
+                     mean(testTime0(testTime0(:,3) ~= 0, 3)), ...
+                     mean(testTime0(testTime0(:,4) ~= 0, 4))];
+stdTimeArrayComp0 = [std(testTime0(testTime0(:,1) ~= 0, 1)), ...
+                    std(testTime0(testTime0(:,2) ~= 0, 2)), ...
+                    std(testTime0(testTime0(:,3) ~= 0, 3)), ...
+                    std(testTime0(testTime0(:,4) ~= 0, 4))];
+
+timecount1 = 0;
+condCount = ones(1, 4);
+
+i = 1;
+% -- begin looping through each test folder
+for test1 = 1:size(files1, 1)
+
+    % -- make sure that we capture a number not '.' or '..'
+    if (files1(test1).name ~= "." && files1(test1).name ~= ".." && files1(test1).name ~= ".DS_Store")
+        
+        % -- within the test number folder, get the participant numbers
+        subDir1 = strcat(parentDir1, "/", files1(test1).name);
+        participant_folders1 = dir(subDir1);
+        
+        % -- begin looping through all the participant folders
+        for participant1 = 1:size(participant_folders1, 1)
+            % -- make sure that we capture a number not '.' or '..'
+            if (participant_folders1(participant1).name ~= "." && participant_folders1(participant1).name ~= ".." && participant_folders(participant).name ~= ".DS_Store")
+            
+                % -- create participant directory
+                partDir1 = strcat(subDir1,"/",participant_folders1(participant1).name);
+    
+                % -- begin looping through all conditions tested
+                for cond = 1:size(conditions, 2)
+    
+                    % -- create condition directory
+                    condDir1 = strcat(partDir1, "/", conditions(cond));
+                    condFile1 = strcat(condDir1, "/", Matfile);
+    
+                    % -- read the data captured for the test
+                    TestData = load(condFile1);
+
+                    % -- check if the autonomous robot found the target
+                    if TestData.simdata.Which_robot ~= 0
+                        % -- compare the ID looking at with the list
+                        % -- to get the original time ran
+                        for id = 1:size(IDs, 1)
+                            if num2str(IDs(id)) == participant_folders1(participant1).name
+                                % -- get the time difference and store it
+                                if cond ~= 4
+                                    testTime1(condCount(1,cond), cond) = abs(timeArray(id, cond) - TestData.simdata.time);
+                                else
+                                    testTime1(condCount(1,cond), cond) = abs(timeArray(id, cond)+timeArray(id, cond+1) - TestData.simdata.time);
+                                end
+                                timecount1 = timecount1 + 1;
+                                break;
+                            end
+                        end
+                    end
+                    condCount(1,cond) = condCount(1,cond) + 1;
+                end
+                i = i + 1;
+            end
+        end
+    end
+end
+
+meanTimeArrayComp1 = [mean(testTime1(testTime1(:,1) ~= 0, 1)), ...
+                     mean(testTime1(testTime1(:,2) ~= 0, 2)), ...
+                     mean(testTime1(testTime1(:,3) ~= 0, 3)), ...
+                     mean(testTime1(testTime1(:,4) ~= 0, 4))];
+stdTimeArrayComp1 = [std(testTime1(testTime1(:,1) ~= 0, 1)), ...
+                    std(testTime1(testTime1(:,2) ~= 0, 2)), ...
+                    std(testTime1(testTime1(:,3) ~= 0, 3)), ...
+                    std(testTime1(testTime1(:,4) ~= 0, 4))];
+
+% -- create figure
+figure(1); clf; gcf;
+
+% -- plot the results
+errorbar(0:1:3, ...
+         [meanTimeArrayComp(1,1), RWmeanTimeArrayComp(1,1), meanTimeArrayComp0(1,1), meanTimeArrayComp1(1,1)],...
+         [stdTimeArrayComp(1,1), RWstdTimeArrayComp(1,1), stdTimeArrayComp0(1,1), stdTimeArrayComp1(1,1)],...
+         'LineWidth',2); hold on;
+
+errorbar(0:1:3, ...
+         [meanTimeArrayComp(1,2), RWmeanTimeArrayComp(1,2), meanTimeArrayComp0(1,2), meanTimeArrayComp1(1,2)],...
+         [stdTimeArrayComp(1,2), RWstdTimeArrayComp(1,2), stdTimeArrayComp0(1,2), stdTimeArrayComp1(1,2)],...
+         'LineWidth',2); hold on;
+
+errorbar(0:1:3, ...
+         [meanTimeArrayComp(1,3), RWmeanTimeArrayComp(1,3), meanTimeArrayComp0(1,3), meanTimeArrayComp1(1,3)],...
+         [stdTimeArrayComp(1,3), RWstdTimeArrayComp(1,3), stdTimeArrayComp0(1,3), stdTimeArrayComp1(1,3)],...
+         'LineWidth',2); hold on;
+
+errorbar(0:1:3, ...
+         [meanTimeArrayComp(1,4), RWmeanTimeArrayComp(1,4), meanTimeArrayComp0(1,4), meanTimeArrayComp1(1,4)],...
+         [stdTimeArrayComp(1,4), RWstdTimeArrayComp(1,4), stdTimeArrayComp0(1,4), stdTimeArrayComp1(1,4)],...
+         'LineWidth',2); 
+
+legend('No Map, No Target',...
+       'No Map, Yes Target',...
+       'Yes Map, No Target',...
+       'Yes Map, Yes Target');
+
+ylabel("Time improved");
+
+% -- make the plot nice
+ax = gca;
+ax.FontSize = 18;
+ticklabels({'a(f)', 'RW', 'a=0', 'a=1'});
+
+end
+
 function PlotWhoFoundTarget_testSet()
 
 % -- define the conditions tested
@@ -558,106 +893,6 @@ testset.Y41 = [sum(WhichRobot1(4,:) == 0), sum(WhichRobot1(4,:) == 2) + sum(Whic
 
 % -- function that input all test data captured
 PercentTargetFound(testset);
-
-% -- create figure
- figure(1); clf; gcf;
-
-% -- plot bar graph and make it look nice
-subplot(2,2,1); bar(X, Y1);
-text(1:length(X),Y1',num2str(Y1'),'vert','bottom','horiz','center','FontSize',16);
-xlabel("Robot");
-ylabel({"Number of times target";"was found by robot"});
-title("Condition: 1");
-
-% -- set figure parameters
-ax = gca; 
-ax.FontSize = 16;
-xticklabels({'Ref robot','auto robot'});
-
-subplot(2,2,2); bar(X, Y2);
-text(1:length(X),Y2',num2str(Y2'),'vert','bottom','horiz','center','FontSize',16);
-xlabel("Robot");
-ylabel({"Number of times target";"was found by robot"});
-title("Condition: 2");
-
-% -- set figure parameters
-ax = gca; 
-ax.FontSize = 16;
-xticklabels({'Ref robot','auto robot'});
-
-
-subplot(2,2,3); bar(X, Y3);
-text(1:length(X),Y3',num2str(Y3'),'vert','bottom','horiz','center','FontSize',16);
-xlabel("Robot");
-ylabel({"Number of times target";"was found by robot"});
-title("Condition: 3");
-
-% -- set figure parameters
-ax = gca; 
-ax.FontSize = 16;
-xticklabels({'Ref robot','auto robot'});
-
-subplot(2,2,4); bar(X, Y4);
-text(1:length(X),Y4',num2str(Y4'),'vert','bottom','horiz','center','FontSize',16);
-xlabel("Robot");
-ylabel({"Number of times target";"was found by robot"});
-title("Condition: 4");
-
-% -- set figure parameters
-ax = gca; 
-ax.FontSize = 16;
-xticklabels({'Ref robot','auto robot'});
-
-% -- create figure
-figure(2); clf; gcf;
-
-% -- plot bar graph and make it look nice
-subplot(2,2,1); bar(X, RWY1);
-text(1:length(X),RWY1',num2str(RWY1'),'vert','bottom','horiz','center','FontSize',16);
-xlabel("Robot");
-ylabel({"Number of times target";"was found by robot"});
-title("Condition: 1");
-
-% -- set figure parameters
-ax = gca; 
-ax.FontSize = 16;
-xticklabels({'Ref robot','auto robot'});
-
-subplot(2,2,2); bar(X, RWY2);
-text(1:length(X),RWY2',num2str(RWY2'),'vert','bottom','horiz','center','FontSize',16);
-xlabel("Robot");
-ylabel({"Number of times target";"was found by robot"});
-title("Condition: 2");
-
-% -- set figure parameters
-ax = gca; 
-ax.FontSize = 16;
-xticklabels({'Ref robot','auto robot'});
-
-
-subplot(2,2,3); bar(X, RWY3);
-text(1:length(X),RWY3',num2str(RWY3'),'vert','bottom','horiz','center','FontSize',16);
-xlabel("Robot");
-ylabel({"Number of times target";"was found by robot"});
-title("Condition: 3");
-
-% -- set figure parameters
-ax = gca; 
-ax.FontSize = 16;
-xticklabels({'Ref robot','auto robot'});
-
-subplot(2,2,4); bar(X, RWY4);
-text(1:length(X),RWY4',num2str(RWY4'),'vert','bottom','horiz','center','FontSize',16);
-xlabel("Robot");
-ylabel({"Number of times target";"was found by robot"});
-title("Condition: 4");
-
-% -- set figure parameters
-ax = gca; 
-ax.FontSize = 16;
-xticklabels({'Ref robot','auto robot'});
-
-SingleFigBarPlot(Y1, RWY1, Y2, RWY2, Y3, RWY3, Y4, RWY4);
 
 end
 
