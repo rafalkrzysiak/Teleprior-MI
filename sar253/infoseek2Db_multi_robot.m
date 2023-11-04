@@ -458,7 +458,17 @@ for jj=1:param.nsim
                 if ConfigSetup == "FreezeTime"
                     % -- This is where we will calculate the amount of time 
                     % -- the human controlled robot was "frozen" for.
-                    
+                    if k > 2*param.tau+3
+                        feature_k = sum(d(k-2*param.tau:k, 1));
+    
+                        [alpha(k+1,1), pDxMxT(k+1,1), pDyMyT(k+1,1)] = ...
+                            UpdateAlpha(feature_k, pdstr, xdstr, alpha(k,1));
+                    else
+                        % move this out of UpdateAlpha
+                        alpha(k+1,1)=param.alphaBegin;
+                        pDxMxT(k+1,1)=0.00001;
+                        pDyMyT(k+1,1)=0.00001;
+                    end
                 end
 
                 % -- set alpha to be constant value
