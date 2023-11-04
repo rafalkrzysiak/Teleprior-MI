@@ -1,6 +1,6 @@
 function infoseek2Db_multi_robot(param, img, saveIn, maps, ...
                                 saveFrames, target_loc, exp_id, condition, ...
-                                pdstr, xdstr)
+                                pdstr, xdstr, ConfigSetup)
 
 % preset values when not running this script from another script
 if nargin < 1
@@ -221,6 +221,7 @@ for jj=1:param.nsim
     alpha = d;
     pDxMxT = d;
     pDyMyT = d;
+    f_time = d;
 
     % -- set the alpha to be what it was in the beginning 
     alpha(1,1) = param.alphaBegin;
@@ -456,10 +457,30 @@ for jj=1:param.nsim
                 % -- check if we want to look into how freeze time
                 % -- of the human controlled robot affects the alpha update
                 if ConfigSetup == "FreezeTime"
+
+                    if k > 2
+                        % -- check if the robot speed and turn rate are
+                        % -- less than 0.1 m/s or rad/s
+                        % -- IF abs(speed_data) < 0.1 & abs(tr_data) < 0.1
+                        if abs(vel(1,k,1,1)) < 0.1 && abs(omega(1,k,1,1)) < 0.1
+                            % -- add up individual time steps of the
+                            % -- simulation if the human controlled robot
+                            % -- is "freezing"
+                            f_time(k, 1) = param.dt;
+                        else
+                            % -- if the human controlled robot is
+                            % -- understood to not be "freezing" under the
+                            % -- required conditions, add 0.0s
+                            f_time(k, 1) = 0.0;
+                        end
+                    else
+                        f_time(k, 1) = 0.0;
+                    end
+
                     % -- This is where we will calculate the amount of time 
                     % -- the human controlled robot was "frozen" for.
                     if k > 2*param.tau+3
-                        feature_k = sum(d(k-2*param.tau:k, 1));
+                        feature_k = sum(f_time(k-2*param.tau:k, 1));
     
                         [alpha(k+1,1), pDxMxT(k+1,1), pDyMyT(k+1,1)] = ...
                             UpdateAlpha(feature_k, pdstr, xdstr, alpha(k,1));

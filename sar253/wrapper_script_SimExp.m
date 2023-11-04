@@ -55,13 +55,12 @@ for test = 1:test_size % -- looping through every environment
 %     [pdstr, xdstr]=calc_pdf_feature(tau, ids_train);
 
     % -- getting the values for the freeze time
-    dstr_freeze=extract_freezing_data(tau, ID_Data, ...
+    dstr_freeze=extract_freezing_data(tau, ids_train, ...
                 dtTrack, dtCommand); % distance
-    [p_frz, x_frz]=calc_pdf(dstr_freeze, ...
-        'time staying still (fraction)', conditions);
+    [p_frz, x_frz]=calc_pdf(dstr_freeze);
 
-    % -- for simplicity to not continuously comment/uncomment the main
-    % -- script for the Sim Exp, save the p_... and x_... under the
+    % -- NOTE: For simplicity to not continuously comment/uncomment the 
+    % -- main script for the Sim Exp, save the p_... and x_... under the
     % -- same variable. However, understand that the variable definitions
     % -- for each of the calc_pdf functions have different meanings
     pdstr = p_frz;
@@ -77,11 +76,6 @@ for test = 1:test_size % -- looping through every environment
 
     for participant = 1:size(ids_test, 1)
         for exp_cond = 1:size(conds, 2)
-            
-            % -- we will set a fifth condition, which will statnd for randomwalk (openloop) 
-            %if exp_cond == 5
-                %param.closedloop = 0;
-            %end
 
             % -- initialize the parameters of the simulation
             [param, maps, ~, ~, ~, target_locations, ~, ~] = ...
