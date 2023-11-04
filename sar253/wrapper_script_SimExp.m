@@ -14,6 +14,14 @@ function wrapper_script_SimExp
 addpath ../src
 ID_Data=csvread('../src/IDList_Completed.csv',1,0);
 
+% -- defining a variable to be a flag for us to easily switch 
+% -- between conditions wanting to test under for updating alpha of the
+% -- autonomous robots
+% -- Options so far:
+% -- "TotalDist"
+% -- "FreezeTime"
+ConfigSetup = "FreezeTime"; 
+
 % -- initialize the parameters of the simulation
 % [param, maps, folder, bias, share_info, target_locations, agents, file_id] = ...
 %     ParamConfig();
@@ -22,6 +30,11 @@ conds = [1, 2, 3, 4];
 
 tic % -- start timer to determine computational time
 test_size = 200;
+
+% -- define the dt for the tracking system as well as the 
+% -- teleoperation system used for the in-lab experiments
+dtTrack = 1/2;
+dtCommand = 1/10;
 
 for test = 1:test_size % -- looping through every environment
 
@@ -39,14 +52,27 @@ for test = 1:test_size % -- looping through every environment
     % tau should be param.tau but for that paramconfig should be called outside
     % the for loop--can we do that?
     tau=20;
-    [pdstr, xdstr]=calc_pdf_feature(tau, ids_train);
+%     [pdstr, xdstr]=calc_pdf_feature(tau, ids_train);
+
+    % -- getting the values for the freeze time
+    dstr_freeze=extract_freezing_data(tau, ID_Data, ...
+                dtTrack, dtCommand); % distance
+    [p_frz, x_frz]=calc_pdf(dstr_freeze, ...
+        'time staying still (fraction)', conditions);
+
+    % -- for simplicity to not continuously comment/uncomment the main
+    % -- script for the Sim Exp, save the p_... and x_... under the
+    % -- same variable. However, understand that the variable definitions
+    % -- for each of the calc_pdf functions have different meanings
+    pdstr = p_frz;
+    xdstr = x_frz;
 
     %path = convertStringsToChars(strcat(folder, maps(env), ".jpg")); % -- strcat the folder and image name
     img = imread("maps/OmronLab.jpg"); % -- read the image into Matlab
     img = imbinarize(img); % -- binarize the image
     
     % -- create a folder that correspond to the environment
-    test_folder = strcat("data/alpha_1/",sprintf('%05d',test),"/");
+    test_folder = strcat("data/Varying alpha/FreezeTime/",sprintf('%05d',test),"/");
     mkdir(test_folder);
 
     for participant = 1:size(ids_test, 1)
@@ -75,7 +101,7 @@ for test = 1:test_size % -- looping through every environment
             infoseek2Db_multi_robot(param, img, saveIn, "OmronLab", ...
                                     saveFrames, target_locations,...
                                     num2str(ids_test(participant,1)), exp_cond,...
-                                    pdstr, xdstr);
+                                    pdstr, xdstr, ConfigSetup);
         end
     end
 

@@ -405,51 +405,64 @@ for jj=1:param.nsim
             end
                    
             if param.closedloop
-                % calculate alpha here and pass to O_MI
-                % algorithm on how to calculate alpha (put inside a
-                % function that admits Xs and timestep k)
-                % extract last 15 seconds of robot data from Xs
-                    % calculate d(k)=the distance moved (this can be done by
-                    % simply adding the difference between successive
-                    % locations)
-                    % load pdist.mat which has the probability
-                    % distributions for distance
-                    % later we'll expand to include everything
-                    %
-                    % calculate the p(d(k)|xMxT), p(d(k)|yMyT) 
-                    % next calculate p(xMxT|d(k))
-                    % 
-                    % since alpha in our setup means independence, we can
-                    % set alpha=p(yMyT|d(k)) or
-                    % set alpha=p(xMxT|d(k))
-                % -- make sure that we have 2 times ran before we try and
-                % -- calculate the distance that the reference robot has moved
-                if k > 2
-%                     d(k, 1) = sqrt(sum((Xh(6:7,k,1,robot) - Xh(6:7,k-1,1,robot)).^2));
-                    d(k, 1) = sqrt(sum((Xs(1:2,k,1,1) - Xs(1:2,k-1,1,1)).^2));
-                else
-                    d(k, 1) = 0;
-                end
-                
-                % -- begin alpha caluclation based on distance traveled 
-                % -- by reference robot within the environment
-                % feature is distance but could be anything e.g. turn rate,
-                % fraction of time spent staying in place, which is why we
-                % update the function to work on features instead of
-                % distance
-                if k > 2*param.tau+3
-                    feature_k = sum(d(k-2*param.tau:k, 1));
 
-                    [alpha(k+1,1), pDxMxT(k+1,1), pDyMyT(k+1,1)] = ...
-                        UpdateAlpha(feature_k, pdstr, xdstr, alpha(k,1));
-                else
-                    % move this out of UpdateAlpha
-                    alpha(k+1,1)=param.alphaBegin;
-                    pDxMxT(k+1,1)=0.00001;
-                    pDyMyT(k+1,1)=0.00001;
+                if ConfigSetup == "TotalDist"
+                    % calculate alpha here and pass to O_MI
+                    % algorithm on how to calculate alpha (put inside a
+                    % function that admits Xs and timestep k)
+                    % extract last 15 seconds of robot data from Xs
+                        % calculate d(k)=the distance moved (this can be done by
+                        % simply adding the difference between successive
+                        % locations)
+                        % load pdist.mat which has the probability
+                        % distributions for distance
+                        % later we'll expand to include everything
+                        %
+                        % calculate the p(d(k)|xMxT), p(d(k)|yMyT) 
+                        % next calculate p(xMxT|d(k))
+                        % 
+                        % since alpha in our setup means independence, we can
+                        % set alpha=p(yMyT|d(k)) or
+                        % set alpha=p(xMxT|d(k))
+                    % -- make sure that we have 2 times ran before we try and
+                    % -- calculate the distance that the reference robot has moved
+                    if k > 2
+    %                     d(k, 1) = sqrt(sum((Xh(6:7,k,1,robot) - Xh(6:7,k-1,1,robot)).^2));
+                        d(k, 1) = sqrt(sum((Xs(1:2,k,1,1) - Xs(1:2,k-1,1,1)).^2));
+                    else
+                        d(k, 1) = 0;
+                    end
+                    
+                    % -- begin alpha caluclation based on distance traveled 
+                    % -- by reference robot within the environment
+                    % feature is distance but could be anything e.g. turn rate,
+                    % fraction of time spent staying in place, which is why we
+                    % update the function to work on features instead of
+                    % distance
+                    if k > 2*param.tau+3
+                        feature_k = sum(d(k-2*param.tau:k, 1));
+    
+                        [alpha(k+1,1), pDxMxT(k+1,1), pDyMyT(k+1,1)] = ...
+                            UpdateAlpha(feature_k, pdstr, xdstr, alpha(k,1));
+                    else
+                        % move this out of UpdateAlpha
+                        alpha(k+1,1)=param.alphaBegin;
+                        pDxMxT(k+1,1)=0.00001;
+                        pDyMyT(k+1,1)=0.00001;
+                    end
                 end
+
+                
+                % -- check if we want to look into how freeze time
+                % -- of the human controlled robot affects the alpha update
+                if ConfigSetup == "FreezeTime"
+                    % -- This is where we will calculate the amount of time 
+                    % -- the human controlled robot was "frozen" for.
+                    
+                end
+
                 % -- set alpha to be constant value
-                alpha(k+1,1) = 1.0;
+%                 alpha(k+1,1) = 1.0;
                 % maximize mutual rb_information
     %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, eta, hfun, om, r_visible);
     %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, om, lfn);
