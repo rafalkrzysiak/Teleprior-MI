@@ -569,7 +569,7 @@ for jj=1:param.nsim
         if param.debug
             debug_plot(Xs(:,k,1,:), Xh(:,k,1,:), k, p(:,:,k,:), param, ...
                        bin_map, fiducial, jj, X0, saveFrames, target_loc, ...
-                       I(:,:,1,:), alpha, TotalDist, pDxMxT, pDyMyT)
+                       I(:,:,1,:), alpha, TotalDist, pDxMxT, pDyMyT, ConfigSetup)
         end
         
         % -- end the msimulation if the target was found

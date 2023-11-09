@@ -1,6 +1,6 @@
 function debug_plot(Xs, Xh, k, p, param, bin_map, fiducial, ...
                     jj, X0, saveFrames, target_locations, I, ...
-                    alpha, TotalDist, pDxMxT, pDyMyT)
+                    alpha, TotalDist, pDxMxT, pDyMyT, ConfigSetup)
 % This function is to be used as a debugging tool
 % a figure is displayed to show what is happening while the mutual
 % information code with a particle filter is running
@@ -181,18 +181,26 @@ for kk = 1:param.agents
     end
 end
 
-subplot(1,3,3);
-for kk = 1:param.agents
-    if kk ~=1
-        hold on;
-        plot(1:1:k, TotalDist(1:k,1,kk), self_l_color(kk), 'LineWidth', 2)
-        xlabel('Time (s)', 'FontSize', 16);
-        ylabel('Total distance', 'FontSize', 16); 
-        title('Total distance', 'fontsize', 18);
-        axis square;
+if ConfigSetup == "TotalDist"
+
+    subplot(1,3,3);
+    for kk = 1:param.agents
+        if kk ~=1
+            hold on;
+            plot(1:1:k, TotalDist(1:k,1,kk), self_l_color(kk), 'LineWidth', 2)
+            xlabel('Time (s)', 'FontSize', 16);
+            ylabel('Total distance', 'FontSize', 16); 
+            title('Total distance', 'fontsize', 18);
+            axis square;
+        end
     end
+    legend('robot 1', 'robot 2');
+
 end
-legend('robot 1', 'robot 2');
+
+if ConfigSetup == "FreezeTime"
+    
+end
 
 figure(50); gcf; clf;
 plot(1:1:k, pDxMxT(1:k,1), 'k-', 'LineWidth', 2);
