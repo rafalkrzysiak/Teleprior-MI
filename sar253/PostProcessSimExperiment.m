@@ -498,11 +498,11 @@ for RWtest = 1:size(RW_files, 1)
                         for id = 1:size(IDs, 1)
                             if num2str(IDs(id)) == RWparticipant_folders(RWparticipant).name
                                 % -- get the time difference and store it
-                                if cond ~= 4
+                                % if cond ~= 4
                                     RWtestTime(condCount(1,cond), cond) =  abs(timeArray(id, cond) - RWTestData.simdata.time);
-                                else
-                                    RWtestTime(condCount(1,cond), cond) = abs(timeArray(id, cond)+timeArray(id, cond+1) - RWTestData.simdata.time);
-                                end
+                                % else
+                                %     RWtestTime(condCount(1,cond), cond) = abs(timeArray(id, cond) + timeArray(id, cond+1) - RWTestData.simdata.time);
+                                % end
                                 RWtimecount = RWtimecount + 1;
                                 break;
                             end
