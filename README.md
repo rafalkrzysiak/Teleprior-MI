@@ -1,3 +1,10 @@
-# Human-Subject-Experiment
+# Inferring prior knowledge for robot control
 
-folder data contains all data, src contains all code, and doc contains plots
+## folders
+- data contains experiment data
+- src contains postprocessing and analysis scripts
+- sar253 contains simulation scripts
+
+## other sources
+
+

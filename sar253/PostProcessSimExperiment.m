@@ -7,18 +7,18 @@ function PostProcessSimExperiment()
 % -- Written by: Rafal Krzysiak
 
 % -- clear verything prior to running this script
-clear all variables
+clear variables
 
 % -- import the data saved
 %SimExp = ImportAllData();
 
 % -- plot which robot found the missing target 
-%PlotWhoFoundTarget(SimExp);
-%PlotWhoFoundTarget_testSet();
+% PlotWhoFoundTarget(SimExp);
+% PlotWhoFoundTarget_testSet();
 TimeGained();
 
 % -- plot all trajectories 
-%PlotAllTraj(SimExp);
+% PlotAllTraj(SimExp);
 % PlotTrajTestDataSet();
 % PlotRWControls();
 % ControlInputMapped();
