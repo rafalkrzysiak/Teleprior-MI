@@ -33,6 +33,7 @@ if nargin < 1
     iter_num = 1;
     saveIn = strcat("data/combination", num2str(iter_num));
     alpha = 1;
+    fps=2; % frame rate for robot data --SB
     % -- the disturbance in the particles jusitification:
     % -- 1. the robot itself can successfully localize itself great
     % -- 2. the target has a small amount of jitter, it might move ever so slightly
@@ -479,9 +480,10 @@ for jj=1:param.nsim
 
                     % -- This is where we will calculate the amount of time 
                     % -- the human controlled robot was "frozen" for.
-                    if k > 2*param.tau+3
-                        feature_k = sum(f_time(k-2*param.tau:k, 1));
-    
+                    if k > fps*param.tau+3
+                        feature_k = sum(f_time(k-fps*param.tau:k, 1));
+                        % it's actually fraction of time spent freezing so
+                        % need to divide by fps*param.tau ? check value and compare with plots -- SB
                         [alpha(k+1,1), pDxMxT(k+1,1), pDyMyT(k+1,1)] = ...
                             UpdateAlpha(feature_k, pdstr, xdstr, alpha(k,1));
                     else
@@ -584,11 +586,13 @@ for jj=1:param.nsim
     simdata(jj).param = param; % -- save all the parameters used in the simulation
     simdata(jj).Xh = Xh; % -- estimate robot position
     simdata(jj).Xs = Xs; % -- simulated robot position
+    simdata(jj).alpha= alpha; % alpha value -- SB?
     %simdata(jj).p = p; % -- particle state of all robots
     %simdata(jj).P = P; % -- covariance
     simdata(jj).vel = vel; % -- velocity values throughout the whole simulation
     simdata(jj).omega = omega; % -- omega values throughout the whole simulation
     simdata(jj).tloc = target_loc; % -- target location for the simulation
+    % is time here in frames or seconds. it should be seconds? 
     simdata(jj).time = time(jj); % -- time it took to finish the simulation
     simdata(jj).success = result(jj); % -- flags that state which sim found the target
     simdata(jj).Z = Z; % -- measurement of the target w.r.t robot

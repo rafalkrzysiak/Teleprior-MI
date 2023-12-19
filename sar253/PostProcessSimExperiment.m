@@ -373,7 +373,7 @@ conditions = ["condition_1",...
 Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
 
 % -- pull list of test folders within test folder
-parentDir = "data/test";
+parentDir = "data/alpha_t/TotalDist";
 parentDir_RW = "data/RandomWalk";
 parentDir0 = "data/alpha_0";
 parentDir1 = "data/alpha_1";
@@ -383,8 +383,8 @@ RW_files = dir(parentDir_RW);
 files0 = dir(parentDir0);
 files1 = dir(parentDir1);
 
-timeArray = csvread('TimeToFind.csv');
-IDs = csvread('IDList_Completed.csv', 1);
+timeArray = csvread('../data/TimeToFind.csv');
+IDs = csvread('../src/IDList_Completed.csv', 1);
 
 % -- initialize the counter
 i = 1; 
@@ -401,7 +401,8 @@ timecount = 0;
 for test = 1:size(files, 1)
 
     % -- make sure that we capture a number not '.' or '..'
-    if (files(test).name ~= "." && files(test).name ~= ".." && files(test).name ~= ".DS_Store")
+    if (files(test).name ~= "." && files(test).name ~= ".." && ...
+            files(test).name ~= ".DS_Store")
         
         % -- within the test number folder, get the participant numbers
         subDir = strcat(parentDir, "/", files(test).name);
@@ -410,7 +411,9 @@ for test = 1:size(files, 1)
         % -- begin looping through all the participant folders
         for participant = 1:size(participant_folders, 1)
             % -- make sure that we capture a number not '.' or '..'
-            if (participant_folders(participant).name ~= "." && participant_folders(participant).name ~= ".." && participant_folders(participant).name ~= ".DS_Store")
+            if (participant_folders(participant).name ~= "." && ...
+                    participant_folders(participant).name ~= ".." && ...
+                    participant_folders(participant).name ~= ".DS_Store")
             
                 % -- create participant directory
                 partDir = strcat(subDir,"/",participant_folders(participant).name);
@@ -432,11 +435,18 @@ for test = 1:size(files, 1)
                         for id = 1:size(IDs, 1)
                             if num2str(IDs(id)) == participant_folders(participant).name
                                 % -- get the time difference and store it
-                                if cond ~= 4
-                                    testTime(condCount(1,cond), cond) = abs(timeArray(id, cond) - TestData.simdata.time);
-                                else
-                                    testTime(condCount(1,cond), cond) = abs(timeArray(id, cond) + timeArray(id, cond+1) - TestData.simdata.time);
-                                end
+                                % why absolute value, it should be always
+                                % more if the autonomous robot found it,
+                                % no? - SB
+%                                 if cond ~= 4
+                                    testTime(condCount(1,cond), cond) = ...
+                                        timeArray(id, cond) - TestData.simdata.time/2;
+                                  % Commenting this out because we want to
+                                  % ignore deception - SB
+%                                 else
+%                                     testTime(condCount(1,cond), cond) = ...
+%                                         abs(timeArray(id, cond) + timeArray(id, cond+1) - TestData.simdata.time);
+%                                 end
                                 timecount = timecount + 1;
                                 break;
                             end
@@ -467,7 +477,8 @@ i = 1;
 for RWtest = 1:size(RW_files, 1)
 
     % -- make sure that we capture a number not '.' or '..'
-    if (RW_files(RWtest).name ~= "." && RW_files(RWtest).name ~= ".." && RW_files(RWtest).name ~= ".DS_Store")
+    if (RW_files(RWtest).name ~= "." && RW_files(RWtest).name ~= ".." && ...
+            RW_files(RWtest).name ~= ".DS_Store")
         
         % -- within the test number folder, get the participant numbers
         RWsubDir = strcat(parentDir_RW, "/", RW_files(RWtest).name);
@@ -476,7 +487,9 @@ for RWtest = 1:size(RW_files, 1)
         % -- begin looping through all the participant folders
         for RWparticipant = 1:size(RWparticipant_folders, 1)
             % -- make sure that we capture a number not '.' or '..'
-            if (RWparticipant_folders(RWparticipant).name ~= "." && RWparticipant_folders(RWparticipant).name ~= ".." && RWparticipant_folders(RWparticipant).name ~= ".DS_Store")
+            if (RWparticipant_folders(RWparticipant).name ~= "." && ...
+                    RWparticipant_folders(RWparticipant).name ~= ".." && ...
+                    RWparticipant_folders(RWparticipant).name ~= ".DS_Store")
             
                 % -- create participant directory
                 RWpartDir = strcat(RWsubDir,"/",RWparticipant_folders(RWparticipant).name);
@@ -499,9 +512,11 @@ for RWtest = 1:size(RW_files, 1)
                             if num2str(IDs(id)) == RWparticipant_folders(RWparticipant).name
                                 % -- get the time difference and store it
                                 % if cond ~= 4
-                                    RWtestTime(condCount(1,cond), cond) =  abs(timeArray(id, cond) - RWTestData.simdata.time);
+                                    RWtestTime(condCount(1,cond), cond) =  ...
+                                        timeArray(id, cond) - RWTestData.simdata.time/2;
                                 % else
-                                %     RWtestTime(condCount(1,cond), cond) = abs(timeArray(id, cond) + timeArray(id, cond+1) - RWTestData.simdata.time);
+                                %     RWtestTime(condCount(1,cond), cond) = ...
+                                %   abs(timeArray(id, cond) + timeArray(id, cond+1) - RWTestData.simdata.time);
                                 % end
                                 RWtimecount = RWtimecount + 1;
                                 break;
@@ -533,7 +548,8 @@ i = 1;
 for test0 = 1:size(files0, 1)
 
     % -- make sure that we capture a number not '.' or '..'
-    if (files0(test0).name ~= "." && files0(test0).name ~= ".." && files0(test0).name ~= ".DS_Store")
+    if (files0(test0).name ~= "." && files0(test0).name ~= ".." && ...
+            files0(test0).name ~= ".DS_Store")
         
         % -- within the test number folder, get the participant numbers
         subDir0 = strcat(parentDir0, "/", files0(test0).name);
@@ -542,7 +558,9 @@ for test0 = 1:size(files0, 1)
         % -- begin looping through all the participant folders
         for participant0 = 1:size(participant_folders0, 1)
             % -- make sure that we capture a number not '.' or '..'
-            if (participant_folders0(participant0).name ~= "." && participant_folders0(participant0).name ~= ".." && participant_folders(participant).name ~= ".DS_Store")
+            if (participant_folders0(participant0).name ~= "." && ...
+                    participant_folders0(participant0).name ~= ".." && ...
+                    participant_folders0(participant0).name ~= ".DS_Store")
             
                 % -- create participant directory
                 partDir0 = strcat(subDir0,"/",participant_folders0(participant0).name);
@@ -564,11 +582,16 @@ for test0 = 1:size(files0, 1)
                         for id = 1:size(IDs, 1)
                             if num2str(IDs(id)) == participant_folders0(participant0).name
                                 % -- get the time difference and store it
-                                if cond ~= 4
-                                    testTime0(condCount(1,cond), cond) = abs(timeArray(id, cond) - TestData.simdata.time);
-                                else
-                                    testTime0(condCount(1,cond), cond) = abs(timeArray(id, cond)+timeArray(id, cond+1) - TestData.simdata.time);
-                                end
+%                                 if cond ~= 4
+                                    testTime0(condCount(1,cond), cond) = ...
+                                        timeArray(id, cond) - TestData.simdata.time/2;
+                                  % Commenting this out because we want to
+                                  % ignore deception  - SB
+%                                 else
+%                                     testTime0(condCount(1,cond), cond) = ...
+%                                                   abs(timeArray(id, cond)+ ...
+%                                           timeArray(id, cond+1) - TestData.simdata.time);
+%                                 end
                                 timecount0 = timecount0 + 1;
                                 break;
                             end
@@ -599,7 +622,8 @@ i = 1;
 for test1 = 1:size(files1, 1)
 
     % -- make sure that we capture a number not '.' or '..'
-    if (files1(test1).name ~= "." && files1(test1).name ~= ".." && files1(test1).name ~= ".DS_Store")
+    if (files1(test1).name ~= "." && files1(test1).name ~= ".." && ...
+            files1(test1).name ~= ".DS_Store")
         
         % -- within the test number folder, get the participant numbers
         subDir1 = strcat(parentDir1, "/", files1(test1).name);
@@ -608,7 +632,9 @@ for test1 = 1:size(files1, 1)
         % -- begin looping through all the participant folders
         for participant1 = 1:size(participant_folders1, 1)
             % -- make sure that we capture a number not '.' or '..'
-            if (participant_folders1(participant1).name ~= "." && participant_folders1(participant1).name ~= ".." && participant_folders(participant).name ~= ".DS_Store")
+            if (participant_folders1(participant1).name ~= "." && ...
+                    participant_folders1(participant1).name ~= ".." && ...
+                    participant_folders(participant).name ~= ".DS_Store")
             
                 % -- create participant directory
                 partDir1 = strcat(subDir1,"/",participant_folders1(participant1).name);
@@ -630,11 +656,16 @@ for test1 = 1:size(files1, 1)
                         for id = 1:size(IDs, 1)
                             if num2str(IDs(id)) == participant_folders1(participant1).name
                                 % -- get the time difference and store it
-                                if cond ~= 4
-                                    testTime1(condCount(1,cond), cond) = abs(timeArray(id, cond) - TestData.simdata.time);
-                                else
-                                    testTime1(condCount(1,cond), cond) = abs(timeArray(id, cond)+timeArray(id, cond+1) - TestData.simdata.time);
-                                end
+%                                 if cond ~= 4
+                                    testTime1(condCount(1,cond), cond) = ...
+                                        timeArray(id, cond) - TestData.simdata.time/2;
+                                  % Commenting this out because we want to
+                                  % ignore deception -SB  
+%                                 else
+%                                     testTime1(condCount(1,cond), cond) = ...
+%                                         abs(timeArray(id, cond)+...
+%                                         timeArray(id, cond+1) - TestData.simdata.time);
+%                                 end
                                 timecount1 = timecount1 + 1;
                                 break;
                             end
@@ -657,6 +688,13 @@ stdTimeArrayComp1 = [std(testTime1(testTime1(:,1) ~= 0, 1)), ...
                     std(testTime1(testTime1(:,3) ~= 0, 3)), ...
                     std(testTime1(testTime1(:,4) ~= 0, 4))];
 
+% save workspace and then just select and run the rest of the script to
+% save time
+
+save('timegained_workspace.mat')
+
+%% run this section separately to save time
+load('timegained_workspace.mat')
 % -- create figure
 figure(1); clf; gcf;
 
@@ -664,36 +702,69 @@ figure(1); clf; gcf;
 errorbar(0:1:3, ...
          [meanTimeArrayComp(1,1), RWmeanTimeArrayComp(1,1), meanTimeArrayComp0(1,1), meanTimeArrayComp1(1,1)],...
          [stdTimeArrayComp(1,1), RWstdTimeArrayComp(1,1), stdTimeArrayComp0(1,1), stdTimeArrayComp1(1,1)],...
-         'LineWidth',2); hold on;
+         '^','markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto'); hold on;
 
 errorbar(0:1:3, ...
          [meanTimeArrayComp(1,2), RWmeanTimeArrayComp(1,2), meanTimeArrayComp0(1,2), meanTimeArrayComp1(1,2)],...
          [stdTimeArrayComp(1,2), RWstdTimeArrayComp(1,2), stdTimeArrayComp0(1,2), stdTimeArrayComp1(1,2)],...
-         'LineWidth',2); hold on;
+         's','markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto'); hold on;
 
 errorbar(0:1:3, ...
          [meanTimeArrayComp(1,3), RWmeanTimeArrayComp(1,3), meanTimeArrayComp0(1,3), meanTimeArrayComp1(1,3)],...
          [stdTimeArrayComp(1,3), RWstdTimeArrayComp(1,3), stdTimeArrayComp0(1,3), stdTimeArrayComp1(1,3)],...
-         'LineWidth',2); hold on;
+         'd','markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto'); hold on;
 
 errorbar(0:1:3, ...
          [meanTimeArrayComp(1,4), RWmeanTimeArrayComp(1,4), meanTimeArrayComp0(1,4), meanTimeArrayComp1(1,4)],...
          [stdTimeArrayComp(1,4), RWstdTimeArrayComp(1,4), stdTimeArrayComp0(1,4), stdTimeArrayComp1(1,4)],...
-         'LineWidth',2); 
+         'o', 'markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto'); 
 
 legend('No Map, No Target',...
        'No Map, Yes Target',...
        'Yes Map, No Target',...
        'Yes Map, Yes Target');
 
-ylabel("Time improved");
+ylabel("Time gained (s)");
 
 % -- make the plot nice
 ax = gca;
 ax.FontSize = 18;
-ticklabels({'a(f)', 'RW', 'a=0', 'a=1'});
+set(gca, 'xtick', 0:3)
+xticklabels({'\alpha(t)', 'random', '\alpha=0', '\alpha=1'});
 
+
+% -- create single figure
+figure(2); clf; gcf;
+
+% -- populate figure
+% Why is this not the same as when we use robot found flag only? -- SB
+plot(0:1:3, [sum(testTime(:,1)>0)/size(testTime,1); sum(RWtestTime(:,1)>0)/size(RWtestTime,1); ...
+             sum(testTime0(:,1)>0)/size(testTime0,1); sum(testTime1(:,1)>0)/size(testTime1,1)], ...
+     '^m', 'MarkerSize', 18, 'LineWidth', 2); hold on;
+plot(0:1:3, [sum(testTime(:,2)>0)/size(testTime,1); sum(RWtestTime(:,2)>0)/size(RWtestTime,1); ...
+             sum(testTime0(:,2)>0)/size(testTime0,1); sum(testTime1(:,2)>0)/size(testTime1,1)], ...
+     'sr', 'MarkerSize', 18, 'LineWidth', 2); hold on;
+plot(0:1:3, [sum(testTime(:,3)>0)/size(testTime,1); sum(RWtestTime(:,3)>0)/size(RWtestTime,1); ...
+             sum(testTime0(:,3)>0)/size(testTime0,1); sum(testTime1(:,3)>0)/size(testTime1,1)], ...
+     'db', 'MarkerSize', 18, 'LineWidth', 2); hold on;
+plot(0:1:3, [sum(testTime(:,4)>0)/size(testTime,1); sum(RWtestTime(:,4)>0)/size(RWtestTime,1); ...
+             sum(testTime0(:,4)>0)/size(testTime0,1); sum(testTime1(:,4)>0)/size(testTime1,1)], ...
+     'ok', 'MarkerSize', 18, 'LineWidth', 2);
+
+% -- legend
+legend('No Map, No Target',...
+       'No Map, Yes Target',...
+       'Yes Map, No Target',...
+       'Yes Map, Yes Target');
+
+% -- make figure look nice
+ylabel("Fraction of trials target found by auto. robots");
+ax = gca; 
+ax.FontSize = 18;
+set(gca, 'xtick', 0:3)
+xticklabels({'\alpha(t)', 'random', '\alpha=0', '\alpha=1'});
 end
+
 
 function PlotWhoFoundTarget_testSet()
 
@@ -707,7 +778,7 @@ conditions = ["condition_1",...
 Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
 
 % -- pull list of test folders within test folder
-parentDir = "data/test";
+parentDir = "data/alpha_t/TotalDist";
 parentDir_RW = "data/RandomWalk";
 parentDir0 = "data/alpha_0";
 parentDir1 = "data/alpha_1";
@@ -905,13 +976,13 @@ figure(2); clf; gcf;
 
 % -- populate figure
 plot(0:1:3, [testset.Y1(1,2); testset.RWY1(1,2); testset.Y10(1,2); testset.Y11(1,2)], ...
-     'sm', 'MarkerSize', 18, 'LineWidth', 2); hold on;
+     '^m', 'MarkerSize', 18, 'LineWidth', 2); hold on;
 plot(0:1:3, [testset.Y2(1,2); testset.RWY2(1,2); testset.Y20(1,2); testset.Y21(1,2)], ...
-     'or', 'MarkerSize', 18, 'LineWidth', 2); hold on;
+     'sr', 'MarkerSize', 18, 'LineWidth', 2); hold on;
 plot(0:1:3, [testset.Y3(1,2); testset.RWY3(1,2); testset.Y30(1,2); testset.Y31(1,2)], ...
-     '^b', 'MarkerSize', 18, 'LineWidth', 2); hold on;
+     'db', 'MarkerSize', 18, 'LineWidth', 2); hold on;
 plot(0:1:3, [testset.Y4(1,2); testset.RWY4(1,2); testset.Y40(1,2); testset.Y41(1,2)], ...
-     'kx', 'MarkerSize', 18, 'LineWidth', 2);
+     'ok', 'MarkerSize', 18, 'LineWidth', 2);
 
 % -- legend
 legend('No Map, No Target',...
@@ -920,10 +991,11 @@ legend('No Map, No Target',...
        'Yes Map, Yes Target');
 
 % -- make figure look nice
-ylabel("Percent time target found by autonomous robots");
+ylabel("Fraction of time target found by auto. robots");
 ax = gca; 
 ax.FontSize = 18;
-xticklabels({'a(f)', 'RW', 'a=0', 'a=1'});
+set(gca, 'xtick', 0:3)
+xticklabels({'\alpha(t)', 'random', '\alpha=0', '\alpha=1'});
 end
 
 function SingleFigBarPlot(Y1, RWY1, Y2, RWY2, Y3, RWY3, Y4, RWY4)
@@ -1124,7 +1196,7 @@ L= [18 9];
 self_color = ["k", "r", "g"];
 r_pos = ["k.", "r.", "g."];
 r_vel = ["k-", "r-", "g-"];
-
+i=1;
 % -- begin looping through each test folder
 for RWtest = 1:size(RW_files, 1)
 
@@ -1168,17 +1240,17 @@ for RWtest = 1:size(RW_files, 1)
 
                         % -- plot the target location
                         plot(RWTestData.simdata.Xs(4,1,1,1), RWTestData.simdata.Xs(5,1,1,1),...
-                                      "ms", MarkerSize=16, LineWidth=3);
+                                      "ms", 'MarkerSize',16, 'LineWidth',3);
                         
                         for r = 1:3
                             subplot(2,2,[1,2]);
                             % -- plot the position of the robots in the domain
                             hold on; plot(RWTestData.simdata.Xs(1,k,1,r), RWTestData.simdata.Xs(2,k,1,r), ...
-                                          r_pos(r), MarkerSize=36); % -- ref robot position
+                                          r_pos(r), 'MarkerSize',36); % -- ref robot position
 %                             hold on; plot(RWTestData.simdata.Xs(1,k,1,2), RWTestData.simdata.Xs(2,k,1,2), ...
-%                                           'r.', MarkerSize=36); % -- Auto 1 robot position
+%                                           'r.', 'MarkerSize',36); % -- Auto 1 robot position
 %                             hold on; plot(RWTestData.simdata.Xs(1,k,1,3), RWTestData.simdata.Xs(2,k,1,3), ...
-%                                           'g.', MarkerSize=36); % -- Auto 2 robot position
+%                                           'g.', 'MarkerSize',36); % -- Auto 2 robot position
                             % -- plot the orientation vector
                             line([RWTestData.simdata.Xs(1,k,1,r),...
                                   RWTestData.simdata.Xs(1,k,1,r) + 3*cos(RWTestData.simdata.Xs(3,k,1,r)) ],...
@@ -1191,11 +1263,11 @@ for RWtest = 1:size(RW_files, 1)
                             % -- In the next subplot, plot the velocities of the robots over time
                             subplot(2,2,3);
                             hold on; plot(RWTestData.simdata.vel(1,1:k,1,r), ...
-                                          r_vel(r), LineWidth=2); % -- ref robot velocity
+                                          r_vel(r), 'LineWidth',2); % -- ref robot velocity
 %                             hold on; plot(RWTestData.simdata.vel(1,1:k,1,2), ...
-%                                           'r-', LineWidth=2); % -- Auto 1 robot velocity
+%                                           'r-', 'LineWidth',2); % -- Auto 1 robot velocity
 %                             hold on; plot(RWTestData.simdata.vel(1,1:k,1,3), ...
-%                                           'g-', LineWidth=2); % -- Auto 2 robot velocity
+%                                           'g-', 'LineWidth',2); % -- Auto 2 robot velocity
                             xlabel('Time step');
                             ylabel('Velocity (m/s)');
                             ax = gca; 
@@ -1204,11 +1276,11 @@ for RWtest = 1:size(RW_files, 1)
                             % -- In the next subplot, plot the turn rates of the robots over time
                             subplot(2,2,4);
                             hold on; plot(RWTestData.simdata.omega(1,1:k,1,r), ...
-                                          r_vel(r), LineWidth=2); % -- ref robot turn rate
+                                          r_vel(r), 'LineWidth',2); % -- ref robot turn rate
 %                             hold on; plot(RWTestData.simdata.omega(1,1:k,1,2), ...
-%                                           'r-', LineWidth=2); % -- Auto 1 robot turn rate
+%                                           'r-', 'LineWidth',2); % -- Auto 1 robot turn rate
 %                             hold on; plot(RWTestData.simdata.omega(1,1:k,1,3), ...
-%                                           'g-', LineWidth=2); % -- Auto 2 robot turn rate
+%                                           'g-', 'LineWidth',2); % -- Auto 2 robot turn rate
                         
                             xlabel('Time step');
                             ylabel('Turn rate (rad/s)');

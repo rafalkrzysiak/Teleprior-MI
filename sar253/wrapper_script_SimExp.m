@@ -51,6 +51,7 @@ for test = 1:test_size % -- looping through every environment
 
     % tau should be param.tau but for that paramconfig should be called outside
     % the for loop--can we do that?
+    % set tau 15 seconds for distance and 20 seconds for freezing -- SB
     tau=20;
 %     [pdstr, xdstr]=calc_pdf_feature(tau, ids_train);
 
