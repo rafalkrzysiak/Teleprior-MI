@@ -441,7 +441,7 @@ for jj=1:param.nsim
                     % fraction of time spent staying in place, which is why we
                     % update the function to work on features instead of
                     % distance
-                    if k > 2*param.tau+3
+                    if k > fps*param.tau+3
                         feature_k = sum(d(k-2*param.tau:k, 1));
     
                         [alpha(k+1,1), pDxMxT(k+1,1), pDyMyT(k+1,1)] = ...
@@ -483,7 +483,9 @@ for jj=1:param.nsim
                     if k > fps*param.tau+3
                         feature_k = sum(f_time(k-fps*param.tau:k, 1));
                         % it's actually fraction of time spent freezing so
-                        % need to divide by fps*param.tau ? check value and compare with plots -- SB
+                        % need to divide by fps*param.tau ? 
+                        % check that the value lies between 0-1 by running it through a test trial
+                        % to make sure that this is correct -- SB
                         [alpha(k+1,1), pDxMxT(k+1,1), pDyMyT(k+1,1)] = ...
                             UpdateAlpha(feature_k, pdstr, xdstr, alpha(k,1));
                     else
@@ -592,7 +594,7 @@ for jj=1:param.nsim
     simdata(jj).vel = vel; % -- velocity values throughout the whole simulation
     simdata(jj).omega = omega; % -- omega values throughout the whole simulation
     simdata(jj).tloc = target_loc; % -- target location for the simulation
-    % is time here in frames or seconds. it should be seconds? 
+    % time is in frames, now factored in the analysis 
     simdata(jj).time = time(jj); % -- time it took to finish the simulation
     simdata(jj).success = result(jj); % -- flags that state which sim found the target
     simdata(jj).Z = Z; % -- measurement of the target w.r.t robot

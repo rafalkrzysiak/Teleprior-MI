@@ -396,10 +396,11 @@ testTime1 = testTime;
 condCount = ones(1,4);
 
 timecount = 0;
+fps=2; % frame rate for simdata --SB
 
 % -- begin looping through each test folder
 for test = 1:size(files, 1)
-
+    % can collapse all these into a single function for efficiency --SB
     % -- make sure that we capture a number not '.' or '..'
     if (files(test).name ~= "." && files(test).name ~= ".." && ...
             files(test).name ~= ".DS_Store")
@@ -435,12 +436,12 @@ for test = 1:size(files, 1)
                         for id = 1:size(IDs, 1)
                             if num2str(IDs(id)) == participant_folders(participant).name
                                 % -- get the time difference and store it
-                                % why absolute value, it should be always
-                                % more if the autonomous robot found it,
-                                % no? - SB
 %                                 if cond ~= 4
+                                % only count if the difference is positive
+                                if timeArray(id, cond) - TestData.simdata.time/fps > 0
                                     testTime(condCount(1,cond), cond) = ...
-                                        timeArray(id, cond) - TestData.simdata.time/2;
+                                        timeArray(id, cond) - TestData.simdata.time/fps;
+                                end
                                   % Commenting this out because we want to
                                   % ignore deception - SB
 %                                 else
@@ -512,8 +513,11 @@ for RWtest = 1:size(RW_files, 1)
                             if num2str(IDs(id)) == RWparticipant_folders(RWparticipant).name
                                 % -- get the time difference and store it
                                 % if cond ~= 4
+                                % only count if the difference is positive
+                                if timeArray(id, cond) - RWTestData.simdata.time/fps > 0
                                     RWtestTime(condCount(1,cond), cond) =  ...
-                                        timeArray(id, cond) - RWTestData.simdata.time/2;
+                                        timeArray(id, cond) - RWTestData.simdata.time/fps;
+                                end
                                 % else
                                 %     RWtestTime(condCount(1,cond), cond) = ...
                                 %   abs(timeArray(id, cond) + timeArray(id, cond+1) - RWTestData.simdata.time);
@@ -583,8 +587,10 @@ for test0 = 1:size(files0, 1)
                             if num2str(IDs(id)) == participant_folders0(participant0).name
                                 % -- get the time difference and store it
 %                                 if cond ~= 4
+                                if timeArray(id, cond) - TestData.simdata.time/fps > 0
                                     testTime0(condCount(1,cond), cond) = ...
-                                        timeArray(id, cond) - TestData.simdata.time/2;
+                                        timeArray(id, cond) - TestData.simdata.time/fps;
+                                end
                                   % Commenting this out because we want to
                                   % ignore deception  - SB
 %                                 else
@@ -634,7 +640,7 @@ for test1 = 1:size(files1, 1)
             % -- make sure that we capture a number not '.' or '..'
             if (participant_folders1(participant1).name ~= "." && ...
                     participant_folders1(participant1).name ~= ".." && ...
-                    participant_folders(participant).name ~= ".DS_Store")
+                    participant_folders1(participant1).name ~= ".DS_Store")
             
                 % -- create participant directory
                 partDir1 = strcat(subDir1,"/",participant_folders1(participant1).name);
@@ -657,8 +663,10 @@ for test1 = 1:size(files1, 1)
                             if num2str(IDs(id)) == participant_folders1(participant1).name
                                 % -- get the time difference and store it
 %                                 if cond ~= 4
+                                if timeArray(id, cond) - TestData.simdata.time/fps > 0
                                     testTime1(condCount(1,cond), cond) = ...
-                                        timeArray(id, cond) - TestData.simdata.time/2;
+                                        timeArray(id, cond) - TestData.simdata.time/fps;
+                                end
                                   % Commenting this out because we want to
                                   % ignore deception -SB  
 %                                 else

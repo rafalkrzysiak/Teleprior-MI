@@ -25,7 +25,7 @@ markertypes={'o', 's', 'd', '^'};
 
 for ii=1:numel(obsvTime)
     
-    figure(1); gcf; clf;
+    figure(ii); gcf; clf;
     dstr_speed=extract_speed_data(obsvTime(ii), ID_Data, ...
         dtTrack, dtCommand); % speed
     subplot(2,2,1);
@@ -65,7 +65,7 @@ for ii=1:numel(obsvTime)
 %         sprintf('../doc/plots/pdistr_%ds.png', obsvTime(ii)))
 end
 
-figure(2); gcf;clf;
+figure(ii+1); gcf;clf;
 % subplot(1,2,1);
 % plot(obsvTime, kldist14, 'linewidth', 2);
 % set(gca, 'fontsize', 16);

@@ -14,7 +14,7 @@ switch feature
         end
     case 'turnrate'
         for ii=tauframes:size(data,2)
-            data1(ii-tauframes+1)=sum(data(ii-tauframes+1:ii));
+            data1(ii-tauframes+1)=mean(data(ii-tauframes+1:ii));
         end
     case 'freezing'
         for ii=tauframes:size(data,2)
