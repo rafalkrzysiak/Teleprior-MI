@@ -20,7 +20,7 @@ ID_Data=csvread('../src/IDList_Completed.csv',1,0);
 % -- Options so far:
 % -- "TotalDist"
 % -- "FreezeTime"
-ConfigSetup = "FreezeTime"; 
+ConfigSetup = "TotalDist"; 
 
 % -- initialize the parameters of the simulation
 % [param, maps, folder, bias, share_info, target_locations, agents, file_id] = ...
@@ -53,6 +53,7 @@ for test = 1:test_size % -- looping through every environment
     % the for loop--can we do that?
     % set tau 15 seconds for distance and 20 seconds for freezing -- SB
     tau=30;
+    tau=15;
 %     [pdstr, xdstr]=calc_pdf_feature(tau, ids_train);
 
     % -- getting the values for the freeze time
@@ -72,7 +73,7 @@ for test = 1:test_size % -- looping through every environment
     img = imbinarize(img); % -- binarize the image
     
     % -- create a folder that correspond to the environment
-    test_folder = strcat("data/Varying alpha/FreezeTime/",sprintf('%05d',test),"/");
+    test_folder = strcat("data/Varying alpha/TotalDist/",sprintf('%05d',test),"/");
     mkdir(test_folder);
 
     for participant = 1:size(ids_test, 1)

@@ -26,6 +26,7 @@ param.norm = 1;
 share_info = 1;
 param.alphaBegin = 0.5; 
 param.tau = 30;
+param.tau = 15;
 param.share = 1;
 param.bias = 0;
 param.agents = 3; % -- define the total number of robots to be in the domain
