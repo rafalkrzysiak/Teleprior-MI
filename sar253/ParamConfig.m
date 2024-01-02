@@ -4,6 +4,7 @@ function [param, maps, folder, bias, share_info, target_locations, agents, file_
 % -- the mutual information based control Search and rescue simulation
 
 param.dt = 0.5; % -- timestep (s)
+param.fps = 2;
 [~, param.T, tloc, file_id] = RobotExperimentDataSet(exp_id, cond); %2500/param.dt; % -- max time (s)
 param.N = 1200; % -- number of particles in the simulation
 param.nsim = 1; % -- number of simulations per combination
@@ -24,7 +25,7 @@ bias = [0]; % -- flag for enabling/disabling bias of the human operated robot
 param.norm = 1;
 share_info = 1;
 param.alphaBegin = 0.5; 
-param.tau = 20;
+param.tau = 30;
 param.share = 1;
 param.bias = 0;
 param.agents = 3; % -- define the total number of robots to be in the domain

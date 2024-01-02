@@ -441,7 +441,7 @@ for jj=1:param.nsim
                     % fraction of time spent staying in place, which is why we
                     % update the function to work on features instead of
                     % distance
-                    if k > fps*param.tau+3
+                    if k > param.fps*param.tau+3
                         feature_k = sum(d(k-2*param.tau:k, 1));
     
                         [alpha(k+1,1), pDxMxT(k+1,1), pDyMyT(k+1,1)] = ...
@@ -480,8 +480,8 @@ for jj=1:param.nsim
 
                     % -- This is where we will calculate the amount of time 
                     % -- the human controlled robot was "frozen" for.
-                    if k > fps*param.tau+3
-                        feature_k = sum(f_time(k-fps*param.tau:k, 1));
+                    if k > param.fps*param.tau+3
+                        feature_k = sum(f_time(k-param.fps*param.tau:k, 1))/(param.fps*param.tau);
                         % it's actually fraction of time spent freezing so
                         % need to divide by fps*param.tau ? 
                         % check that the value lies between 0-1 by running it through a test trial
