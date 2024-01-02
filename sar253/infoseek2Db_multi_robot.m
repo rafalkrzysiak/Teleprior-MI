@@ -441,7 +441,7 @@ for jj=1:param.nsim
                     % fraction of time spent staying in place, which is why we
                     % update the function to work on features instead of
                     % distance
-                    if k > fps*param.tau+3
+                    if k > param.fps*param.tau+3
                         feature_k = sum(d(k-2*param.tau:k, 1));
     
                         [alpha(k+1,1), pDxMxT(k+1,1), pDyMyT(k+1,1)] = ...
