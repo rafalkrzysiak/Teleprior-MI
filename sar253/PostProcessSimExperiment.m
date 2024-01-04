@@ -15,11 +15,11 @@ clear variables
 % -- plot which robot found the missing target 
 % PlotWhoFoundTarget(SimExp);
 % PlotWhoFoundTarget_testSet();
-TimeGained();
+% TimeGained();
 
 % -- plot all trajectories 
 % PlotAllTraj(SimExp);
-% PlotTrajTestDataSet();
+PlotTrajTestDataSet();
 % PlotRWControls();
 % ControlInputMapped();
 
@@ -64,20 +64,21 @@ cond_names=["xMxT","xMyT","yMxT","yMyT"];
 Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
 
 % -- pull list of test folders within test folder
-parentDir = "data/alpha_t/TotalDist";
+parentDir = "data/alpha_t/FreezeTime";
 parentDir_RW = "data/RandomWalk";
 files = dir(parentDir);
 RW_files = dir(parentDir_RW);
 
 i = 1;
 
-figure(1); clf; gcf;
-
 % -- define the domain size
 L= [18 9];
 
+% ids to plot
+ids_to_plot=11;
+
 % -- begin looping through each test folder
-for test = 4:4%1:size(files, 1)
+for test = ids_to_plot%1:size(files, 1)
 
     % -- make sure that we capture a number not '.' or '..'
     if (files(test).name ~= "." && files(test).name ~= "..")
@@ -90,7 +91,7 @@ for test = 4:4%1:size(files, 1)
         for participant = 1:size(participant_folders, 1)
             % -- make sure that we capture a number not '.' or '..'
             if (participant_folders(participant).name ~= "." && participant_folders(participant).name ~= "..")
-                figure(participant-2); gcf;
+                figure(participant-2); gcf; 
 
                 % -- create participant directory
                 partDir = strcat(subDir,"/",participant_folders(participant).name);
@@ -109,7 +110,8 @@ for test = 4:4%1:size(files, 1)
                     tf = TestData.simdata.time;
 
                     % -- plot everything nicely
-                    subplot(2, 2, cond);
+                    subplot(2, 4, 2*cond-1);
+                    cla;
                     % -- display the Omron Lab map
                     hold on; imagesc([0 L(1)],[0 L(2)], TestData.img); 
                     set(gca,'ydir','reverse');
@@ -164,7 +166,7 @@ i = 1;
 
 
 % -- begin looping through each test folder
-for test = 1:10%1:size(files, 1)
+for test = ids_to_plot%1:size(files, 1)
 
     % -- make sure that we capture a number not '.' or '..'
     if (files(test).name ~= "." && files(test).name ~= "..")
@@ -177,7 +179,7 @@ for test = 1:10%1:size(files, 1)
         for participant = 1:size(participant_folders, 1)
             % -- make sure that we capture a number not '.' or '..'
             if (participant_folders(participant).name ~= "." && participant_folders(participant).name ~= "..")
-                figure(participant+10); gcf;
+                figure(participant-2); gcf;
 
                 % -- create participant directory
                 partDir = strcat(subDir,"/",participant_folders(participant).name);
@@ -194,15 +196,16 @@ for test = 1:10%1:size(files, 1)
 
                     % -- get the end time
                     tf = TestData.simdata.time;
-                    alpha = TestData.simdata.alpha;
 
                     % -- plot everything nicely
-                    subplot(2, 2, cond);
+                    subplot(2, 4, 2*cond);
+                    cla;
 
                     % -- plot the target location
-                    hold on; plot(1:TestData.simdata.time, ...
+                    hold on; plot(1:tf, ...
                                   TestData.simdata.alpha(1:tf), ...
-                                  'k-', 'LineWidth', 3); % -- Target location 
+                                  'k-', 'LineWidth', 3); % -- alpha
+                    set(gca, 'ylim', [0,1]);
 
                     title(sprintf("\\alpha_k (%s)", cond_names(cond)))          
                 end
@@ -211,14 +214,11 @@ for test = 1:10%1:size(files, 1)
         end
     end
 end
-
+%{
 % --- 
-
-
 i = 1; 
-
 % -- begin looping through each test folder
-for RWtest = 4:4%1:size(RW_files, 1)
+for RWtest = ids_to_plot%1:size(RW_files, 1)
 
     % -- make sure that we capture a number not '.' or '..'
     if (RW_files(RWtest).name ~= "." && RW_files(RWtest).name ~= ".." && RW_files(RWtest).name ~= ".DS_Store")
@@ -300,6 +300,7 @@ for RWtest = 4:4%1:size(RW_files, 1)
         end
     end
 end
+%}
 end
 
 
@@ -809,16 +810,17 @@ figure(2); clf; gcf;
 % Why is this not the same as when we use robot found flag only? -- SB
 plot(0:1:3, [sum(testTime(:,1)>0)/size(testTime,1); sum(RWtestTime(:,1)>0)/size(RWtestTime,1); ...
              sum(testTime0(:,1)>0)/size(testTime0,1); sum(testTime1(:,1)>0)/size(testTime1,1)], ...
-     '^m', 'MarkerSize', 18, 'LineWidth', 2); hold on;
+     '^m', 'MarkerSize', 18, 'MarkerFaceColor', 'm', 'LineWidth', 2); hold on;
 plot(0:1:3, [sum(testTime(:,2)>0)/size(testTime,1); sum(RWtestTime(:,2)>0)/size(RWtestTime,1); ...
              sum(testTime0(:,2)>0)/size(testTime0,1); sum(testTime1(:,2)>0)/size(testTime1,1)], ...
-     'sr', 'MarkerSize', 18, 'LineWidth', 2); hold on;
+     'sr', 'MarkerSize', 18,'MarkerFaceColor', 'r', 'LineWidth', 2); hold on;
 plot(0:1:3, [sum(testTime(:,3)>0)/size(testTime,1); sum(RWtestTime(:,3)>0)/size(RWtestTime,1); ...
              sum(testTime0(:,3)>0)/size(testTime0,1); sum(testTime1(:,3)>0)/size(testTime1,1)], ...
-     'db', 'MarkerSize', 18, 'LineWidth', 2); hold on;
+     'db', 'MarkerSize', 18, 'MarkerFaceColor', 'b','LineWidth', 2); hold on;
 plot(0:1:3, [sum(testTime(:,4)>0)/size(testTime,1); sum(RWtestTime(:,4)>0)/size(RWtestTime,1); ...
              sum(testTime0(:,4)>0)/size(testTime0,1); sum(testTime1(:,4)>0)/size(testTime1,1)], ...
-     'ok', 'MarkerSize', 18, 'LineWidth', 2);
+     'ok', 'MarkerSize', 18,'MarkerFaceColor', 'k', 'LineWidth', 2);
+
 
 % -- legend
 legend('No Map, No Target',...
@@ -827,10 +829,11 @@ legend('No Map, No Target',...
        'Yes Map, Yes Target');
 
 % -- make figure look nice
+grid on;
 ylabel("Fraction of trials target found by auto. robots");
 ax = gca; 
 ax.FontSize = 18;
-set(gca, 'xtick', 0:3)
+set(gca, 'xtick', 0:3, 'ylim', [0,1])
 xticklabels({'\alpha(t)', 'random', '\alpha=0', '\alpha=1'});
 end
 

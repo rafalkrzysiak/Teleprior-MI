@@ -2,24 +2,57 @@ function test_alpha_compute
 % check alpha computation here first, this runs directly on experimental
 % data
 
-% load distribution
-Exp = load('../src/pdist_tau=15s.mat');
+addpath ../src
+ID_Data=csvread('../src/IDList_Completed.csv',1,0);
+
+% calcluate distribution
+% here we create the test/train scenario 
+% use 26 randomly selected ids to create pdistr and xdistr and run it on 3
+% remaining ones only
+numSubjects=size(ID_Data,1);
+idsall=randperm(numSubjects);
+
+num_train=floor(0.9*numSubjects);
+
+ids_train=ID_Data(idsall(1:num_train),:);
+ids_test=ID_Data(idsall(num_train+1:numSubjects),:);
+
+dtTrack=1/2;
+dtCommand=1/10;
+fps=1/dtTrack;
+
+% tau should be param.tau but for that paramconfig should be called outside
+% the for loop--can we do that?
+% set tau 15 seconds for distance and 20 seconds for freezing -- SB
+
+tau=15;
+data=extract_dist_data(tau, ids_train, ...
+            dtTrack, dtCommand); % distance
+[p_dist, x_dist]=calc_pdf(data);
+
+% -- getting the values for the freeze time
+% tau=30;
+% data=extract_freezing_data(tau, ids_train, ...
+%             dtTrack, dtCommand); % distance
+% [p_dist, x_dist]=calc_pdf(data);
 
 % load data
-[xs, tf, tloc, file_id] = RobotExperimentDataSet();
+[xs, tf, tloc, file_id] = RobotExperimentDataSet('2241','3');
 
 % calculate d
 d = sqrt(sum((xs(1:2,2:end) - xs(1:2,1:end-1)).^2))';
 
 % calculate alpha
-alpha=zeros(1,tf);
-tau=15*2; % since tau is in seconds but the one passed is in frames
-param.alphaBegin=0.5; % the only parameter we need in this function
-for k=1:tf-1
-    [alpha(k+1), TotalDist_k, pDxMxT_k, pDyMyT_k] = ...
-        UpdateAlpha(d, Exp.p_dist, Exp.x_dist, k, param, tau, alpha(k));
+alpha=ones(1,tf)*0.5;
+for k=fps*tau:tf-1
+    feature_k=sum(d(k-fps*tau+1:k, 1));
+    [alpha(k+1), pDxMxT_k, pDyMyT_k] = ...
+        UpdateAlpha(feature_k, p_dist, x_dist, alpha(k));
 end
 figure(1); gcf; clf;
+subplot(1,2,1);
+plot(x_dist,p_dist);
+subplot(1,2,2);
 plot(1:tf, alpha, 'linewidth', 2);
 xlabel('frame');
 ylabel('alpha');

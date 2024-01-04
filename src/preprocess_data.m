@@ -69,7 +69,8 @@ conditions = ["1","2","3","4"];
 % timeStayingStill(ID_List, trials, conditions, ID_conditions, ID_Data)
 % DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
-PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
+% PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
+PlotTrajectoryWithAllInfo_robot_movement(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 % SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 % SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
@@ -1417,6 +1418,255 @@ end
 % -- create csv file to store the commanded acceleration for each
 % -- participant during each condition
 csvwrite('stats data/CommandedAccel.csv',[CommandedAccel,ID_Data(:,3:end-1)]);
+
+end
+function PlotTrajectoryWithAllInfo_robot_movement(ID_List, trials, conditions, ID_conditions, ID_Data)
+
+Ns=size(ID_Data,1);
+
+% Load the omron lab mosaic 
+OmronLabMap = imread('../data/maps/OmronLabMosaicCrop_lowres.jpg');
+
+if size(ID_Data,1)>1
+    nr=5; % number of rows/conditions (remember: condition 4 is split into 4a and 4b)
+    nc=3; % number of columns 
+else
+    nr=4;
+    nc=5;
+end
+
+% -- forcing terms for the ylim
+MaxSpeed = 0.65;
+MaxTurnRate = 3.5;
+
+for ii = 5:5
+    
+    % -- only want to loop through individuals that hav undergone
+    % -- condition 4b (incorrect prior knowledge of target location)
+    if (ID_Data(ii, 2) || ID_Data(ii,1) ==9998)
+        
+        % -- create figure dedicated to an individual ID
+        % -- and create a tiled layout of 1x4
+        figure(ii); gcf; clf;% -- contains fig num 1 -> # participants
+    
+        % -- loop through each of the conditions
+        for Condition = 1:4
+            
+            % -- create the string that corresponds to the name of the file
+            % -- that contains the trajectory data
+            EKFtrajFile = strcat('../data/FILTERED/', num2str(ID_Data(ii,1)), ...
+                '/EKFtraj_condition_', num2str(Condition), '.csv');
+
+            % -- load the file that contains the trajectory data
+            X = load(EKFtrajFile);
+            
+            EKFspeedFile = strcat('../data/FILTERED/', num2str(ID_Data(ii,1)), ...
+                '/EKFVel_condition_', num2str(Condition), '.csv');
+            SP = load(EKFspeedFile);
+            dt = 0.5;
+            
+            EKFomFile = strcat('../data/FILTERED/', num2str(ID_Data(ii,1)), ...
+                '/EKFom_condition_', num2str(Condition), '.csv');
+            OM = load(EKFomFile);
+            
+            % -- define the file that contains commanded wheel speeds and load it
+            CommandedInputFile = strcat('../data/RAW/', num2str(ID_Data(ii,1)), ...
+                '/condition_', num2str(Condition), '/WheelVel.csv');
+            U = load(CommandedInputFile);
+
+            % -- convert the commanded left and right wheel speeds to 
+            % -- commanded speed and turnrate
+            % -- commanded wheel speeds saved in mm/s
+            CommandedSpeed = (((U(:,2) + U(:,3))/ 1000) / 2);
+            CommandedTurnRate = (((U(:,2) - U(:,3))/ 1000) / .235);
+            
+            % -- check what condition we are trying to plot
+            if Condition < 4 || ID_Data(ii,1) ==9998
+                % -- begin plotting the data
+                subplot(nr,nc,3*(Condition-1)+1)
+                imagesc([-1 15],[-1 7.5], flip(OmronLabMap));
+                set(gca,'xdir','reverse','ydir','reverse', 'fontsize', 16);
+                hold on; plot(X(1,1), X(2,1), 'bs', 'markersize', 6, 'linewidth', 3); % -- starting point
+                plot(X(1,end), X(2,end), 'bx', 'markersize', 6, 'linewidth', 3); % -- end point
+                plot(X(1,:), X(2,:), 'b-', 'linewidth', 3); % -- trajectory
+                plot(X(4,1), X(5,1), 'rs', 'markersize', 6, 'linewidth', 3); % -- Target location
+                axis image; 
+                %title(sprintf('Condition:%d', Condition), 'fontsize', 18, 'fontweight', 'normal');
+
+                % -- plot the speed of the robot
+%                 subplot(nr,nc,3*(Condition-1)+2)
+%                 % -- define the time range
+%                 time = U(:,1);
+%                 plot(time, abs(CommandedSpeed), 'k-', 'linewidth', 2);
+%                 ylabel({'Commanded','speed (m/s)'});
+%                 xlabel('time (s)'); grid on;
+%                 set(gca, 'fontsize', 16);
+%                 xlim([0 time(end)]); ylim([0 MaxSpeed]);
+                
+                % -- plot the turn rate of the robot
+%                 subplot(nr,nc,3*(Condition-1)+3)
+%                 plot(time, abs(CommandedTurnRate), 'k-', 'linewidth', 2);
+%                 ylabel({'Commanded','turn rate (rad/s)'});
+%                 xlabel('time (s)'); grid on;
+%                 set(gca, 'fontsize', 16);
+%                 xlim([0 time(end)]); ylim([0 MaxTurnRate]);
+                
+                % -- plot the commanded speed for each condition
+                subplot(nr,nc,3*(Condition-1)+2)
+                time = 0:dt:size(SP,1)*dt;
+                plot(time(1:end-1), abs(SP), 'b-', 'linewidth', 2);
+                ylabel('Speed (m/s)');
+                xlabel('time (s)');
+                set(gca, 'fontsize', 16);
+                grid on; xlim([0 time(end)]); ylim([0 MaxSpeed]);
+
+                % -- plot the commanded turn rate for each condition
+                subplot(nr,nc,3*(Condition-1)+3)
+                time = 0:dt:size(OM,1)*dt;
+                plot(time(1:end-1), abs(OM), 'b-', 'linewidth', 2);
+                ylabel('Turn rate (rad/s)');
+                xlabel('time (s)'); grid on;
+                set(gca, 'fontsize', 16);
+                xlim([0 time(end)]); ylim([0 MaxTurnRate]);
+
+            
+            else % -- if we are looking at condition 4
+                % -- begin plotting the data
+                subplot(nr,nc,3*(Condition-1)+1)
+                imagesc([-1 15],[-1 7.5], flip(OmronLabMap));
+                set(gca,'xdir','reverse','ydir','reverse');
+                hold on; plot(X(1,1), X(2,1), 'bs', 'markersize', 6, 'linewidth', 3); % -- starting point
+                plot(X(1,ID_Data(ii,end)), X(2,ID_Data(ii,end)), 'bx', 'markersize', 6, 'linewidth', 3); % -- end point
+                plot(X(1,1:ID_Data(ii,end)), X(2,1:ID_Data(ii,end)), 'b-', 'linewidth', 3); % -- trajectory
+                plot(X(4,1), X(5,1), 'rs', 'markersize', 6, 'linewidth', 3); % -- Target location
+                set(gca, 'fontsize', 16);
+                axis image; 
+                %title(sprintf('Condition:%d', Condition), 'fontsize', 18, 'fontweight', 'normal');
+
+                % -- plot the speed of the robot
+%                 subplot(nr,nc,5*(Condition-1)+2)
+%                 % -- define the time range
+%                 time = U(:,1);
+%                 plot(time(1:5*ID_Data(ii,end)), abs(CommandedSpeed(1:5*ID_Data(ii,end))), 'k-', 'linewidth', 2);
+%                 ylabel({'Commanded','speed (m/s)'});
+%                 xlabel('time (s)'); grid on;
+%                 set(gca, 'fontsize', 16);
+%                 xlim([0 time(5*ID_Data(ii,end))]); ylim([0 MaxSpeed]);
+
+                % -- plot the turn rate of the robot
+%                 subplot(nr,nc,5*(Condition-1)+3)
+%                 plot(time(1:5*ID_Data(ii,end)), abs(CommandedTurnRate(1:5*ID_Data(ii,end))), 'k-', 'linewidth', 2);
+%                 ylabel({'Commanded','turn rate (rad/s)'});
+%                 xlabel('time (s)'); grid on;
+%                 set(gca, 'fontsize', 16);
+%                 xlim([0 time(5*ID_Data(ii,end))]); ylim([0 MaxTurnRate]);
+
+                % -- plot the commanded speed for each condition
+                subplot(nr,nc,3*(Condition-1)+2)
+                time = 0:dt:size(SP,1)*dt;
+                plot(time(1:ID_Data(ii,end)), abs(SP(1:ID_Data(ii,end))), 'b-', 'linewidth', 2);
+                ylabel('Speed (m/s)');
+                xlabel('time (s)'); grid on;
+                set(gca, 'fontsize', 16);
+                xlim([0 time(ID_Data(ii,end))]); ylim([0 MaxSpeed]);
+
+                % -- plot the commanded turn rate for each condition
+                subplot(nr,nc,3*(Condition-1)+3)
+                time = 0:dt:size(OM,1)*dt;
+                plot(time(1:ID_Data(ii,end)), abs(OM(1:ID_Data(ii,end))), 'b-', 'linewidth', 2);
+                ylabel('Turn rate (rad/s)');
+                xlabel('time (s)'); grid on;
+                set(gca, 'fontsize', 16);
+                xlim([0 time(ID_Data(ii,end))]); ylim([0 MaxTurnRate]);
+                
+                % --------------------------------------------
+                % -- begin plotting the data for condition 4b
+                subplot(nr,nc,3*(Condition)+1)
+                imagesc([-1 15],[-1 7.5], flip(OmronLabMap));
+                set(gca,'xdir','reverse','ydir','reverse');
+                hold on; plot(X(1,ID_Data(ii,end)), X(2,ID_Data(ii,end)), 'bs', 'markersize', 6, 'linewidth', 3); % -- starting point
+                plot(X(1,end), X(2,end), 'bx', 'markersize', 6, 'linewidth', 3); % -- end point
+                plot(X(1,ID_Data(ii,end):end), X(2,ID_Data(ii,end):end), 'b-', 'linewidth', 3); % -- trajectory
+                plot(X(4,1), X(5,1), 'rs', 'markersize', 6, 'linewidth', 3); % -- Target location
+                set(gca, 'fontsize', 16);
+                axis image; 
+                %title(sprintf('Condition:%d', Condition), 'fontsize', 18, 'fontweight', 'normal');
+
+                % -- plot the commanded speed of the robot
+%                 subplot(nr,nc,5*(Condition)+2)
+%                 % -- define the time range
+%                 time = U(:,1);
+%                 plot(time(5*ID_Data(ii,end):end), abs(CommandedSpeed(5*ID_Data(ii,end):end)), 'k-', 'linewidth', 2);
+%                 ylabel({'Commanded','speed (m/s)'});
+%                 xlabel('time (s)'); grid on;
+%                 set(gca, 'fontsize', 16);
+%                 xlim([time(5*ID_Data(ii,end)) time(end)]); ylim([0 MaxSpeed]);
+
+                % -- plot the commanded turn rate of the robot
+%                 subplot(nr,nc,5*(Condition)+3)
+%                 plot(time(5*ID_Data(ii,end):end), abs(CommandedTurnRate(5*ID_Data(ii,end):end)), 'k-', 'linewidth', 2);
+%                 ylabel({'Commanded','turn rate (rad/s)'});
+%                 xlabel('time (s)'); grid on;
+%                 set(gca, 'fontsize', 16);
+%                 xlim([time(5*ID_Data(ii,end)) time(end)]); ylim([0 MaxTurnRate]);
+
+                % -- plot the Robot speed for each condition
+                subplot(nr,nc,3*(Condition)+2)
+                time = 0:dt:size(SP,1)*dt;
+                plot(time(ID_Data(ii,end):end-1), abs(SP(ID_Data(ii,end):end)), 'b-', 'linewidth', 2);
+                ylabel('Speed (m/s)');
+                xlabel('time (s)'); grid on;
+                set(gca, 'fontsize', 16);
+                xlim([time(ID_Data(ii,end)) time(end)]); ylim([0 MaxSpeed]);
+
+                % -- plot the Robot turn rate for each condition
+                subplot(nr,nc,3*(Condition)+3)
+                time = 0:dt:size(OM,1)*dt;
+                plot(time(ID_Data(ii,end):end-1), abs(OM(ID_Data(ii,end):end)), 'b-', 'linewidth', 2);
+                ylabel('Turn rate (rad/s)');
+                xlabel('time (s)'); grid on;
+                set(gca, 'fontsize', 16);
+                xlim([time(ID_Data(ii,end)) time(end)]); ylim([0 MaxTurnRate]);
+            
+            end
+
+            drawnow;
+    %         
+    %         
+    %         % -- commanded acceleration
+    %         CommandAccel = zeros(1, size(CommandedSpeed, 1)-1);
+    %         
+    %         for t = 2:size(CommandedSpeed, 1)
+    %            % -- a=dv/dt
+    %            CommandAccel(1,t-1) = (CommandedSpeed(t) - CommandedSpeed(t-1)) / (U(t) - U(t-1)); 
+    %         end
+    %         
+    %         % -- plot the commanded acceleration 
+    %         subplot(nr,nc,Condition+nc*5)
+    %         plot(U(2:end,1), CommandAccel);
+    %         ylabel({'Commanded', 'acceleration (m/s^2)'});
+    %         xlabel('time (s)');
+    %         
+    %         % -- commanded angular acceleration
+    %         CommandAngAccel = zeros(1, size(CommandedTurnRate, 1)-1);
+    %         
+    %         for t = 2:size(CommandedSpeed, 1)
+    %            % -- a=domega/dt
+    %            CommandAngAccel(1,t-1) = (CommandedTurnRate(t) - CommandedTurnRate(t-1)) / (U(t) - U(t-1)); 
+    %         end
+    %         
+    %         % -- plot the commanded angular acceleration 
+    %         subplot(nr,nc,Condition+nc*6)
+    %         plot(U(2:end,1), CommandAngAccel);
+    %         ylabel({'Commanded Ang.', 'acceleration (rad/s^2)'});
+    %         xlabel('time (s)');
+
+            
+        end
+        set(gcf, 'position', [54, 511, 1681, 441]);
+    %     print('-dpng', ['./stats data/', num2str(ID_Data(ii,1)), '_traj.png']);
+    end
+end
 
 end
 

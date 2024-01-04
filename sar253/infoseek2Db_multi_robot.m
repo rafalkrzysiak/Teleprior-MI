@@ -467,15 +467,15 @@ for jj=1:param.nsim
                             % -- add up individual time steps of the
                             % -- simulation if the human controlled robot
                             % -- is "freezing"
-                            f_time(k, 1) = param.dt;
+                            f_time(k, 1) = 1; % this was 0.5 but should be 1 because we are counting frames --SB
                         else
                             % -- if the human controlled robot is
                             % -- understood to not be "freezing" under the
                             % -- required conditions, add 0.0s
-                            f_time(k, 1) = 0.0;
+                            f_time(k, 1) = 0;
                         end
                     else
-                        f_time(k, 1) = 0.0;
+                        f_time(k, 1) = 0;
                     end
 
                     % -- This is where we will calculate the amount of time 
