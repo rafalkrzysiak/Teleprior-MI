@@ -64,7 +64,7 @@ cond_names=["xMxT","xMyT","yMxT","yMyT"];
 Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
 
 % -- pull list of test folders within test folder
-parentDir = "data/alpha_t/FreezeTime";
+parentDir = "data/alpha_t/TotalDist";
 parentDir_RW = "data/RandomWalk";
 files = dir(parentDir);
 RW_files = dir(parentDir_RW);
@@ -153,7 +153,8 @@ for test = ids_to_plot%1:size(files, 1)
                     hold on; plot(TestData.simdata.Xs(1, 1:tf, 1, 3), ...
                                   TestData.simdata.Xs(2, 1:tf, 1, 3), ...
                                   'g-', 'LineWidth', 2); % -- autonomous robot 2 trajectory
-                    title(sprintf("\\alpha_k (%s)", cond_names(cond)))          
+%                     title(sprintf("\\alpha_k (%s)", cond_names(cond))) 
+                    title(cond_names(cond)) 
                 end
                  i = i + 1;
             end
@@ -207,7 +208,11 @@ for test = ids_to_plot%1:size(files, 1)
                                   'k-', 'LineWidth', 3); % -- alpha
                     set(gca, 'ylim', [0,1]);
 
-                    title(sprintf("\\alpha_k (%s)", cond_names(cond)))          
+%                     title(cond_names(cond))
+                    ylabel('$\alpha_k=p(\mathrm{xMxT}|f_{\tau})$', ...
+                            'interpreter', 'latex')
+                    xlabel('time (s)');
+                    
                 end
                  i = i + 1;
             end

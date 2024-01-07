@@ -25,7 +25,6 @@ bias = [0]; % -- flag for enabling/disabling bias of the human operated robot
 param.norm = 1;
 share_info = 1;
 param.alphaBegin = 0.5; 
-param.tau = 30;
 param.tau = 15;
 param.share = 1;
 param.bias = 0;

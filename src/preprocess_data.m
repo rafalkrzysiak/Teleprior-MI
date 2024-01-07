@@ -70,7 +70,8 @@ conditions = ["1","2","3","4"];
 % DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
 % PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
-PlotTrajectoryWithAllInfo_robot_movement(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
+% PlotTrajectoryWithAllInfo_robot_movement(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
+get_distance_from_target(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 % SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 % SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
@@ -1420,6 +1421,56 @@ end
 csvwrite('stats data/CommandedAccel.csv',[CommandedAccel,ID_Data(:,3:end-1)]);
 
 end
+
+function get_distance_from_target(ID_List, trials, conditions, ID_conditions, ID_Data)
+
+Ns=size(ID_Data,1);
+
+for ii = 1:size(ID_Data, 1)
+    
+    % -- only want to loop through individuals that hav undergone
+    % -- condition 4b (incorrect prior knowledge of target location)
+    if (ID_Data(ii, 2) || ID_Data(ii,1) ==9998)
+        
+        % -- create figure dedicated to an individual ID
+        % -- and create a tiled layout of 1x4
+        figure(ii); gcf; clf;% -- contains fig num 1 -> # participants
+    
+        % -- loop through each of the conditions
+        for Condition = 1:4
+            
+            % -- create the string that corresponds to the name of the file
+            % -- that contains the trajectory data
+            EKFtrajFile = strcat('../data/FILTERED/', num2str(ID_Data(ii,1)), ...
+                '/EKFtraj_condition_', num2str(Condition), '.csv');
+
+            % -- load the file that contains the trajectory data
+            X = load(EKFtrajFile);
+            
+            
+            % -- check what condition we are trying to plot
+            if Condition < 4 || ID_Data(ii,1) ==9998
+                % -- begin plotting the data
+                subplot(1,4,Condition);
+                hold on; plot(X(1,1), X(2,1), 'bs', 'markersize', 6, 'linewidth', 3); % -- starting point
+                plot(X(1,end), X(2,end), 'bx', 'markersize', 6, 'linewidth', 3); % -- end point
+                plot(X(1,:), X(2,:), 'b-', 'linewidth', 3); % -- trajectory
+                plot(X(4,1), X(5,1), 'rs', 'markersize', 16, 'linewidth', 3); % -- Target location
+                axis image; 
+                %title(sprintf('Condition:%d', Condition), 'fontsize', 18, 'fontweight', 'normal');
+                fprintf('%.2f\n', norm(X(1:2,end)-X(4:5,1)))
+            end
+            drawnow;
+    
+            
+        end
+    end
+end
+
+end
+
+
+
 function PlotTrajectoryWithAllInfo_robot_movement(ID_List, trials, conditions, ID_conditions, ID_Data)
 
 Ns=size(ID_Data,1);

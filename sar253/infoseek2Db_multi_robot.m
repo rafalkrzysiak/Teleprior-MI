@@ -266,6 +266,7 @@ for jj=1:param.nsim
             
             kappa = 5;
             rij0 = 1.5;
+            % these values are 1 because 1-0 is 1!
             phuman = 1-(1-1)./(1+exp(-kappa*(rij(robot,1)-rij0)));
             probot = 1-(1-1)./(1+exp(-kappa*(Rr(robot,1)-rij0)));
             
@@ -287,6 +288,8 @@ for jj=1:param.nsim
                 % -- if the measurement taken by the robot is within the field of view
                 if abs(Z(:,k,1,robot)) < param.r_FOV(robot)/2
                     Z(:,k,1,robot) = Z(:,k,1,robot);
+                    % why 0.75? -- SB this sets the actual range to be
+                    % 1.125, which may be difficult to explain...
                     if rij(robot,1) < .75*param.r_visible(robot) % -- must be closer to get a diffinitive answer
                         Num_target_found(jj) = 1; % -- save a yes to the sim number where target was found
                         time(jj) = k; % -- mark the time the target was found

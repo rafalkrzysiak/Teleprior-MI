@@ -94,7 +94,8 @@ for test = 1:test_size % -- looping through every environment
                      test, num2str(ids_test(participant,1)), conds(exp_cond));
 
             % -- create a new directory to hold all information about the simulation
-            saveIn = strcat(test_folder, num2str(ids_test(participant,1)), "/condition_", num2str(conds(exp_cond)), "/");
+            saveIn = strcat(test_folder, num2str(ids_test(participant,1)), ...
+                "/condition_", num2str(conds(exp_cond)), "/");
             saveFrames = strcat(saveIn, "frames/");
             directory = mkdir(saveIn);
             frames = mkdir(saveFrames);
