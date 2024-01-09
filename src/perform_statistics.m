@@ -50,7 +50,7 @@ timeTurningInPlaceArray = csvread('../data/fractionTimeTurningInPlace.csv');
 t_timeTurningInPlace = array2table(timeTurningInPlaceArray,...
     'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
 plot_and_stats(t_timeTurningInPlace, 1:4,  xticklbl, ...
-    'Fraction time spent turning in place', '(c)',[0 1], 1);
+    'Fraction of time turning in place', '(c)',[0 1], 1);
 
 
 
@@ -72,7 +72,7 @@ FractionTimeStayingStillArray = csvread('../data/FractionTimeStayingStill.csv');
 t_FractionTimeStayingStillArray = array2table(FractionTimeStayingStillArray,...
     'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
 plot_and_stats(t_FractionTimeStayingStillArray, 1:4,  xticklbl,...
-    'Fraction time spent staying still', '(d)',[0,1],1);
+    'Fraction of time staying still (freezing)', '(d)',[0,1],1);
 
 % frequency of stops
 subplot(236);
@@ -114,8 +114,10 @@ plot_and_stats(t_comTurnRate, 1:4,  xticklbl, ...
     'Commanded turn rate (rad/s)','(b)',  [], 1);
 set(gca, 'YLim', [0, 1/2]);
 
+%% robot speed
+figure(3); gcf; clf;
 % Robot speed
-subplot(223);
+subplot(121);
 % hyp: speed will depend on prior knowledge.
 % higher speeds when target is known (c2 with c1, c4 with c3)
 % higher speeds when map is known (c3 with c1)
@@ -123,11 +125,11 @@ EKFSpdData = csvread('../data/RobotSpeedData.csv');
 t_EKFSpd = array2table(EKFSpdData,...
     'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
 plot_and_stats(t_EKFSpd, 1:4,  xticklbl, ...
-    'Robot speed (m/s)', '(c)', [], 1);
+    'Robot speed (m/s)', '(a)', [], 1);
 set(gca, 'YLim', [0, 0.3]);
 
 % Robot turn rate
-subplot(224);
+subplot(122);
 % hyp: turn rate will depend on prior knowledge. 
 % Higher turn rate when target is not known
 % no difference when map is known
@@ -135,13 +137,13 @@ EKFOmegaArray = csvread('../data/RobotTurnrateData.csv');
 t_EKFOmega = array2table(EKFOmegaArray,...
     'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
 plot_and_stats(t_EKFOmega, 1:4,  xticklbl, ...
-    'Robot turn rate (rad/s)', '(d)', [],1);
-set(gca, 'YLim', [0, 1]);
+    'Robot turn rate (rad/s)', '(b)', [],1);
+set(gca, 'YLim', [0, 1.1]);
 
 diary off;
 
 %% H3, Does accuracy in prior knowledge affect motion
-figure(3); gcf; clf;
+figure(4); gcf; clf;
 dfile ='H3-stats.txt';
 if exist(dfile, 'file') ; delete(dfile); end
 diary(dfile)
@@ -221,7 +223,7 @@ plot_and_stats(t_FractionTimeStayingStillArray, 1:3,  xticklbl, ...
 diary off
 
 %% Workload         
-figure(4); gcf; clf;
+figure(5); gcf; clf;
 dfile ='Workload-stats-C4a.txt';
 if exist(dfile, 'file') ; delete(dfile); end
 diary(dfile)

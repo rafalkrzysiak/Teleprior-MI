@@ -23,26 +23,27 @@ kldist14=zeros(numel(obsvTime),4);
 wsdist14=zeros(numel(obsvTime),4);
 markertypes={'o', 's', 'd', '^'};
 
+
 for ii=1:numel(obsvTime)
     
     figure(ii); gcf; clf;
     dstr_speed=extract_speed_data(obsvTime(ii), ID_Data, ...
         dtTrack, dtCommand); % speed
-    subplot(2,2,1);
+    subplot(2,4,3);
     [p_speed, x_speed]=calc_pdf(dstr_speed, ...
         'average speed (m/s)', conditions);
     [kldist14(ii,1),wsdist14(ii,1)]=calc_pdf_dist(p_speed, x_speed);
     
     dstr_dist=extract_dist_data(obsvTime(ii), ID_Data, ...
         dtTrack, dtCommand); % distance
-    subplot(2,2,2);
+    subplot(2,4,4);
     [p_dist, x_dist]=calc_pdf(dstr_dist,  ...
         'distance (m)', conditions);
     [kldist14(ii,2),wsdist14(ii,2)]=calc_pdf_dist(p_dist, x_dist);
     
     dstr_tr=extract_turnrate_data(obsvTime(ii), ID_Data, ...
         dtTrack, dtCommand); % turn rate
-    subplot(2,2,3);
+    subplot(2,4,7);
     [p_tr, x_tr]=calc_pdf(dstr_tr, ...
         'average turn rate (rad/s)', conditions);
     [kldist14(ii,3), wsdist14(ii,3)]=calc_pdf_dist(p_tr, x_tr);
@@ -56,7 +57,7 @@ for ii=1:numel(obsvTime)
     
     dstr_freeze=extract_freezing_data(obsvTime(ii), ID_Data, ...
         dtTrack, dtCommand); % freezing
-    subplot(2,2,4);
+    subplot(2,4,8);
     [p_frz, x_frz]=calc_pdf(dstr_freeze, ...
         'time staying still (fraction)', conditions);
     [kldist14(ii,4), wsdist14(ii,4)]=calc_pdf_dist(p_frz, x_frz);
@@ -65,7 +66,6 @@ for ii=1:numel(obsvTime)
 %         sprintf('../doc/plots/pdistr_%ds.png', obsvTime(ii)))
 end
 
-figure(ii+1); gcf;clf;
 % subplot(1,2,1);
 % plot(obsvTime, kldist14, 'linewidth', 2);
 % set(gca, 'fontsize', 16);
@@ -75,6 +75,9 @@ figure(ii+1); gcf;clf;
 % 
 % subplot(1,2,2);
 
+
+figure(3); gcf; 
+subplot(2,4,[1 2 5 6]);
 for ii=1:size(wsdist14,2)
     plot(obsvTime, wsdist14(:,ii),['k-', markertypes{ii}],'linewidth', 2, ...
         'Markersize', 18);

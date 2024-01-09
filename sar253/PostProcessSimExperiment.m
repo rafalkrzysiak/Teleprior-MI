@@ -16,6 +16,7 @@ clear variables
 % PlotWhoFoundTarget(SimExp);
 % PlotWhoFoundTarget_testSet();
 % TimeGained();
+% plot_performance_comparison();
 
 % -- plot all trajectories 
 % PlotAllTraj(SimExp);
@@ -75,7 +76,8 @@ i = 1;
 L= [18 9];
 
 % ids to plot
-ids_to_plot=11;
+ids_to_plot=7;% 197,112
+
 
 % -- begin looping through each test folder
 for test = ids_to_plot%1:size(files, 1)
@@ -439,7 +441,7 @@ conditions = ["condition_1",...
 Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
 
 % -- pull list of test folders within test folder
-parentDir = "data/alpha_t/FreezeTime";%TotalDist,FreezeTime
+parentDir = "data/alpha_t/TotalDist";%TotalDist,FreezeTime
 parentDir_RW = "data/RandomWalk";
 parentDir0 = "data/alpha_0";
 parentDir1 = "data/alpha_1";
@@ -450,6 +452,7 @@ files0 = dir(parentDir0);
 files1 = dir(parentDir1);
 
 timeArray = csvread('../data/TimeToFind.csv');
+timeArray(:,1)=timeArray(:,1)/2.27; % scaling to compensate for length and obstacles
 timeArray(:,1:4) = timeArray(:,1:4)-5.0; % -- adjusting for humans entering code into computer
 IDs = csvread('../src/IDList_Completed.csv', 1);
 
@@ -766,63 +769,79 @@ stdTimeArrayComp1 = [std(testTime1(testTime1(:,1) ~= 0, 1)), ...
 % save workspace and then just select and run the rest of the script to
 % save time
 
-save('timegained_workspace.mat')
+ftype=split(parentDir, '/');
+save(['timegained_workspace', ftype{3}, '.mat'])
+end
 
+function plot_performance_comparison()
 %% run this section separately to save time
-load('timegained_workspace.mat')
+
+load('timegained_workspaceFreezeTime.mat')
+meanTimeArrayComp_FT=meanTimeArrayComp;
+stdTimeArrayComp_FT=stdTimeArrayComp;
+testTime_FT=testTime;
+load('timegained_workspaceTotalDist.mat')
+meanTimeArrayComp_TD=meanTimeArrayComp;
+stdTimeArrayComp_TD=stdTimeArrayComp;
+testTime_TD=testTime;
+
 % -- create figure
 figure(1); clf; gcf;
 
+subplot(1,2,2);
 % -- plot the results
-errorbar(0:1:3, ...
-         [meanTimeArrayComp(1,1), RWmeanTimeArrayComp(1,1), meanTimeArrayComp0(1,1), meanTimeArrayComp1(1,1)],...
-         [stdTimeArrayComp(1,1), RWstdTimeArrayComp(1,1), stdTimeArrayComp0(1,1), stdTimeArrayComp1(1,1)],...
-         '^','markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto'); hold on;
+errorbar(0:1:4, ...
+         [meanTimeArrayComp_TD(1,1),meanTimeArrayComp_FT(1,1), RWmeanTimeArrayComp(1,1), meanTimeArrayComp0(1,1), meanTimeArrayComp1(1,1)],...
+         [stdTimeArrayComp_TD(1,1), stdTimeArrayComp_FT(1,1), RWstdTimeArrayComp(1,1), stdTimeArrayComp0(1,1), stdTimeArrayComp1(1,1)],...
+         '^m','markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto'); hold on;
 
-errorbar(0:1:3, ...
-         [meanTimeArrayComp(1,2), RWmeanTimeArrayComp(1,2), meanTimeArrayComp0(1,2), meanTimeArrayComp1(1,2)],...
-         [stdTimeArrayComp(1,2), RWstdTimeArrayComp(1,2), stdTimeArrayComp0(1,2), stdTimeArrayComp1(1,2)],...
-         's','markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto'); hold on;
+errorbar(0:1:4, ...
+         [meanTimeArrayComp_TD(1,2), meanTimeArrayComp_FT(1,2), RWmeanTimeArrayComp(1,2), meanTimeArrayComp0(1,2), meanTimeArrayComp1(1,2)],...
+         [stdTimeArrayComp_TD(1,2), stdTimeArrayComp_FT(1,2), RWstdTimeArrayComp(1,2), stdTimeArrayComp0(1,2), stdTimeArrayComp1(1,2)],...
+         'sr','markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto'); hold on;
 
-errorbar(0:1:3, ...
-         [meanTimeArrayComp(1,3), RWmeanTimeArrayComp(1,3), meanTimeArrayComp0(1,3), meanTimeArrayComp1(1,3)],...
-         [stdTimeArrayComp(1,3), RWstdTimeArrayComp(1,3), stdTimeArrayComp0(1,3), stdTimeArrayComp1(1,3)],...
-         'd','markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto'); hold on;
+errorbar(0:1:4, ...
+         [meanTimeArrayComp_TD(1,3), meanTimeArrayComp_FT(1,3), RWmeanTimeArrayComp(1,3), meanTimeArrayComp0(1,3), meanTimeArrayComp1(1,3)],...
+         [stdTimeArrayComp_TD(1,3), stdTimeArrayComp_FT(1,3), RWstdTimeArrayComp(1,3), stdTimeArrayComp0(1,3), stdTimeArrayComp1(1,3)],...
+         'db','markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto'); hold on;
 
-errorbar(0:1:3, ...
-         [meanTimeArrayComp(1,4), RWmeanTimeArrayComp(1,4), meanTimeArrayComp0(1,4), meanTimeArrayComp1(1,4)],...
-         [stdTimeArrayComp(1,4), RWstdTimeArrayComp(1,4), stdTimeArrayComp0(1,4), stdTimeArrayComp1(1,4)],...
-         'o', 'markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto'); 
+errorbar(0:1:4, ...
+         [meanTimeArrayComp_TD(1,4), meanTimeArrayComp_FT(1,4), RWmeanTimeArrayComp(1,4), meanTimeArrayComp0(1,4), meanTimeArrayComp1(1,4)],...
+         [stdTimeArrayComp_TD(1,4), stdTimeArrayComp_FT(1,4), RWstdTimeArrayComp(1,4), stdTimeArrayComp0(1,4), stdTimeArrayComp1(1,4)],...
+         'ok', 'markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto'); 
 
-legend('No Map, No Target',...
-       'No Map, Yes Target',...
-       'Yes Map, No Target',...
-       'Yes Map, Yes Target');
+% legend('No Map, No Target',...
+%        'No Map, Yes Target',...
+%        'Yes Map, No Target',...
+%        'Yes Map, Yes Target');
 
 ylabel("Time gained (s)");
 
 % -- make the plot nice
+grid on;
+box off
 ax = gca;
 ax.FontSize = 18;
-set(gca, 'xtick', 0:3)
-xticklabels({'\alpha(t)', 'random', '\alpha=0', '\alpha=1'});
-
+set(gca, 'xtick', 0:4)
+xlabel({'Weighting strategy', '(b)'});
+xticklabels({'\alpha_k (distance)', '\alpha_k (freezing)', 'random', '\alpha=0', '\alpha=1'});
+xtickangle(30);
 
 % -- create single figure
-figure(2); clf; gcf;
+subplot(1,2,1);
 
 % -- populate figure
 % Why is this not the same as when we use robot found flag only? -- SB
-plot(0:1:3, [sum(testTime(:,1)>0)/size(testTime,1); sum(RWtestTime(:,1)>0)/size(RWtestTime,1); ...
+plot(0:1:4, [sum(testTime_TD(:,1)>0)/size(testTime_TD,1); sum(testTime_FT(:,1)>0)/size(testTime_FT,1); sum(RWtestTime(:,1)>0)/size(RWtestTime,1); ...
              sum(testTime0(:,1)>0)/size(testTime0,1); sum(testTime1(:,1)>0)/size(testTime1,1)], ...
      '^m', 'MarkerSize', 18, 'MarkerFaceColor', 'm', 'LineWidth', 2); hold on;
-plot(0:1:3, [sum(testTime(:,2)>0)/size(testTime,1); sum(RWtestTime(:,2)>0)/size(RWtestTime,1); ...
+plot(0:1:4, [sum(testTime_TD(:,2)>0)/size(testTime_TD,1); sum(testTime_FT(:,2)>0)/size(testTime_FT,1); sum(RWtestTime(:,2)>0)/size(RWtestTime,1); ...
              sum(testTime0(:,2)>0)/size(testTime0,1); sum(testTime1(:,2)>0)/size(testTime1,1)], ...
      'sr', 'MarkerSize', 18,'MarkerFaceColor', 'r', 'LineWidth', 2); hold on;
-plot(0:1:3, [sum(testTime(:,3)>0)/size(testTime,1); sum(RWtestTime(:,3)>0)/size(RWtestTime,1); ...
+plot(0:1:4, [sum(testTime_TD(:,3)>0)/size(testTime_TD,1); sum(testTime_FT(:,3)>0)/size(testTime_FT,1); sum(RWtestTime(:,3)>0)/size(RWtestTime,1); ...
              sum(testTime0(:,3)>0)/size(testTime0,1); sum(testTime1(:,3)>0)/size(testTime1,1)], ...
      'db', 'MarkerSize', 18, 'MarkerFaceColor', 'b','LineWidth', 2); hold on;
-plot(0:1:3, [sum(testTime(:,4)>0)/size(testTime,1); sum(RWtestTime(:,4)>0)/size(RWtestTime,1); ...
+plot(0:1:4, [sum(testTime_TD(:,4)>0)/size(testTime_TD,1); sum(testTime_FT(:,4)>0)/size(testTime_FT,1); sum(RWtestTime(:,4)>0)/size(RWtestTime,1); ...
              sum(testTime0(:,4)>0)/size(testTime0,1); sum(testTime1(:,4)>0)/size(testTime1,1)], ...
      'ok', 'MarkerSize', 18,'MarkerFaceColor', 'k', 'LineWidth', 2);
 
@@ -835,11 +854,14 @@ legend('No Map, No Target',...
 
 % -- make figure look nice
 grid on;
+box off
 ylabel("Fraction of trials target found by auto. robots");
+xlabel({'Weighting strategy', '(a)'});
 ax = gca; 
 ax.FontSize = 18;
-set(gca, 'xtick', 0:3, 'ylim', [0,1])
-xticklabels({'\alpha(t)', 'random', '\alpha=0', '\alpha=1'});
+set(gca, 'xtick', 0:4, 'ylim', [0,1])
+xticklabels({'\alpha_k (distance)', '\alpha_k (freezing)', 'random', '\alpha=0', '\alpha=1'});
+xtickangle(30);
 end
 
 

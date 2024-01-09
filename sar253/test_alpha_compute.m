@@ -36,8 +36,14 @@ data=extract_dist_data(tau, ids_train, ...
 %             dtTrack, dtCommand); % distance
 % [p_dist, x_dist]=calc_pdf(data);
 
+figure(1); gcf; clf;
+subplot(2,4,1);
+plot(x_dist,p_dist);
+
 % load data
-[xs, tf, tloc, file_id] = RobotExperimentDataSet('2241','3');
+check=sprintf('%d', ids_test(1,1));
+for ii=1:4
+[xs, tf, tloc, file_id] = RobotExperimentDataSet(check,num2str(ii)); 
 
 % calculate d
 d = sqrt(sum((xs(1:2,2:end) - xs(1:2,1:end-1)).^2))';
@@ -46,13 +52,12 @@ d = sqrt(sum((xs(1:2,2:end) - xs(1:2,1:end-1)).^2))';
 alpha=ones(1,tf)*0.5;
 for k=fps*tau:tf-1
     feature_k=sum(d(k-fps*tau+1:k, 1));
-    [alpha(k+1), pDxMxT_k, pDyMyT_k] = ...
+    alpha(k+1) = ...
         UpdateAlpha(feature_k, p_dist, x_dist, alpha(k));
 end
-figure(1); gcf; clf;
-subplot(1,2,1);
-plot(x_dist,p_dist);
-subplot(1,2,2);
+
+subplot(2,4,ii+4);
 plot(1:tf, alpha, 'linewidth', 2);
 xlabel('frame');
 ylabel('alpha');
+end
