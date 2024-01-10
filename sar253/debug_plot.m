@@ -181,7 +181,7 @@ for kk = 1:param.agents
     end
 end
 
-if ConfigSetup == "TotalDist"
+if ConfigSetup == "alpha_t/TotalDist"
 
     subplot(1,3,3);
     for kk = 1:param.agents
@@ -198,7 +198,7 @@ if ConfigSetup == "TotalDist"
 
 end
 
-if ConfigSetup == "FreezeTime"
+if ConfigSetup == "alpha_t/FreezeTime"
     
 end
 

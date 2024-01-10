@@ -18,9 +18,12 @@ ID_Data=csvread('../src/IDList_Completed.csv',1,0);
 % -- between conditions wanting to test under for updating alpha of the
 % -- autonomous robots
 % -- Options so far:
-% -- "TotalDist"
-% -- "FreezeTime"
-ConfigSetup = "TotalDist"; 
+% -- "alpha_t/TotalDist"
+% -- "alpha_t/FreezeTime"
+% -- "alpha_0"
+% -- "alpha_1"
+% -- "random_search"
+ConfigSetup = "random_search"; 
 
 % -- initialize the parameters of the simulation
 % [param, maps, folder, bias, share_info, target_locations, agents, file_id] = ...
@@ -52,18 +55,21 @@ for test = 1:test_size % -- looping through every environment
     % tau should be param.tau but for that paramconfig should be called outside
     % the for loop--can we do that?
     % set tau 15 seconds for distance and 30 seconds for freezing -- SB
-    if ConfigSetup=="TotalDist"
+    if ConfigSetup=="alpha_t/TotalDist"
         % -- getting the values for the distance
         tau=15;
         data=extract_dist_data(tau, ids_train, ...
                     dtTrack, dtCommand); % distance
         [pdstr, xdstr]=calc_pdf(data);
-    elseif ConfigSetup=="FreezeTime"
+    elseif ConfigSetup=="alpha_t/FreezeTime"
         % -- getting the values for the freeze time
         tau=30;
         data=extract_freezing_data(tau, ids_train, ...
                     dtTrack, dtCommand); % distance
         [pdstr, xdstr]=calc_pdf(data);
+    else
+        pdstr=[];
+        xdstr=[];
     end
 
 
@@ -79,7 +85,7 @@ for test = 1:test_size % -- looping through every environment
     img = imbinarize(img); % -- binarize the image
     
     % -- create a folder that correspond to the environment
-    test_folder = strcat("data/alpha_t/", ConfigSetup, "/",sprintf('%05d',test),"/");
+    test_folder = strcat("data/", ConfigSetup, "/",sprintf('%05d',test),"/");
     mkdir(test_folder);
 
     for participant = 1:size(ids_test, 1)
