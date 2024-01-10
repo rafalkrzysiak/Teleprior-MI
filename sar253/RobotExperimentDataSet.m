@@ -5,7 +5,7 @@ function [xs, tf, tloc, file_id] = RobotExperimentDataSet(exp_id, condition)
 addpath(strcat('data/FILTERED/', exp_id, '/'));
 id=exp_id;
 cond=num2str(condition);
-loc = ['data', filesep, 'FILTERED', filesep, id,...
+loc = ['..', filesep, 'data', filesep, 'FILTERED', filesep, id,...
     filesep, 'EKFtraj_condition_', cond, '.csv'];
 
 traj = csvread(loc); % -- pull data from csv file

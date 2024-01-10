@@ -76,7 +76,7 @@ i = 1;
 L= [18 9];
 
 % ids to plot
-ids_to_plot=7;% 197,112
+ids_to_plot=4:10;% 197,112
 
 
 % -- begin looping through each test folder
@@ -459,16 +459,14 @@ IDs = csvread('../src/IDList_Completed.csv', 1);
 % -- initialize the counter
 i = 1; 
 
-testTime = zeros(600, 4);
-RWtestTime = testTime;
-testTime0 = testTime;
-testTime1 = testTime;
+
 condCount = ones(1,4);
 
 timecount = 0;
 fps=2; % frame rate for simdata --SB
 
 % -- begin looping through each test folder
+testTime = zeros(size(files, 1), 4);
 for test = 1:size(files, 1)
     % can collapse all these into a single function for efficiency --SB
     % -- make sure that we capture a number not '.' or '..'
@@ -545,6 +543,7 @@ condCount = ones(1, 4);
 
 i = 1;
 % -- begin looping through each test folder
+RWtestTime = zeros(size(RW_files, 1), 4);
 for RWtest = 1:size(RW_files, 1)
 
     % -- make sure that we capture a number not '.' or '..'
@@ -619,6 +618,7 @@ condCount = ones(1, 4);
 
 i = 1;
 % -- begin looping through each test folder
+testTime0 = zeros(size(files0, 1), 4);
 for test0 = 1:size(files0, 1)
 
     % -- make sure that we capture a number not '.' or '..'
@@ -695,6 +695,7 @@ condCount = ones(1, 4);
 
 i = 1;
 % -- begin looping through each test folder
+testTime1 = zeros(size(files1, 1), 4);
 for test1 = 1:size(files1, 1)
 
     % -- make sure that we capture a number not '.' or '..'
