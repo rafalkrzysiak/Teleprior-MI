@@ -22,8 +22,8 @@ ID_Data=csvread('../src/IDList_Completed.csv',1,0);
 % -- "alpha_t/FreezeTime"
 % -- "alpha_0"
 % -- "alpha_1"
-% -- "random_search"
-ConfigSetup = "random_search"; 
+% -- "RandomWalk"
+ConfigSetup = "RandomWalk"; 
 
 % -- initialize the parameters of the simulation
 % [param, maps, folder, bias, share_info, target_locations, agents, file_id] = ...

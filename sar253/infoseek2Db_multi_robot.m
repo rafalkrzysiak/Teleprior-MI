@@ -506,7 +506,7 @@ for jj=1:param.nsim
                 %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, om, lfn);
                 [omega(1,k,1,robot),vel(1,k,1,robot),I(:,k,1,robot)] = ...
                     O_MI(k, p, wts, bin_map, Z(:,k,1,:), robot, Zr(:,k,1,:), alpha(k+1,1));
-            elseif ConfigSetup == "random_search"
+            elseif ConfigSetup == "RandomWalk"
                 % turn rate uniformly distributed between  [-0.25, 0.25]
                 omega(1,k,1,robot)=0.5*rand-0.25; %param.omega0+0.1*randn;
                 % fixed speed
