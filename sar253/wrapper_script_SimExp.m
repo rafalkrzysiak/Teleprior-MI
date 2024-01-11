@@ -55,7 +55,7 @@ for ii = 1:size(ConfigChoice,2)
     % if there is a bad batch, simply remove the folder and rerun
     existing_files=dir(strcat(dataFolder, ConfigSetup, "/"));
     
-    restart_num=str2double(existing_files(3).name);
+    restart_num=size(existing_files,1)-2;
     
     for test = restart_num+1:restart_num+nsims % -- looping through every environment
         
