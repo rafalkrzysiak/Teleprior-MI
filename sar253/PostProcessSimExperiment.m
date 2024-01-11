@@ -16,11 +16,11 @@ clear variables
 % PlotWhoFoundTarget(SimExp);
 % PlotWhoFoundTarget_testSet();
 % TimeGained();
-% plot_performance_comparison();
+plot_performance_comparison();
 
 % -- plot all trajectories 
 % PlotAllTraj(SimExp);
-PlotTrajTestDataSet();
+% PlotTrajTestDataSet();
 % PlotRWControls();
 % ControlInputMapped();
 
@@ -65,8 +65,8 @@ cond_names=["xMxT","xMyT","yMxT","yMyT"];
 Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
 
 % -- pull list of test folders within test folder
-parentDir = "data/alpha_t/TotalDist";
-parentDir_RW = "data/RandomWalk";
+parentDir = "../../simdata/alpha_0";
+parentDir_RW = "../../simdata/RandomWalk";
 files = dir(parentDir);
 RW_files = dir(parentDir_RW);
 
@@ -76,7 +76,7 @@ i = 1;
 L= [18 9];
 
 % ids to plot
-ids_to_plot=4:10;% 197,112
+ids_to_plot=3;% 197,112
 
 
 % -- begin looping through each test folder
@@ -441,10 +441,10 @@ conditions = ["condition_1",...
 Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
 
 % -- pull list of test folders within test folder
-parentDir = "data/alpha_t/TotalDist";%TotalDist,FreezeTime
-parentDir_RW = "data/RandomWalk";
-parentDir0 = "data/alpha_0";
-parentDir1 = "data/alpha_1";
+parentDir = "../../simdata/alpha_t/FreezeTime";%TotalDist,FreezeTime
+parentDir_RW = "../../simdata/RandomWalk";
+parentDir0 = "../../simdata/alpha_0";
+parentDir1 = "../../simdata/alpha_1";
 
 files = dir(parentDir);
 RW_files = dir(parentDir_RW);
@@ -771,17 +771,17 @@ stdTimeArrayComp1 = [std(testTime1(testTime1(:,1) ~= 0, 1)), ...
 % save time
 
 ftype=split(parentDir, '/');
-save(['timegained_workspace', ftype{3}, '.mat'])
+save(['timegained_workspace_', ftype{end}, '.mat'])
 end
 
 function plot_performance_comparison()
 %% run this section separately to save time
 
-load('timegained_workspaceFreezeTime.mat')
+load('timegained_workspace_FreezeTime.mat')
 meanTimeArrayComp_FT=meanTimeArrayComp;
 stdTimeArrayComp_FT=stdTimeArrayComp;
 testTime_FT=testTime;
-load('timegained_workspaceTotalDist.mat')
+load('timegained_workspace_TotalDist.mat')
 meanTimeArrayComp_TD=meanTimeArrayComp;
 stdTimeArrayComp_TD=stdTimeArrayComp;
 testTime_TD=testTime;

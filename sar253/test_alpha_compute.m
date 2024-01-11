@@ -43,7 +43,7 @@ plot(x_dist,p_dist);
 % load data
 check=sprintf('%d', ids_test(1,1));
 for ii=1:4
-[xs, tf, tloc, file_id] = RobotExperimentDataSet(check,num2str(ii)); 
+[xs, ~, ~, tf] = RobotExperimentDataSet(check,num2str(ii)); 
 
 % calculate d
 d = sqrt(sum((xs(1:2,2:end) - xs(1:2,1:end-1)).^2))';

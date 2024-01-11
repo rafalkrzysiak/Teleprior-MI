@@ -1,11 +1,13 @@
-function [param, maps, folder, bias, share_info, target_locations, agents, file_id] = ParamConfig(exp_id, cond)
+function [param, maps, folder, bias, ...
+    share_info, target_locations, agents, ...
+    file_id] = ParamConfig(exp_id, cond)
 
 % -- This function will serve to contain all parameters to operate
 % -- the mutual information based control Search and rescue simulation
 
 param.dt = 0.5; % -- timestep (s)
 param.fps = 2;
-[~, param.T, tloc, file_id] = RobotExperimentDataSet(exp_id, cond); %2500/param.dt; % -- max time (s)
+[~, ~, ~, param.T, tloc, file_id] = RobotExperimentDataSet(exp_id, cond); %2500/param.dt; % -- max time (s)
 param.N = 1200; % -- number of particles in the simulation
 param.nsim = 1; % -- number of simulations per combination
 param.closedloop = 1; % -- flag for enabling/disabling MI
@@ -17,7 +19,7 @@ param.r_FOV(1) = 70*pi/18; % -- human robot 70*pi/180 has FOV of 70 degrees, aut
 param.eta = 0.1*ones(1,agents); % -- sensor noise, human robot will have half of auto robot, try a possible higher eta values ^^^^^
 param.r_robot = .15; % --  the radius of the robot (m)
 % maps = ["plain_map", "u_map", "complex_map", "OmronLab"]; % -- image file names
-maps = ["OmronLab"]; % -- image file names
+maps = "OmronLab"; % -- image file names
 folder = "maps/"; % -- folder name where maps are held
 param.loc_sigma = 1; % -- spread of the location particles
 param.kc = 1.5;
@@ -25,7 +27,7 @@ bias = [0]; % -- flag for enabling/disabling bias of the human operated robot
 param.norm = 1;
 share_info = 1;
 param.alphaBegin = 0.5; 
-param.tau = 15;
+param.tau = -1; % tau is set outside
 param.share = 1;
 param.bias = 0;
 param.agents = 3; % -- define the total number of robots to be in the domain
@@ -35,10 +37,10 @@ param.agents = 3; % -- define the total number of robots to be in the domain
 % -- locations where the target can be located
 % R = param.L(2)*sqrt(2)/2; %L/4*(sqrt(2)/2+3);
 
-% target_locations = [R*cosd(45-30), R*sind(45-30); 
-%                     R*cosd(45), R*sind(45); 
+% target_locations = [R*cosd(45-30), R*sind(45-30);
+%                     R*cosd(45), R*sind(45);
 %                     R*cosd(45+30), R*sind(45+30)];
-% target_locations = [R*cosd(45+30), R*sind(45+30)];                
+% target_locations = [R*cosd(45+30), R*sind(45+30)];
 
 %target_locations = [2 2];
 target_locations = [tloc(1) tloc(2)];

@@ -78,7 +78,8 @@ fiducial(:,2) = row*(param.L(2)/imh);
 fiducial(:,1) = col*(param.L(1)/imw);
 
 % -- measurement model | bearing only measurement
-hfun=@(X) wrapToPi(atan2((X(5,:)-X(2,:)), (X(4,:)-X(1,:)))-X(3,:));
+% hfun=@(X) wrapToPi(atan2((X(5,:)-X(2,:)), (X(4,:)-X(1,:)))-X(3,:));
+hfun=@(X) MywrapToPi(atan2((X(5,:)-X(2,:)), (X(4,:)-X(1,:)))-X(3,:));
 
 % the likelihood function for pf_update
 lfn = @(Z, Zr, p, bin_map, robot, param) ...
@@ -138,10 +139,7 @@ for jj=1:param.nsim
     omega = Z; % -- omega values used every time step
     vel = omega; % -- velocity values used every time step
     I = zeros(5,param.T,1,param.agents); % -- holds rb_information regarding the mutual rb_info
-    
-    % -- holds all the optimized velocity and omega data
-    vel_data = zeros(1,param.T,1,param.agents);
-    omega_data = vel_data;
+
     
     % ^^ initial estimate of target location
     % is just uniformly distributed, so we have no idea where the target is
@@ -159,14 +157,7 @@ for jj=1:param.nsim
         p(1:3,:,1,r)=[X0(1,1,1,r)+randn(1,param.N)*w0;
             X0(2,1,1,r)+randn(1,param.N)*w0;
             X0(3,1,1,r)+randn(1,param.N)*w0];
-        
-        %         if r == 1 % human operated robot
-        %            p(4:7,:,1,r:param.agents) = ones(4, param.N, 1, param.agents).* ...
-        %                                        [rand(1,param.N)*param.L(1);
-        %                                         rand(1,param.N)*param.L(2);
-        %                                         rand(1,param.N)*param.L(1);
-        %                                         rand(1,param.N)*param.L(2)];
-        %         end
+       
         
         % -- should assign each value separately -- SB
         %         if r == 1 % human operated robot
@@ -194,7 +185,7 @@ for jj=1:param.nsim
         
         Xh(:,1,1,r)=mean(p(:,:,1,r),2);
         if r == 1
-            [Xs(1:3,:,1,r), ~, ~]=RobotExperimentDataSet(exp_id, condition);
+            [Xs(1:3,:,1,r), speed, tr]=RobotExperimentDataSet(exp_id, condition);
             Xs(4:5,1,1,r)=X0(4:5,:,1,r);
         else
             Xs(1:5,1,1,r)=X0(:,:,1,r);
@@ -264,12 +255,14 @@ for jj=1:param.nsim
             % -- used to determine sharing of rb_information!
             [Neighbors, ~] = find(info_SI(:,robot) == 1);
             
-            kappa = 5;
-            rij0 = 1.5;
             % these values are 1 because 1-0 is 1!
-            phuman = 1-(1-1)./(1+exp(-kappa*(rij(robot,1)-rij0)));
-            probot = 1-(1-1)./(1+exp(-kappa*(Rr(robot,1)-rij0)));
+%             kappa = 5;
+%             rij0 = 1.5;
+%             phuman = 1-(1-1)./(1+exp(-kappa*(rij(robot,1)-rij0)));
+%             probot = 1-(1-1)./(1+exp(-kappa*(Rr(robot,1)-rij0)));
             
+            phuman=1; probot=1;
+                
             % -- check the distance between robot and simulated target
             rij(robot,1) = sqrt((Xs(4,k,1,robot)-Xs(1,k,1,robot))^2+...
                 (Xs(5,k,1,robot)-Xs(2,k,1,robot))^2);
@@ -457,16 +450,13 @@ for jj=1:param.nsim
                 end
                 %                 end
                 
-                
-                % -- check if we want to look into how freeze time
-                % -- of the human controlled robot affects the alpha update
             elseif ConfigSetup == "alpha_t/FreezeTime"
                 
                 if k > 2
                     % -- check if the robot speed and turn rate are
                     % -- less than 0.1 m/s or rad/s
                     % -- IF abs(speed_data) < 0.1 & abs(tr_data) < 0.1
-                    if abs(vel(1,k,1,1)) < 0.1 && abs(omega(1,k,1,1)) < 0.1
+                    if abs(speed(k)) < 0.1 && abs(tr(k)) < 0.1
                         % -- add up individual time steps of the
                         % -- simulation if the human controlled robot
                         % -- is "freezing"
@@ -486,7 +476,7 @@ for jj=1:param.nsim
                 if k > param.fps*param.tau+3
                     feature_k = sum(f_time(k-param.fps*param.tau+1:k, 1))/(param.fps*param.tau);
                     % it's actually fraction of time spent freezing so
-                    % need to divide by fps*param.tau ?
+                    % need to divide by fps*param.tau
                     % check that the value lies between 0-1 by running it through a test trial
                     % to make sure that this is correct -- SB
                     [alpha(k+1,1), pDxMxT(k+1,1), pDyMyT(k+1,1)] = ...
@@ -496,16 +486,7 @@ for jj=1:param.nsim
                     alpha(k+1,1)=param.alphaBegin;
                     pDxMxT(k+1,1)=0.00001;
                     pDyMyT(k+1,1)=0.00001;
-                end
-                %                 end
-                
-                % -- set alpha to be constant value
-                %                 alpha(k+1,1) = 1.0;
-                % maximize mutual rb_information
-                %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, eta, hfun, om, r_visible);
-                %             [omega,vel]=optimize_MI(k, p, v, dt, N, wts, w, om, lfn);
-                [omega(1,k,1,robot),vel(1,k,1,robot),I(:,k,1,robot)] = ...
-                    O_MI(k, p, wts, bin_map, Z(:,k,1,:), robot, Zr(:,k,1,:), alpha(k+1,1));
+                end                
             elseif ConfigSetup == "RandomWalk"
                 % turn rate uniformly distributed between  [-0.25, 0.25]
                 omega(1,k,1,robot)=0.5*rand-0.25; %param.omega0+0.1*randn;
@@ -516,16 +497,18 @@ for jj=1:param.nsim
             elseif ConfigSetup == "alpha_0"
                 % -- set alpha to be constant value
                 alpha(k+1,1) = 0.0;
-                % maximize mutual information
-                [omega(1,k,1,robot),vel(1,k,1,robot),I(:,k,1,robot)] = ...
-                    O_MI(k, p, wts, bin_map, Z(:,k,1,:), robot, Zr(:,k,1,:), alpha(k+1,1));
             elseif ConfigSetup == "alpha_1"
                 % -- set alpha to be constant value
                 alpha(k+1,1) = 1.0;
+            end
+            
+            % only run mi if alpha is set
+            if ConfigSetup ~= "RandomWalk"
                 % maximize mutual information
                 [omega(1,k,1,robot),vel(1,k,1,robot),I(:,k,1,robot)] = ...
                     O_MI(k, p, wts, bin_map, Z(:,k,1,:), robot, Zr(:,k,1,:), alpha(k+1,1));
             end
+             
             
             % -- get the range and bearing rb_information for every fiducial
             % -- for every robot in the simulation
@@ -539,7 +522,7 @@ for jj=1:param.nsim
             
             % speeding up -- SB
             rb_info(:,1)=sqrt((fiducial(:,1)-Xs(1,k,1,robot)).^2+(fiducial(:,2)-Xs(2,k,1,robot)).^2);
-            rb_info(:,2)=wrapToPi(atan2(fiducial(:,2)-Xs(2,k,1,robot), fiducial(:,1)-Xs(1,k,1,robot)) - ...
+            rb_info(:,2)=MywrapToPi(atan2(fiducial(:,2)-Xs(2,k,1,robot), fiducial(:,1)-Xs(1,k,1,robot)) - ...
                 Xs(3,k,1,robot));
             
             % -- look at the points that are only within the collision FOV
@@ -908,46 +891,6 @@ I(3) = MI_r(row,col); % -- MI normalized of the human robot
 I(4) = MI_T(row,col); % -- MI not normalized of the target
 I(5) = MI_R(row,col); % -- MI not normalized of the human robot
 
-function omega=optimize_Htz(k, p, v, dt, N, wts, w, eta, hfun, lfn, omega_range)
-
-Htz=zeros(1, numel(omega_range));
-
-pTkcZk=p(:,:,k);
-mu_pTkcZk=mean(pTkcZk,2);
-for oo=1:numel(omega_range)
-    
-    
-    mmdl1=@(x) rt1d(x, v, omega_range(oo), dt);
-    p_ = pf_predict(pTkcZk, mmdl1, diag(w));
-    
-    % Support for Z should be something that
-    Zsup=[1 -1];
-    %     Z1=mean(hfun(p(:,:,k)));
-    %     Zsup=linspace(Z1-10,Z1+10,10);
-    %     Zsup=hfun(p(:,:,k));
-    %     Zsup=Zsup(:,1:2:end);
-    M=size(Zsup,2);
-    
-    pTk1cZk1=zeros(2, numel(wts),M);
-    for ll=1:M
-        pTk1cZk1(:,:,ll)=pf_update(p_, wts, Zsup(:,ll),lfn);
-    end
-    % entropy of z
-    pTk1cZZk1=squeeze(pTk1cZk1(2,:,:));
-    Htz(oo)=ent(pTk1cZZk1(:)', 10, ...
-        [mu_pTkcZk(2)-5, mu_pTkcZk(2)+5], 'x');
-    %     Htz(oo)=ent(pTk1cZZk1(:)', 20, ...
-    %         [1, 15], 'x');
-    %     Htz(oo)=ent_kde(pTk1cZZk1(:)', .5, 5:1:15);
-    
-end
-
-[~, idx]=min(Htz);
-omega=omega_range(idx);
-
-% -- likelihood function for pf_update only!
-% -- this function combines both looking for the target as well
-% -- as looking for the human operated robot
 function wts=lfn1(Z, Zr, p, hfun, bin_map, robot, param)
 
 % -- number of particles
@@ -1118,6 +1061,10 @@ X(6,1) = X(6,1);
 X(7,1) = X(7,1);
 
 function z = get_measurements(X)
-
-z(1,:)=wrapToPi(atan2((X(5,:)-X(2,:)), (X(4,:)-X(1,:)))-X(3,:));
+bearing = atan2((X(5,:)-X(2,:)), (X(4,:)-X(1,:)))-X(3,:);
+% z(1,:)=wrapToPi(bearing);
+% ztemp = bearing - 2*pi*floor(bearing/(2*pi));
+%z(1,:) = bearing - 2*pi*floor((bearing+pi)/(2*pi));
+z(1,:) = MywrapToPi(bearing);
+% z(1,:)=wrapToPi(atan2((X(5,:)-X(2,:)), (X(4,:)-X(1,:)))-X(3,:));
 % z(1,:)=atan2((X(end,:)-X(2,:)), (X(end-1,:)-X(1,:)))-X(3,:);
