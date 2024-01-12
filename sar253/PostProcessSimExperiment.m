@@ -1,8 +1,8 @@
 function PostProcessSimExperiment()
 
 % -- This function will serve as a mediator of other functions to
-% -- display data saved from the simulation infoseek2Db_multi_robot.m which 
-% -- imports experimental data captured using the overhead tracking system 
+% -- display data saved from the simulation infoseek2Db_multi_robot.m which
+% -- imports experimental data captured using the overhead tracking system
 % -- from the NIU Omron Lab.
 % -- Written by: Rafal Krzysiak
 
@@ -12,13 +12,13 @@ clear variables
 % -- import the data saved
 %SimExp = ImportAllData();
 
-% -- plot which robot found the missing target 
+% -- plot which robot found the missing target
 % PlotWhoFoundTarget(SimExp);
 % PlotWhoFoundTarget_testSet();
-% TimeGained();
-plot_performance_comparison();
+TimeGained();
+% plot_performance_comparison();
 
-% -- plot all trajectories 
+% -- plot all trajectories
 % PlotAllTraj(SimExp);
 % PlotTrajTestDataSet();
 % PlotRWControls();
@@ -55,110 +55,111 @@ function PlotTrajTestDataSet()
 
 % -- define the conditions tested
 conditions = ["condition_1",...
-              "condition_2",...
-              "condition_3",...
-              "condition_4"];
-          
+    "condition_2",...
+    "condition_3",...
+    "condition_4"];
+
 cond_names=["xMxT","xMyT","yMxT","yMyT"];
 
 % -- define the mat file name used for all participants
 Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
 
-% -- pull list of test folders within test folder
-parentDir = "../../simdata/alpha_0";
-parentDir_RW = "../../simdata/RandomWalk";
+% -- data to plot
+parentDir = "../../simdata/alpha_t/TotalDist";
+
+% ids to plot
+ids_to_plot=9;% 197,112
+
 files = dir(parentDir);
-RW_files = dir(parentDir_RW);
 
 i = 1;
 
 % -- define the domain size
 L= [18 9];
 
-% ids to plot
-ids_to_plot=3;% 197,112
+
 
 
 % -- begin looping through each test folder
 for test = ids_to_plot%1:size(files, 1)
-
+    
     % -- make sure that we capture a number not '.' or '..'
     if (files(test).name ~= "." && files(test).name ~= "..")
-
+        
         % -- within the test number folder, get the participant numbers
         subDir = strcat(parentDir, "/", files(test).name);
         participant_folders = dir(subDir);
-
+        
         % -- begin looping through all the participant folders
         for participant = 1:size(participant_folders, 1)
             % -- make sure that we capture a number not '.' or '..'
             if (participant_folders(participant).name ~= "." && participant_folders(participant).name ~= "..")
-                figure(participant-2); gcf; 
-
+                figure(participant-2); gcf;
+                
                 % -- create participant directory
                 partDir = strcat(subDir,"/",participant_folders(participant).name);
-
+                
                 % -- begin looping through all conditions tested
                 for cond = 1:size(conditions, 2)
-
+                    
                     % -- create condition directory
                     condDir = strcat(partDir, "/", conditions(cond));
                     condFile = strcat(condDir, "/", Matfile);
-
+                    
                     % -- read the data captured for the test
                     TestData = load(condFile);
-
+                    
                     % -- get the end time
                     tf = TestData.simdata.time;
-
+                    
                     % -- plot everything nicely
                     subplot(2, 4, 2*cond-1);
                     cla;
                     % -- display the Omron Lab map
-                    hold on; imagesc([0 L(1)],[0 L(2)], TestData.img); 
+                    hold on; imagesc([0 L(1)],[0 L(2)], TestData.img);
                     set(gca,'ydir','reverse');
                     axis image;
-
+                    
                     % -- plot the target location
                     hold on; plot(TestData.simdata.tloc(1, 1), ...
-                                  TestData.simdata.tloc(1, 2), ...
-                                  'm*', 'LineWidth', 3, 'MarkerSize', 12); % -- Target location 
-
+                        TestData.simdata.tloc(1, 2), ...
+                        'm*', 'LineWidth', 3, 'MarkerSize', 12); % -- Target location
+                    
                     % -- plot the beginning and end points of the robots
                     hold on; plot(TestData.simdata.Xs(1, 1, 1, 1), ...
-                                  TestData.simdata.Xs(2, 1, 1, 1), ...
-                                  'ks', 'LineWidth', 3, 'MarkerSize', 12); % -- experiment robot (human controlled robot start)
+                        TestData.simdata.Xs(2, 1, 1, 1), ...
+                        'ks', 'LineWidth', 3, 'MarkerSize', 12); % -- experiment robot (human controlled robot start)
                     hold on; plot(TestData.simdata.Xs(1, 1, 1, 2), ...
-                                  TestData.simdata.Xs(2, 1, 1, 2), ...
-                                  'gs', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 1 start
+                        TestData.simdata.Xs(2, 1, 1, 2), ...
+                        'gs', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 1 start
                     hold on; plot(TestData.simdata.Xs(1, 1, 1, 3), ...
-                                  TestData.simdata.Xs(2, 1, 1, 3), ...
-                                  'gs', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 2 start
-
+                        TestData.simdata.Xs(2, 1, 1, 3), ...
+                        'gs', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 2 start
+                    
                     hold on; plot(TestData.simdata.Xs(1, tf, 1, 1), ...
-                                  TestData.simdata.Xs(2, tf, 1, 1), ...
-                                  'ko', 'LineWidth', 3, 'MarkerSize', 12); % -- experiment robot (human controlled robot end)
+                        TestData.simdata.Xs(2, tf, 1, 1), ...
+                        'ko', 'LineWidth', 3, 'MarkerSize', 12); % -- experiment robot (human controlled robot end)
                     hold on; plot(TestData.simdata.Xs(1, tf, 1, 2), ...
-                                  TestData.simdata.Xs(2, tf, 1, 2), ...
-                                  'go', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 1 end
+                        TestData.simdata.Xs(2, tf, 1, 2), ...
+                        'go', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 1 end
                     hold on; plot(TestData.simdata.Xs(1, tf, 1, 3), ...
-                                  TestData.simdata.Xs(2, tf, 1, 3), ...
-                                  'go', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 2 end
-
+                        TestData.simdata.Xs(2, tf, 1, 3), ...
+                        'go', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 2 end
+                    
                     % -- On top of the domain map, plot all trajectories of the robots
                     hold on; plot(TestData.simdata.Xs(1, 1:tf, 1, 1), ...
-                                  TestData.simdata.Xs(2, 1:tf, 1, 1), ...
-                                  'k-', 'LineWidth', 2); % -- experiment robot (human controlled robot trajectory)
+                        TestData.simdata.Xs(2, 1:tf, 1, 1), ...
+                        'k-', 'LineWidth', 2); % -- experiment robot (human controlled robot trajectory)
                     hold on; plot(TestData.simdata.Xs(1, 1:tf, 1, 2), ...
-                                  TestData.simdata.Xs(2, 1:tf, 1, 2), ...
-                                  'g-', 'LineWidth', 2); % -- autonomous robot 1 trajectory
+                        TestData.simdata.Xs(2, 1:tf, 1, 2), ...
+                        'g-', 'LineWidth', 2); % -- autonomous robot 1 trajectory
                     hold on; plot(TestData.simdata.Xs(1, 1:tf, 1, 3), ...
-                                  TestData.simdata.Xs(2, 1:tf, 1, 3), ...
-                                  'g-', 'LineWidth', 2); % -- autonomous robot 2 trajectory
-%                     title(sprintf("\\alpha_k (%s)", cond_names(cond))) 
-                    title(cond_names(cond)) 
+                        TestData.simdata.Xs(2, 1:tf, 1, 3), ...
+                        'g-', 'LineWidth', 2); % -- autonomous robot 2 trajectory
+                    %                     title(sprintf("\\alpha_k (%s)", cond_names(cond)))
+                    title(cond_names(cond))
                 end
-                 i = i + 1;
+                i = i + 1;
             end
         end
     end
@@ -170,144 +171,58 @@ i = 1;
 
 % -- begin looping through each test folder
 for test = ids_to_plot%1:size(files, 1)
-
+    
     % -- make sure that we capture a number not '.' or '..'
     if (files(test).name ~= "." && files(test).name ~= "..")
-
+        
         % -- within the test number folder, get the participant numbers
         subDir = strcat(parentDir, "/", files(test).name);
         participant_folders = dir(subDir);
-
+        
         % -- begin looping through all the participant folders
         for participant = 1:size(participant_folders, 1)
             % -- make sure that we capture a number not '.' or '..'
             if (participant_folders(participant).name ~= "." && participant_folders(participant).name ~= "..")
                 figure(participant-2); gcf;
-
+                
                 % -- create participant directory
                 partDir = strcat(subDir,"/",participant_folders(participant).name);
-
+                
                 % -- begin looping through all conditions tested
                 for cond = 1:size(conditions, 2)
-
+                    
                     % -- create condition directory
                     condDir = strcat(partDir, "/", conditions(cond));
                     condFile = strcat(condDir, "/", Matfile);
-
+                    
                     % -- read the data captured for the test
                     TestData = load(condFile);
-
+                    
                     % -- get the end time
                     tf = TestData.simdata.time;
-
+                    
                     % -- plot everything nicely
                     subplot(2, 4, 2*cond);
                     cla;
-
+                    
                     % -- plot the target location
                     hold on; plot(1:tf, ...
-                                  TestData.simdata.alpha(1:tf), ...
-                                  'k-', 'LineWidth', 3); % -- alpha
+                        TestData.simdata.alpha(1:tf), ...
+                        'k-', 'LineWidth', 3); % -- alpha
                     set(gca, 'ylim', [0,1]);
-
-%                     title(cond_names(cond))
+                    
+                    %                     title(cond_names(cond))
                     ylabel('$\alpha_k=p(\mathrm{xMxT}|f_{\tau})$', ...
-                            'interpreter', 'latex')
+                        'interpreter', 'latex')
                     xlabel('time (s)');
                     
                 end
-                 i = i + 1;
+                i = i + 1;
             end
         end
     end
 end
-%{
-% --- 
-i = 1; 
-% -- begin looping through each test folder
-for RWtest = ids_to_plot%1:size(RW_files, 1)
 
-    % -- make sure that we capture a number not '.' or '..'
-    if (RW_files(RWtest).name ~= "." && RW_files(RWtest).name ~= ".." && RW_files(RWtest).name ~= ".DS_Store")
-        
-        % -- within the test number folder, get the participant numbers
-        RWsubDir = strcat(parentDir_RW, "/", RW_files(RWtest).name);
-        RWparticipant_folders = dir(RWsubDir);
-        
-        % -- begin looping through all the participant folders
-        for RWparticipant = 1:size(RWparticipant_folders, 1)
-            figure(RWparticipant); gcf;
-            
-            % -- make sure that we capture a number not '.' or '..'
-            if (RWparticipant_folders(RWparticipant).name ~= "." && RWparticipant_folders(RWparticipant).name ~= ".." && RWparticipant_folders(RWparticipant).name ~= ".DS_Store")
-            
-                % -- create participant directory
-                RWpartDir = strcat(RWsubDir,"/",RWparticipant_folders(RWparticipant).name);
-    
-                % -- begin looping through all conditions tested
-                for cond = 1:size(conditions, 2)
-    
-                    % -- create condition directory
-                    RWcondDir = strcat(RWpartDir, "/", conditions(cond));
-                    RWcondFile = strcat(RWcondDir, "/", Matfile);
-    
-                    % -- read the data captured for the test
-                    RWTestData = load(RWcondFile);
-                    % -- get the end time
-                    tf = RWTestData.simdata.time;
-                    
-                    subplot(2, 2, cond);
-                    % -- display the Omron Lab map
-                    
-                    hold on; imagesc([0 L(1)],[0 L(2)], RWTestData.img); 
-                    set(gca,'ydir','reverse');
-                    axis image;
-            
-                    % -- plot the target location
-                    hold on; plot(RWTestData.simdata.tloc(1, 1), ...
-                                  RWTestData.simdata.tloc(1, 2), ...
-                                  'mx', 'LineWidth', 3, 'MarkerSize', 12); % -- Target location 
-                
-                    % -- plot the beginning and end points of the robots
-                    hold on; plot(RWTestData.simdata.Xs(1, 1, 1, 1), ...
-                                  RWTestData.simdata.Xs(2, 1, 1, 1), ...
-                                  'ks', 'LineWidth', 3, 'MarkerSize', 12); % -- experiment robot (human controlled robot start)
-                    hold on; plot(RWTestData.simdata.Xs(1, 1, 1, 2), ...
-                                  RWTestData.simdata.Xs(2, 1, 1, 2), ...
-                                  'gs', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 1 start
-                    hold on; plot(RWTestData.simdata.Xs(1, 1, 1, 3), ...
-                                  RWTestData.simdata.Xs(2, 1, 1, 3), ...
-                                  'gs', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 2 start
-                
-                    hold on; plot(RWTestData.simdata.Xs(1, tf, 1, 1), ...
-                                  RWTestData.simdata.Xs(2, tf, 1, 1), ...
-                                  'kx', 'LineWidth', 3, 'MarkerSize', 12); % -- experiment robot (human controlled robot end)
-                    hold on; plot(RWTestData.simdata.Xs(1, tf, 1, 2), ...
-                                  RWTestData.simdata.Xs(2, tf, 1, 2), ...
-                                  'gx', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 1 end
-                    hold on; plot(RWTestData.simdata.Xs(1, tf, 1, 3), ...
-                                  RWTestData.simdata.Xs(2, tf, 1, 3), ...
-                                  'gx', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 2 end
-                
-                    % -- On top of the domain map, plot all trajectories of the robots
-                    hold on; plot(RWTestData.simdata.Xs(1, 1:tf, 1, 1), ...
-                                  RWTestData.simdata.Xs(2, 1:tf, 1, 1), ...
-                                  'k-', 'LineWidth', 2); % -- experiment robot (human controlled robot trajectory)
-                    hold on; plot(RWTestData.simdata.Xs(1, 1:tf, 1, 2), ...
-                                  RWTestData.simdata.Xs(2, 1:tf, 1, 2), ...
-                                  'g-', 'LineWidth', 2); % -- autonomous robot 1 trajectory
-                    hold on; plot(RWTestData.simdata.Xs(1, 1:tf, 1, 3), ...
-                                  RWTestData.simdata.Xs(2, 1:tf, 1, 3), ...
-                                  'g-', 'LineWidth', 2); % -- autonomous robot 2 trajectory
-                    title(sprintf("random (%s)", cond_names(cond)))
-    
-                end
-                 i = i + 1;
-            end
-        end
-    end
-end
-%}
 end
 
 
@@ -315,9 +230,9 @@ function PlotRWControls()
 
 % -- define the conditions tested
 conditions = ["condition_1",...
-              "condition_2",...
-              "condition_3",...
-              "condition_4"];
+    "condition_2",...
+    "condition_3",...
+    "condition_4"];
 
 % -- define the mat file name used for all participants
 Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
@@ -333,11 +248,11 @@ figure(1); clf; gcf;
 % -- define the domain size
 L= [18 9];
 
-i = 1; 
+i = 1;
 
 % -- begin looping through each test folder
 for RWtest = 4:4%1:size(RW_files, 1)
-
+    
     % -- make sure that we capture a number not '.' or '..'
     if (RW_files(RWtest).name ~= "." && RW_files(RWtest).name ~= ".." && RW_files(RWtest).name ~= ".DS_Store")
         
@@ -351,22 +266,22 @@ for RWtest = 4:4%1:size(RW_files, 1)
             
             % -- make sure that we capture a number not '.' or '..'
             if (RWparticipant_folders(RWparticipant).name ~= "." && RWparticipant_folders(RWparticipant).name ~= ".." && RWparticipant_folders(RWparticipant).name ~= ".DS_Store")
-            
+                
                 % -- create participant directory
                 RWpartDir = strcat(RWsubDir,"/",RWparticipant_folders(RWparticipant).name);
-    
+                
                 % -- begin looping through all conditions tested
                 for cond = 1:size(conditions, 2)
-    
+                    
                     % -- create condition directory
                     RWcondDir = strcat(RWpartDir, "/", conditions(cond));
                     RWcondFile = strcat(RWcondDir, "/", Matfile);
-    
+                    
                     % -- read the data captured for the test
                     RWTestData = load(RWcondFile);
                     % -- get the end time
                     tf = RWTestData.simdata.time;
-
+                    
                     % -- plot everything nicely
                     subplot(2, 2, cond);
                     % -- plot the turn rate and velocity data
@@ -374,14 +289,14 @@ for RWtest = 4:4%1:size(RW_files, 1)
                     hold on; plot(1:tf, RWTestData.simdata.omega(1,1:tf,1,3), 'g-', 'LineWidth', 2);
                     hold on; plot(1:tf, RWTestData.simdata.vel(1,1:tf,1,2), 'm-', 'LineWidth', 2);
                     hold on; plot(1:tf, RWTestData.simdata.vel(1,1:tf,1,3), 'b-', 'LineWidth', 2);
-
+                    
                     legend('Auto1 omega','Auto2 omega','Auto1 vel','Auto1 vel');
-
+                    
                     title(sprintf("Random Walk scenario\n Condition: %d, Controls", cond))
                     
-    
+                    
                 end
-                 i = i + 1;
+                i = i + 1;
             end
         end
     end
@@ -400,7 +315,7 @@ figure(1); clf; gcf;
 for cond = 1:Nc
     % -- create subplots for each condition
     subplot(1,Nc, cond);
-
+    
     % -- collect the which_robot data
     for i = 1:Np
         WhichRobot(i) = SimExp(i, cond).simdata.Which_robot;
@@ -409,21 +324,21 @@ for cond = 1:Nc
     % -- store the data in a temperary and clean variables
     X = [1, 2, 3];
     Y = [sum(WhichRobot == 0), sum(WhichRobot == 2), sum(WhichRobot == 3)];
-
+    
     % -- only for condition 4 (just for labeling purposes of title)
     if cond == 2
         cond = 4;
     end
-
+    
     % -- plot bar graph and make it look nice
     bar(X, Y);
     text(1:length(X),Y',num2str(Y'),'vert','bottom','horiz','center','FontSize',16);
     xlabel("Robot");
     ylabel("Number of times target was found by robot");
     title(sprintf("Condition: %d", cond));
-
+    
     % -- set figure parameters
-    ax = gca; 
+    ax = gca;
     ax.FontSize = 16;
 end
 
@@ -433,41 +348,66 @@ function TimeGained()
 
 % -- define the conditions tested
 conditions = ["condition_1",...
-              "condition_2",...
-              "condition_3",...
-              "condition_4"];
+    "condition_2",...
+    "condition_3",...
+    "condition_4"];
 
 % -- define the mat file name used for all participants
 Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
 
 % -- pull list of test folders within test folder
-parentDir = "../../simdata/alpha_t/FreezeTime";%TotalDist,FreezeTime
+parentDir_FT = "../../simdata/alpha_t/FreezeTime";
+parentDir_TD = "../../simdata/alpha_t/TotalDist";%TotalDist,FreezeTime
 parentDir_RW = "../../simdata/RandomWalk";
 parentDir0 = "../../simdata/alpha_0";
 parentDir1 = "../../simdata/alpha_1";
 
-files = dir(parentDir);
-RW_files = dir(parentDir_RW);
-files0 = dir(parentDir0);
-files1 = dir(parentDir1);
 
 timeArray = csvread('../data/TimeToFind.csv');
 timeArray(:,1)=timeArray(:,1)/2.27; % scaling to compensate for length and obstacles
 timeArray(:,1:4) = timeArray(:,1:4)-5.0; % -- adjusting for humans entering code into computer
 IDs = csvread('../src/IDList_Completed.csv', 1);
 
-% -- initialize the counter
-i = 1; 
+[testTime_FT, meanTimeArrayComp_FT, stdTimeArrayComp_FT]=...
+    collate_time_data(parentDir_FT, timeArray, IDs, conditions, Matfile);
 
+[testTime_TD, meanTimeArrayComp_TD, stdTimeArrayComp_TD]=...
+    collate_time_data(parentDir_TD, timeArray, IDs, conditions, Matfile);
+
+[RWtestTime, RWmeanTimeArrayComp, RWstdTimeArrayComp]=...
+    collate_time_data(parentDir_RW, timeArray, IDs, conditions, Matfile);
+
+[testTime0, meanTimeArrayComp0, stdTimeArrayComp0]=...
+    collate_time_data(parentDir0, timeArray, IDs, conditions, Matfile);
+
+[testTime1, meanTimeArrayComp1, stdTimeArrayComp1]=...
+    collate_time_data(parentDir1, timeArray, IDs, conditions, Matfile);
+
+% save workspace and then just select and run the rest of the script to
+% save time
+
+save(['timegained_workspace', '.mat'])
+end
+
+
+function [testTime, meanTimeArrayComp, stdTimeArrayComp]=...
+    collate_time_data(parentDir, timeArray, IDs, ...
+    conditions, Matfile)
+
+% -- initialize the counter
+i = 1;
 
 condCount = ones(1,4);
 
 timecount = 0;
+
 fps=2; % frame rate for simdata --SB
 
-% -- begin looping through each test folder
-testTime = zeros(size(files, 1), 4);
-for test = 1:size(files, 1)
+files = dir(parentDir);
+num_sims=size(files, 1);
+
+testTime = zeros(num_sims, 4);
+for test = 1:num_sims
     % can collapse all these into a single function for efficiency --SB
     % -- make sure that we capture a number not '.' or '..'
     if (files(test).name ~= "." && files(test).name ~= ".." && ...
@@ -483,17 +423,17 @@ for test = 1:size(files, 1)
             if (participant_folders(participant).name ~= "." && ...
                     participant_folders(participant).name ~= ".." && ...
                     participant_folders(participant).name ~= ".DS_Store")
-            
+                
                 % -- create participant directory
                 partDir = strcat(subDir,"/",participant_folders(participant).name);
-    
+                
                 % -- begin looping through all conditions tested
                 for cond = 1:size(conditions, 2)
-    
+                    
                     % -- create condition directory
                     condDir = strcat(partDir, "/", conditions(cond));
                     condFile = strcat(condDir, "/", Matfile);
-    
+                    
                     % -- read the data captured for the test
                     TestData = load(condFile);
                     
@@ -504,24 +444,24 @@ for test = 1:size(files, 1)
                         for id = 1:size(IDs, 1)
                             if num2str(IDs(id)) == participant_folders(participant).name
                                 % -- get the time difference and store it
-%                                 if cond ~= 4
+                                %                                 if cond ~= 4
                                 % only count if the difference is positive
                                 if timeArray(id, cond) - TestData.simdata.time/fps > 0
                                     testTime(condCount(1,cond), cond) = ...
                                         timeArray(id, cond) - TestData.simdata.time/fps;
                                 end
-                                  % Commenting this out because we want to
-                                  % ignore deception - SB
-%                                 else
-%                                     testTime(condCount(1,cond), cond) = ...
-%                                         abs(timeArray(id, cond) + timeArray(id, cond+1) - TestData.simdata.time);
-%                                 end
+                                % Commenting this out because we want to
+                                % ignore deception - SB
+                                %                                 else
+                                %                                     testTime(condCount(1,cond), cond) = ...
+                                %                                         abs(timeArray(id, cond) + timeArray(id, cond+1) - TestData.simdata.time);
+                                %                                 end
                                 timecount = timecount + 1;
                                 break;
                             end
                         end
                     end
-                condCount(1,cond) = condCount(1,cond) + 1;
+                    condCount(1,cond) = condCount(1,cond) + 1;
                 end
                 i = i + 1;
             end
@@ -530,261 +470,19 @@ for test = 1:size(files, 1)
 end
 
 meanTimeArrayComp = [mean(testTime(testTime(:,1) ~= 0, 1)), ...
-                     mean(testTime(testTime(:,2) ~= 0, 2)), ...
-                     mean(testTime(testTime(:,3) ~= 0, 3)), ...
-                     mean(testTime(testTime(:,4) ~= 0, 4))];
+    mean(testTime(testTime(:,2) ~= 0, 2)), ...
+    mean(testTime(testTime(:,3) ~= 0, 3)), ...
+    mean(testTime(testTime(:,4) ~= 0, 4))];
 stdTimeArrayComp = [std(testTime(testTime(:,1) ~= 0, 1)), ...
-                    std(testTime(testTime(:,2) ~= 0, 2)), ...
-                    std(testTime(testTime(:,3) ~= 0, 3)), ...
-                    std(testTime(testTime(:,4) ~= 0, 4))];
+    std(testTime(testTime(:,2) ~= 0, 2)), ...
+    std(testTime(testTime(:,3) ~= 0, 3)), ...
+    std(testTime(testTime(:,4) ~= 0, 4))];
 
-RWtimecount = 0;
-condCount = ones(1, 4);
-
-i = 1;
-% -- begin looping through each test folder
-RWtestTime = zeros(size(RW_files, 1), 4);
-for RWtest = 1:size(RW_files, 1)
-
-    % -- make sure that we capture a number not '.' or '..'
-    if (RW_files(RWtest).name ~= "." && RW_files(RWtest).name ~= ".." && ...
-            RW_files(RWtest).name ~= ".DS_Store")
-        
-        % -- within the test number folder, get the participant numbers
-        RWsubDir = strcat(parentDir_RW, "/", RW_files(RWtest).name);
-        RWparticipant_folders = dir(RWsubDir);
-        
-        % -- begin looping through all the participant folders
-        for RWparticipant = 1:size(RWparticipant_folders, 1)
-            % -- make sure that we capture a number not '.' or '..'
-            if (RWparticipant_folders(RWparticipant).name ~= "." && ...
-                    RWparticipant_folders(RWparticipant).name ~= ".." && ...
-                    RWparticipant_folders(RWparticipant).name ~= ".DS_Store")
-            
-                % -- create participant directory
-                RWpartDir = strcat(RWsubDir,"/",RWparticipant_folders(RWparticipant).name);
-    
-                % -- begin looping through all conditions tested
-                for cond = 1:size(conditions, 2)
-    
-                    % -- create condition directory
-                    RWcondDir = strcat(RWpartDir, "/", conditions(cond));
-                    RWcondFile = strcat(RWcondDir, "/", Matfile);
-    
-                    % -- read the data captured for the test
-                    RWTestData = load(RWcondFile);
-
-                    % -- check if the autonomous robot found the target
-                    if RWTestData.simdata.Which_robot ~= 0
-                        % -- compare the ID looking at with the list
-                        % -- to get the original time ran
-                        for id = 1:size(IDs, 1)
-                            if num2str(IDs(id)) == RWparticipant_folders(RWparticipant).name
-                                % -- get the time difference and store it
-                                % if cond ~= 4
-                                % only count if the difference is positive
-                                if timeArray(id, cond) - RWTestData.simdata.time/fps > 0
-                                    RWtestTime(condCount(1,cond), cond) =  ...
-                                        timeArray(id, cond) - RWTestData.simdata.time/fps;
-                                end
-                                % else
-                                %     RWtestTime(condCount(1,cond), cond) = ...
-                                %   abs(timeArray(id, cond) + timeArray(id, cond+1) - RWTestData.simdata.time);
-                                % end
-                                RWtimecount = RWtimecount + 1;
-                                break;
-                            end
-                        end
-                    end
-                    condCount(1,cond) = condCount(1,cond) + 1;
-                end
-                i = i + 1;
-            end
-        end
-    end
-end
-
-RWmeanTimeArrayComp = [mean(RWtestTime(RWtestTime(:,1) ~= 0, 1)), ...
-                     mean(RWtestTime(RWtestTime(:,2) ~= 0, 2)), ...
-                     mean(RWtestTime(RWtestTime(:,3) ~= 0, 3)), ...
-                     mean(RWtestTime(RWtestTime(:,4) ~= 0, 4))];
-RWstdTimeArrayComp = [std(RWtestTime(RWtestTime(:,1) ~= 0, 1)), ...
-                    std(RWtestTime(RWtestTime(:,2) ~= 0, 2)), ...
-                    std(RWtestTime(RWtestTime(:,3) ~= 0, 3)), ...
-                    std(RWtestTime(RWtestTime(:,4) ~= 0, 4))];
-
-timecount0 = 0;
-condCount = ones(1, 4);
-
-i = 1;
-% -- begin looping through each test folder
-testTime0 = zeros(size(files0, 1), 4);
-for test0 = 1:size(files0, 1)
-
-    % -- make sure that we capture a number not '.' or '..'
-    if (files0(test0).name ~= "." && files0(test0).name ~= ".." && ...
-            files0(test0).name ~= ".DS_Store")
-        
-        % -- within the test number folder, get the participant numbers
-        subDir0 = strcat(parentDir0, "/", files0(test0).name);
-        participant_folders0 = dir(subDir0);
-        
-        % -- begin looping through all the participant folders
-        for participant0 = 1:size(participant_folders0, 1)
-            % -- make sure that we capture a number not '.' or '..'
-            if (participant_folders0(participant0).name ~= "." && ...
-                    participant_folders0(participant0).name ~= ".." && ...
-                    participant_folders0(participant0).name ~= ".DS_Store")
-            
-                % -- create participant directory
-                partDir0 = strcat(subDir0,"/",participant_folders0(participant0).name);
-    
-                % -- begin looping through all conditions tested
-                for cond = 1:size(conditions, 2)
-    
-                    % -- create condition directory
-                    condDir0 = strcat(partDir0, "/", conditions(cond));
-                    condFile0 = strcat(condDir0, "/", Matfile);
-    
-                    % -- read the data captured for the test
-                    TestData = load(condFile0);
-
-                    % -- check if the autonomous robot found the target
-                    if TestData.simdata.Which_robot ~= 0
-                        % -- compare the ID looking at with the list
-                        % -- to get the original time ran
-                        for id = 1:size(IDs, 1)
-                            if num2str(IDs(id)) == participant_folders0(participant0).name
-                                % -- get the time difference and store it
-%                                 if cond ~= 4
-                                if timeArray(id, cond) - TestData.simdata.time/fps > 0
-                                    testTime0(condCount(1,cond), cond) = ...
-                                        timeArray(id, cond) - TestData.simdata.time/fps;
-                                end
-                                  % Commenting this out because we want to
-                                  % ignore deception  - SB
-%                                 else
-%                                     testTime0(condCount(1,cond), cond) = ...
-%                                                   abs(timeArray(id, cond)+ ...
-%                                           timeArray(id, cond+1) - TestData.simdata.time);
-%                                 end
-                                timecount0 = timecount0 + 1;
-                                break;
-                            end
-                        end
-                    end
-                    condCount(1,cond) = condCount(1,cond) + 1;
-                end
-                i = i + 1;
-            end
-        end
-    end
-end
-
-meanTimeArrayComp0 = [mean(testTime0(testTime0(:,1) ~= 0, 1)), ...
-                     mean(testTime0(testTime0(:,2) ~= 0, 2)), ...
-                     mean(testTime0(testTime0(:,3) ~= 0, 3)), ...
-                     mean(testTime0(testTime0(:,4) ~= 0, 4))];
-stdTimeArrayComp0 = [std(testTime0(testTime0(:,1) ~= 0, 1)), ...
-                    std(testTime0(testTime0(:,2) ~= 0, 2)), ...
-                    std(testTime0(testTime0(:,3) ~= 0, 3)), ...
-                    std(testTime0(testTime0(:,4) ~= 0, 4))];
-
-timecount1 = 0;
-condCount = ones(1, 4);
-
-i = 1;
-% -- begin looping through each test folder
-testTime1 = zeros(size(files1, 1), 4);
-for test1 = 1:size(files1, 1)
-
-    % -- make sure that we capture a number not '.' or '..'
-    if (files1(test1).name ~= "." && files1(test1).name ~= ".." && ...
-            files1(test1).name ~= ".DS_Store")
-        
-        % -- within the test number folder, get the participant numbers
-        subDir1 = strcat(parentDir1, "/", files1(test1).name);
-        participant_folders1 = dir(subDir1);
-        
-        % -- begin looping through all the participant folders
-        for participant1 = 1:size(participant_folders1, 1)
-            % -- make sure that we capture a number not '.' or '..'
-            if (participant_folders1(participant1).name ~= "." && ...
-                    participant_folders1(participant1).name ~= ".." && ...
-                    participant_folders1(participant1).name ~= ".DS_Store")
-            
-                % -- create participant directory
-                partDir1 = strcat(subDir1,"/",participant_folders1(participant1).name);
-    
-                % -- begin looping through all conditions tested
-                for cond = 1:size(conditions, 2)
-    
-                    % -- create condition directory
-                    condDir1 = strcat(partDir1, "/", conditions(cond));
-                    condFile1 = strcat(condDir1, "/", Matfile);
-    
-                    % -- read the data captured for the test
-                    TestData = load(condFile1);
-
-                    % -- check if the autonomous robot found the target
-                    if TestData.simdata.Which_robot ~= 0
-                        % -- compare the ID looking at with the list
-                        % -- to get the original time ran
-                        for id = 1:size(IDs, 1)
-                            if num2str(IDs(id)) == participant_folders1(participant1).name
-                                % -- get the time difference and store it
-%                                 if cond ~= 4
-                                if timeArray(id, cond) - TestData.simdata.time/fps > 0
-                                    testTime1(condCount(1,cond), cond) = ...
-                                        timeArray(id, cond) - TestData.simdata.time/fps;
-                                end
-                                  % Commenting this out because we want to
-                                  % ignore deception -SB  
-%                                 else
-%                                     testTime1(condCount(1,cond), cond) = ...
-%                                         abs(timeArray(id, cond)+...
-%                                         timeArray(id, cond+1) - TestData.simdata.time);
-%                                 end
-                                timecount1 = timecount1 + 1;
-                                break;
-                            end
-                        end
-                    end
-                    condCount(1,cond) = condCount(1,cond) + 1;
-                end
-                i = i + 1;
-            end
-        end
-    end
-end
-
-meanTimeArrayComp1 = [mean(testTime1(testTime1(:,1) ~= 0, 1)), ...
-                     mean(testTime1(testTime1(:,2) ~= 0, 2)), ...
-                     mean(testTime1(testTime1(:,3) ~= 0, 3)), ...
-                     mean(testTime1(testTime1(:,4) ~= 0, 4))];
-stdTimeArrayComp1 = [std(testTime1(testTime1(:,1) ~= 0, 1)), ...
-                    std(testTime1(testTime1(:,2) ~= 0, 2)), ...
-                    std(testTime1(testTime1(:,3) ~= 0, 3)), ...
-                    std(testTime1(testTime1(:,4) ~= 0, 4))];
-
-% save workspace and then just select and run the rest of the script to
-% save time
-
-ftype=split(parentDir, '/');
-save(['timegained_workspace_', ftype{end}, '.mat'])
 end
 
 function plot_performance_comparison()
-%% run this section separately to save time
 
-load('timegained_workspace_FreezeTime.mat')
-meanTimeArrayComp_FT=meanTimeArrayComp;
-stdTimeArrayComp_FT=stdTimeArrayComp;
-testTime_FT=testTime;
-load('timegained_workspace_TotalDist.mat')
-meanTimeArrayComp_TD=meanTimeArrayComp;
-stdTimeArrayComp_TD=stdTimeArrayComp;
-testTime_TD=testTime;
+load('timegained_workspace.mat')
 
 % -- create figure
 figure(1); clf; gcf;
@@ -792,24 +490,32 @@ figure(1); clf; gcf;
 subplot(1,2,2);
 % -- plot the results
 errorbar(0:1:4, ...
-         [meanTimeArrayComp_TD(1,1),meanTimeArrayComp_FT(1,1), RWmeanTimeArrayComp(1,1), meanTimeArrayComp0(1,1), meanTimeArrayComp1(1,1)],...
-         [stdTimeArrayComp_TD(1,1), stdTimeArrayComp_FT(1,1), RWstdTimeArrayComp(1,1), stdTimeArrayComp0(1,1), stdTimeArrayComp1(1,1)],...
-         '^m','markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto'); hold on;
+    [meanTimeArrayComp_TD(1,1),meanTimeArrayComp_FT(1,1), ...
+    RWmeanTimeArrayComp(1,1), meanTimeArrayComp0(1,1), meanTimeArrayComp1(1,1)],...
+    [stdTimeArrayComp_TD(1,1), stdTimeArrayComp_FT(1,1), ...
+    RWstdTimeArrayComp(1,1), stdTimeArrayComp0(1,1), stdTimeArrayComp1(1,1)],...
+    '^m','markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto'); hold on;
 
 errorbar(0:1:4, ...
-         [meanTimeArrayComp_TD(1,2), meanTimeArrayComp_FT(1,2), RWmeanTimeArrayComp(1,2), meanTimeArrayComp0(1,2), meanTimeArrayComp1(1,2)],...
-         [stdTimeArrayComp_TD(1,2), stdTimeArrayComp_FT(1,2), RWstdTimeArrayComp(1,2), stdTimeArrayComp0(1,2), stdTimeArrayComp1(1,2)],...
-         'sr','markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto'); hold on;
+    [meanTimeArrayComp_TD(1,2), meanTimeArrayComp_FT(1,2), ...
+    RWmeanTimeArrayComp(1,2), meanTimeArrayComp0(1,2), meanTimeArrayComp1(1,2)],...
+    [stdTimeArrayComp_TD(1,2), stdTimeArrayComp_FT(1,2), ...
+    RWstdTimeArrayComp(1,2), stdTimeArrayComp0(1,2), stdTimeArrayComp1(1,2)],...
+    'sr','markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto'); hold on;
 
 errorbar(0:1:4, ...
-         [meanTimeArrayComp_TD(1,3), meanTimeArrayComp_FT(1,3), RWmeanTimeArrayComp(1,3), meanTimeArrayComp0(1,3), meanTimeArrayComp1(1,3)],...
-         [stdTimeArrayComp_TD(1,3), stdTimeArrayComp_FT(1,3), RWstdTimeArrayComp(1,3), stdTimeArrayComp0(1,3), stdTimeArrayComp1(1,3)],...
-         'db','markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto'); hold on;
+    [meanTimeArrayComp_TD(1,3), meanTimeArrayComp_FT(1,3), ...
+    RWmeanTimeArrayComp(1,3), meanTimeArrayComp0(1,3), meanTimeArrayComp1(1,3)],...
+    [stdTimeArrayComp_TD(1,3), stdTimeArrayComp_FT(1,3), ...
+    RWstdTimeArrayComp(1,3), stdTimeArrayComp0(1,3), stdTimeArrayComp1(1,3)],...
+    'db','markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto'); hold on;
 
 errorbar(0:1:4, ...
-         [meanTimeArrayComp_TD(1,4), meanTimeArrayComp_FT(1,4), RWmeanTimeArrayComp(1,4), meanTimeArrayComp0(1,4), meanTimeArrayComp1(1,4)],...
-         [stdTimeArrayComp_TD(1,4), stdTimeArrayComp_FT(1,4), RWstdTimeArrayComp(1,4), stdTimeArrayComp0(1,4), stdTimeArrayComp1(1,4)],...
-         'ok', 'markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto'); 
+    [meanTimeArrayComp_TD(1,4), meanTimeArrayComp_FT(1,4), ...
+    RWmeanTimeArrayComp(1,4), meanTimeArrayComp0(1,4), meanTimeArrayComp1(1,4)],...
+    [stdTimeArrayComp_TD(1,4), stdTimeArrayComp_FT(1,4), ...
+    RWstdTimeArrayComp(1,4), stdTimeArrayComp0(1,4), stdTimeArrayComp1(1,4)],...
+    'ok', 'markersize', 16, 'LineWidth',2, 'MarkerFaceColor','auto');
 
 % legend('No Map, No Target',...
 %        'No Map, Yes Target',...
@@ -833,32 +539,48 @@ subplot(1,2,1);
 
 % -- populate figure
 % Why is this not the same as when we use robot found flag only? -- SB
-plot(0:1:4, [sum(testTime_TD(:,1)>0)/size(testTime_TD,1); sum(testTime_FT(:,1)>0)/size(testTime_FT,1); sum(RWtestTime(:,1)>0)/size(RWtestTime,1); ...
-             sum(testTime0(:,1)>0)/size(testTime0,1); sum(testTime1(:,1)>0)/size(testTime1,1)], ...
-     '^m', 'MarkerSize', 18, 'MarkerFaceColor', 'm', 'LineWidth', 2); hold on;
-plot(0:1:4, [sum(testTime_TD(:,2)>0)/size(testTime_TD,1); sum(testTime_FT(:,2)>0)/size(testTime_FT,1); sum(RWtestTime(:,2)>0)/size(RWtestTime,1); ...
-             sum(testTime0(:,2)>0)/size(testTime0,1); sum(testTime1(:,2)>0)/size(testTime1,1)], ...
-     'sr', 'MarkerSize', 18,'MarkerFaceColor', 'r', 'LineWidth', 2); hold on;
-plot(0:1:4, [sum(testTime_TD(:,3)>0)/size(testTime_TD,1); sum(testTime_FT(:,3)>0)/size(testTime_FT,1); sum(RWtestTime(:,3)>0)/size(RWtestTime,1); ...
-             sum(testTime0(:,3)>0)/size(testTime0,1); sum(testTime1(:,3)>0)/size(testTime1,1)], ...
-     'db', 'MarkerSize', 18, 'MarkerFaceColor', 'b','LineWidth', 2); hold on;
-plot(0:1:4, [sum(testTime_TD(:,4)>0)/size(testTime_TD,1); sum(testTime_FT(:,4)>0)/size(testTime_FT,1); sum(RWtestTime(:,4)>0)/size(RWtestTime,1); ...
-             sum(testTime0(:,4)>0)/size(testTime0,1); sum(testTime1(:,4)>0)/size(testTime1,1)], ...
-     'ok', 'MarkerSize', 18,'MarkerFaceColor', 'k', 'LineWidth', 2);
+plot(0:1:4, [sum(testTime_TD(:,1)>0)/size(testTime_TD,1); ...
+    sum(testTime_FT(:,1)>0)/size(testTime_FT,1); ...
+    sum(RWtestTime(:,1)>0)/size(RWtestTime,1); ...
+    sum(testTime0(:,1)>0)/size(testTime0,1); ...
+    sum(testTime1(:,1)>0)/size(testTime1,1)], ...
+    '^m', 'MarkerSize', 18, 'MarkerFaceColor', 'm', ...
+    'LineWidth', 2); hold on;
+plot(0:1:4, [sum(testTime_TD(:,2)>0)/size(testTime_TD,1); ...
+    sum(testTime_FT(:,2)>0)/size(testTime_FT,1); ...
+    sum(RWtestTime(:,2)>0)/size(RWtestTime,1); ...
+    sum(testTime0(:,2)>0)/size(testTime0,1); ...
+    sum(testTime1(:,2)>0)/size(testTime1,1)], ...
+    'sr', 'MarkerSize', 18,'MarkerFaceColor', 'r', ...
+    'LineWidth', 2); hold on;
+plot(0:1:4, [sum(testTime_TD(:,3)>0)/size(testTime_TD,1); ...
+    sum(testTime_FT(:,3)>0)/size(testTime_FT,1); ...
+    sum(RWtestTime(:,3)>0)/size(RWtestTime,1); ...
+    sum(testTime0(:,3)>0)/size(testTime0,1); ...
+    sum(testTime1(:,3)>0)/size(testTime1,1)], ...
+    'db', 'MarkerSize', 18, 'MarkerFaceColor', 'b',...
+    'LineWidth', 2); hold on;
+plot(0:1:4, [sum(testTime_TD(:,4)>0)/size(testTime_TD,1); ...
+    sum(testTime_FT(:,4)>0)/size(testTime_FT,1); ...
+    sum(RWtestTime(:,4)>0)/size(RWtestTime,1); ...
+    sum(testTime0(:,4)>0)/size(testTime0,1); ...
+    sum(testTime1(:,4)>0)/size(testTime1,1)], ...
+    'ok', 'MarkerSize', 18,'MarkerFaceColor', 'k', ...
+    'LineWidth', 2);
 
 
 % -- legend
 legend('No Map, No Target',...
-       'No Map, Yes Target',...
-       'Yes Map, No Target',...
-       'Yes Map, Yes Target');
+    'No Map, Yes Target',...
+    'Yes Map, No Target',...
+    'Yes Map, Yes Target');
 
 % -- make figure look nice
 grid on;
 box off
 ylabel("Fraction of trials target found by auto. robots");
 xlabel({'Weighting strategy', '(a)'});
-ax = gca; 
+ax = gca;
 ax.FontSize = 18;
 set(gca, 'xtick', 0:4, 'ylim', [0,1])
 xticklabels({'\alpha_k (distance)', '\alpha_k (freezing)', 'random', '\alpha=0', '\alpha=1'});
@@ -870,9 +592,9 @@ function PlotWhoFoundTarget_testSet()
 
 % -- define the conditions tested
 conditions = ["condition_1",...
-              "condition_2",...
-              "condition_3",...
-              "condition_4"];
+    "condition_2",...
+    "condition_3",...
+    "condition_4"];
 
 % -- define the mat file name used for all participants
 Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
@@ -889,11 +611,11 @@ files0 = dir(parentDir0);
 files1 = dir(parentDir1);
 
 % -- initialize the counter
-i = 1; 
+i = 1;
 
 % -- begin looping through each test folder
 for test = 1:size(files, 1)
-
+    
     % -- make sure that we capture a number not '.' or '..'
     if (files(test).name ~= "." && files(test).name ~= ".." && files(test).name ~= ".DS_Store")
         
@@ -905,21 +627,21 @@ for test = 1:size(files, 1)
         for participant = 1:size(participant_folders, 1)
             % -- make sure that we capture a number not '.' or '..'
             if (participant_folders(participant).name ~= "." && participant_folders(participant).name ~= ".." && participant_folders(participant).name ~= ".DS_Store")
-            
+                
                 % -- create participant directory
                 partDir = strcat(subDir,"/",participant_folders(participant).name);
-    
+                
                 % -- begin looping through all conditions tested
                 for cond = 1:size(conditions, 2)
-    
+                    
                     % -- create condition directory
                     condDir = strcat(partDir, "/", conditions(cond));
                     condFile = strcat(condDir, "/", Matfile);
-    
+                    
                     % -- read the data captured for the test
                     TestData = load(condFile);
                     WhichRobot(cond, i) = TestData.simdata.Which_robot;
-    
+                    
                 end
                 i = i + 1;
             end
@@ -930,7 +652,7 @@ end
 i = 1;
 % -- begin looping through each test folder
 for RWtest = 1:size(RW_files, 1)
-
+    
     % -- make sure that we capture a number not '.' or '..'
     if (RW_files(RWtest).name ~= "." && RW_files(RWtest).name ~= ".." && RW_files(RWtest).name ~= ".DS_Store")
         
@@ -942,21 +664,21 @@ for RWtest = 1:size(RW_files, 1)
         for RWparticipant = 1:size(RWparticipant_folders, 1)
             % -- make sure that we capture a number not '.' or '..'
             if (RWparticipant_folders(RWparticipant).name ~= "." && RWparticipant_folders(RWparticipant).name ~= ".." && RWparticipant_folders(RWparticipant).name ~= ".DS_Store")
-            
+                
                 % -- create participant directory
                 RWpartDir = strcat(RWsubDir,"/",RWparticipant_folders(RWparticipant).name);
-    
+                
                 % -- begin looping through all conditions tested
                 for cond = 1:size(conditions, 2)
-    
+                    
                     % -- create condition directory
                     RWcondDir = strcat(RWpartDir, "/", conditions(cond));
                     RWcondFile = strcat(RWcondDir, "/", Matfile);
-    
+                    
                     % -- read the data captured for the test
                     RWTestData = load(RWcondFile);
                     RWWhichRobot(cond, i) = RWTestData.simdata.Which_robot;
-    
+                    
                 end
                 i = i + 1;
             end
@@ -967,7 +689,7 @@ end
 i = 1;
 % -- begin looping through each test folder
 for test0 = 1:size(files0, 1)
-
+    
     % -- make sure that we capture a number not '.' or '..'
     if (files0(test0).name ~= "." && files0(test0).name ~= ".." && files0(test0).name ~= ".DS_Store")
         
@@ -979,21 +701,21 @@ for test0 = 1:size(files0, 1)
         for participant0 = 1:size(participant_folders0, 1)
             % -- make sure that we capture a number not '.' or '..'
             if (participant_folders0(participant0).name ~= "." && participant_folders0(participant0).name ~= ".." && participant_folders(participant).name ~= ".DS_Store")
-            
+                
                 % -- create participant directory
                 partDir0 = strcat(subDir0,"/",participant_folders0(participant0).name);
-    
+                
                 % -- begin looping through all conditions tested
                 for cond = 1:size(conditions, 2)
-    
+                    
                     % -- create condition directory
                     condDir0 = strcat(partDir0, "/", conditions(cond));
                     condFile0 = strcat(condDir0, "/", Matfile);
-    
+                    
                     % -- read the data captured for the test
                     TestData = load(condFile0);
                     WhichRobot0(cond, i) = TestData.simdata.Which_robot;
-    
+                    
                 end
                 i = i + 1;
             end
@@ -1004,7 +726,7 @@ end
 i = 1;
 % -- begin looping through each test folder
 for test1 = 1:size(files1, 1)
-
+    
     % -- make sure that we capture a number not '.' or '..'
     if (files1(test1).name ~= "." && files1(test1).name ~= ".." && files1(test1).name ~= ".DS_Store")
         
@@ -1016,21 +738,21 @@ for test1 = 1:size(files1, 1)
         for participant1 = 1:size(participant_folders1, 1)
             % -- make sure that we capture a number not '.' or '..'
             if (participant_folders1(participant1).name ~= "." && participant_folders1(participant1).name ~= ".." && participant_folders(participant).name ~= ".DS_Store")
-            
+                
                 % -- create participant directory
                 partDir1 = strcat(subDir1,"/",participant_folders1(participant1).name);
-    
+                
                 % -- begin looping through all conditions tested
                 for cond = 1:size(conditions, 2)
-    
+                    
                     % -- create condition directory
                     condDir1 = strcat(partDir1, "/", conditions(cond));
                     condFile1 = strcat(condDir1, "/", Matfile);
-    
+                    
                     % -- read the data captured for the test
                     TestData = load(condFile1);
                     WhichRobot1(cond, i) = TestData.simdata.Which_robot;
-    
+                    
                 end
                 i = i + 1;
             end
@@ -1076,23 +798,23 @@ figure(2); clf; gcf;
 
 % -- populate figure
 plot(0:1:3, [testset.Y1(1,2); testset.RWY1(1,2); testset.Y10(1,2); testset.Y11(1,2)], ...
-     '^m', 'MarkerSize', 18, 'LineWidth', 2); hold on;
+    '^m', 'MarkerSize', 18, 'LineWidth', 2); hold on;
 plot(0:1:3, [testset.Y2(1,2); testset.RWY2(1,2); testset.Y20(1,2); testset.Y21(1,2)], ...
-     'sr', 'MarkerSize', 18, 'LineWidth', 2); hold on;
+    'sr', 'MarkerSize', 18, 'LineWidth', 2); hold on;
 plot(0:1:3, [testset.Y3(1,2); testset.RWY3(1,2); testset.Y30(1,2); testset.Y31(1,2)], ...
-     'db', 'MarkerSize', 18, 'LineWidth', 2); hold on;
+    'db', 'MarkerSize', 18, 'LineWidth', 2); hold on;
 plot(0:1:3, [testset.Y4(1,2); testset.RWY4(1,2); testset.Y40(1,2); testset.Y41(1,2)], ...
-     'ok', 'MarkerSize', 18, 'LineWidth', 2);
+    'ok', 'MarkerSize', 18, 'LineWidth', 2);
 
 % -- legend
 legend('No Map, No Target',...
-       'No Map, Yes Target',...
-       'Yes Map, No Target',...
-       'Yes Map, Yes Target');
+    'No Map, Yes Target',...
+    'Yes Map, No Target',...
+    'Yes Map, Yes Target');
 
 % -- make figure look nice
 ylabel("Fraction of time target found by auto. robots");
-ax = gca; 
+ax = gca;
 ax.FontSize = 18;
 set(gca, 'xtick', 0:3)
 xticklabels({'\alpha(t)', 'random', '\alpha=0', '\alpha=1'});
@@ -1111,10 +833,10 @@ title("Condition: 1");
 ylim([0 600]);
 
 % -- set figure parameters
-ax = gca; 
+ax = gca;
 ax.FontSize = 16;
 xticklabels({'Ref robot: adaptive a','Auto robot: adaptive a',...
-             'Ref robot: RW', 'Auto robot: RW'});
+    'Ref robot: RW', 'Auto robot: RW'});
 
 subplot(2,2,2); bar(X, [Y2,RWY2]);
 text(1:length(X),[Y2,RWY2]',num2str([Y2,RWY2]'),'vert','bottom','horiz','center','FontSize',16);
@@ -1123,10 +845,10 @@ title("Condition: 2");
 ylim([0 600]);
 
 % -- set figure parameters
-ax = gca; 
+ax = gca;
 ax.FontSize = 16;
 xticklabels({'Ref robot: adaptive a','Auto robot: adaptive a',...
-             'Ref robot: RW', 'Auto robot: RW'});
+    'Ref robot: RW', 'Auto robot: RW'});
 
 subplot(2,2,3); bar(X, [Y3,RWY3]);
 text(1:length(X),[Y3,RWY3]',num2str([Y3,RWY3]'),'vert','bottom','horiz','center','FontSize',16);
@@ -1135,10 +857,10 @@ title("Condition: 3");
 ylim([0 600]);
 
 % -- set figure parameters
-ax = gca; 
+ax = gca;
 ax.FontSize = 16;
 xticklabels({'Ref robot: adaptive a','Auto robot: adaptive a',...
-             'Ref robot: HRW', 'Auto robot: RW'});
+    'Ref robot: HRW', 'Auto robot: RW'});
 
 subplot(2,2,4); bar(X, [Y4,RWY4]);
 text(1:length(X),[Y4,RWY4]',num2str([Y4,RWY4]'),'vert','bottom','horiz','center','FontSize',16);
@@ -1147,10 +869,10 @@ title("Condition: 4");
 ylim([0 600]);
 
 % -- set figure parameters
-ax = gca; 
+ax = gca;
 ax.FontSize = 16;
 xticklabels({'Ref robot: adaptive a','Auto robot: adaptive a',...
-             'Ref robot: RW', 'Auto robot: RW'});
+    'Ref robot: RW', 'Auto robot: RW'});
 
 end
 
@@ -1171,57 +893,57 @@ L= [18 9];
 for i = 1:Np
     % -- create individual participant figures
     figure(9+i); clf; gcf;
-
+    
     for j = 1:Nc
-
+        
         % -- get the end time
         tf = SimExp(i,j).simdata.time;
-    
+        
         % -- create subplots for each condition for each participant
         subplot(1,Nc,j);
-    
+        
         % -- display the Omron Lab map
-        hold on; imagesc([0 L(1)],[0 L(2)], SimExp(i).img); 
+        hold on; imagesc([0 L(1)],[0 L(2)], SimExp(i).img);
         set(gca,'ydir','reverse');
         axis image;
-
+        
         % -- plot the target location
         hold on; plot(SimExp(i,j).simdata.tloc(1, 1), ...
-                      SimExp(i,j).simdata.tloc(1, 2), ...
-                      'mx', 'LineWidth', 3, 'MarkerSize', 12); % -- Target location 
-    
+            SimExp(i,j).simdata.tloc(1, 2), ...
+            'mx', 'LineWidth', 3, 'MarkerSize', 12); % -- Target location
+        
         % -- plot the beginning and end points of the robots
         hold on; plot(SimExp(i,j).simdata.Xs(1, 1, 1, 1), ...
-                      SimExp(i,j).simdata.Xs(2, 1, 1, 1), ...
-                      'ks', 'LineWidth', 3, 'MarkerSize', 12); % -- experiment robot (human controlled robot start)
+            SimExp(i,j).simdata.Xs(2, 1, 1, 1), ...
+            'ks', 'LineWidth', 3, 'MarkerSize', 12); % -- experiment robot (human controlled robot start)
         hold on; plot(SimExp(i,j).simdata.Xs(1, 1, 1, 2), ...
-                      SimExp(i,j).simdata.Xs(2, 1, 1, 2), ...
-                      'rs', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 1 start
+            SimExp(i,j).simdata.Xs(2, 1, 1, 2), ...
+            'rs', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 1 start
         hold on; plot(SimExp(i,j).simdata.Xs(1, 1, 1, 3), ...
-                      SimExp(i,j).simdata.Xs(2, 1, 1, 3), ...
-                      'gs', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 2 start
-    
+            SimExp(i,j).simdata.Xs(2, 1, 1, 3), ...
+            'gs', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 2 start
+        
         hold on; plot(SimExp(i,j).simdata.Xs(1, tf, 1, 1), ...
-                      SimExp(i,j).simdata.Xs(2, tf, 1, 1), ...
-                      'kx', 'LineWidth', 3, 'MarkerSize', 12); % -- experiment robot (human controlled robot end)
+            SimExp(i,j).simdata.Xs(2, tf, 1, 1), ...
+            'kx', 'LineWidth', 3, 'MarkerSize', 12); % -- experiment robot (human controlled robot end)
         hold on; plot(SimExp(i,j).simdata.Xs(1, tf, 1, 2), ...
-                      SimExp(i,j).simdata.Xs(2, tf, 1, 2), ...
-                      'rx', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 1 end
+            SimExp(i,j).simdata.Xs(2, tf, 1, 2), ...
+            'rx', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 1 end
         hold on; plot(SimExp(i,j).simdata.Xs(1, tf, 1, 3), ...
-                      SimExp(i,j).simdata.Xs(2, tf, 1, 3), ...
-                      'gx', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 2 end
-    
+            SimExp(i,j).simdata.Xs(2, tf, 1, 3), ...
+            'gx', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 2 end
+        
         % -- On top of the domain map, plot all trajectories of the robots
         hold on; plot(SimExp(i,j).simdata.Xs(1, 1:tf, 1, 1), ...
-                      SimExp(i,j).simdata.Xs(2, 1:tf, 1, 1), ...
-                      'k-', 'LineWidth', 2); % -- experiment robot (human controlled robot trajectory)
+            SimExp(i,j).simdata.Xs(2, 1:tf, 1, 1), ...
+            'k-', 'LineWidth', 2); % -- experiment robot (human controlled robot trajectory)
         hold on; plot(SimExp(i,j).simdata.Xs(1, 1:tf, 1, 2), ...
-                      SimExp(i,j).simdata.Xs(2, 1:tf, 1, 2), ...
-                      'r-', 'LineWidth', 2); % -- autonomous robot 1 trajectory
+            SimExp(i,j).simdata.Xs(2, 1:tf, 1, 2), ...
+            'r-', 'LineWidth', 2); % -- autonomous robot 1 trajectory
         hold on; plot(SimExp(i,j).simdata.Xs(1, 1:tf, 1, 3), ...
-                      SimExp(i,j).simdata.Xs(2, 1:tf, 1, 3), ...
-                      'g-', 'LineWidth', 2); % -- autonomous robot 2 trajectory
-    
+            SimExp(i,j).simdata.Xs(2, 1:tf, 1, 3), ...
+            'g-', 'LineWidth', 2); % -- autonomous robot 2 trajectory
+        
         % -- make the figure look nice
         xlabel("X (m)");
         ylabel("Y (m)");
@@ -1230,10 +952,10 @@ for i = 1:Np
         end
         title(sprintf("Participant ID: %s, Condition: %d", ids(i, :), j));
         legend('Target','','','','','','','Human robot', 'Autonomous robot 1', 'Autonomous robot 2');
-        ax = gca; 
+        ax = gca;
         ax.FontSize = 12;
     end
-
+    
 end
 
 end
@@ -1252,23 +974,23 @@ ids = ids(3:end-1,1:4); % -- reformat to only have the numbers
 for i = 1:Np
     % -- create individual participant figures
     figure(29+i); clf; gcf;
-
-    for j = 1:Nc
     
+    for j = 1:Nc
+        
         % -- create subplots for each condition for each participant
         subplot(2,2,j);
         
         % -- plot the transient alpha values
         hold on; plot(SimExp(i,j).simdata.alpha(:,1), ...
-                      'k-', 'LineWidth', 2); % -- transient alpha value
-    
+            'k-', 'LineWidth', 2); % -- transient alpha value
+        
         % -- make the figure look nice
         xlabel("Timestep");
         ylabel("Alpha");
         title(sprintf("Participant ID: %s, Condition: %d", ids(i, :), j));
         ylim([0 1]);
         axis square;
-        ax = gca; 
+        ax = gca;
         ax.FontSize = 12;
     end
 end
@@ -1279,9 +1001,9 @@ function ControlInputMapped()
 
 % -- define the conditions tested
 conditions = ["condition_1",...
-              "condition_2",...
-              "condition_3",...
-              "condition_4"];
+    "condition_2",...
+    "condition_3",...
+    "condition_4"];
 
 % -- define the mat file name used for all participants
 Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
@@ -1299,7 +1021,7 @@ r_vel = ["k-", "r-", "g-"];
 i=1;
 % -- begin looping through each test folder
 for RWtest = 1:size(RW_files, 1)
-
+    
     % -- make sure that we capture a number not '.' or '..'
     if (RW_files(RWtest).name ~= "." && RW_files(RWtest).name ~= ".." && RW_files(RWtest).name ~= ".DS_Store")
         
@@ -1311,86 +1033,86 @@ for RWtest = 1:size(RW_files, 1)
         for RWparticipant = 1:size(RWparticipant_folders, 1)
             % -- make sure that we capture a number not '.' or '..'
             if (RWparticipant_folders(RWparticipant).name ~= "." && RWparticipant_folders(RWparticipant).name ~= ".." && RWparticipant_folders(RWparticipant).name ~= ".DS_Store")
-            
+                
                 % -- create participant directory
                 RWpartDir = strcat(RWsubDir,"/",RWparticipant_folders(RWparticipant).name);
-    
+                
                 % -- begin looping through all conditions tested
                 for cond = 1:size(conditions, 2)
-    
+                    
                     % -- create condition directory
                     RWcondDir = strcat(RWpartDir, "/", conditions(cond));
                     RWcondFile = strcat(RWcondDir, "/", Matfile);
-    
+                    
                     % -- read the data captured for the test
                     RWTestData = load(RWcondFile);
                     
                     % -- create the figure
                     figure(1); clf; gcf;
-
+                    
                     % -- loop through the simulation
                     for k = 1:RWTestData.simdata.time
                         % -- display the Omron Lab map
                         subplot(2,2,[1,2]);
-                        hold on; imagesc([0 L(1)],[0 L(2)], RWTestData.img); 
+                        hold on; imagesc([0 L(1)],[0 L(2)], RWTestData.img);
                         set(gca,'ydir','reverse');
                         axis image;
                         xlim([0 L(1)]);
                         ylim([0 L(2)]);
-
+                        
                         % -- plot the target location
                         plot(RWTestData.simdata.Xs(4,1,1,1), RWTestData.simdata.Xs(5,1,1,1),...
-                                      "ms", 'MarkerSize',16, 'LineWidth',3);
+                            "ms", 'MarkerSize',16, 'LineWidth',3);
                         
                         for r = 1:3
                             subplot(2,2,[1,2]);
                             % -- plot the position of the robots in the domain
                             hold on; plot(RWTestData.simdata.Xs(1,k,1,r), RWTestData.simdata.Xs(2,k,1,r), ...
-                                          r_pos(r), 'MarkerSize',36); % -- ref robot position
-%                             hold on; plot(RWTestData.simdata.Xs(1,k,1,2), RWTestData.simdata.Xs(2,k,1,2), ...
-%                                           'r.', 'MarkerSize',36); % -- Auto 1 robot position
-%                             hold on; plot(RWTestData.simdata.Xs(1,k,1,3), RWTestData.simdata.Xs(2,k,1,3), ...
-%                                           'g.', 'MarkerSize',36); % -- Auto 2 robot position
+                                r_pos(r), 'MarkerSize',36); % -- ref robot position
+                            %                             hold on; plot(RWTestData.simdata.Xs(1,k,1,2), RWTestData.simdata.Xs(2,k,1,2), ...
+                            %                                           'r.', 'MarkerSize',36); % -- Auto 1 robot position
+                            %                             hold on; plot(RWTestData.simdata.Xs(1,k,1,3), RWTestData.simdata.Xs(2,k,1,3), ...
+                            %                                           'g.', 'MarkerSize',36); % -- Auto 2 robot position
                             % -- plot the orientation vector
                             line([RWTestData.simdata.Xs(1,k,1,r),...
-                                  RWTestData.simdata.Xs(1,k,1,r) + 3*cos(RWTestData.simdata.Xs(3,k,1,r)) ],...
-                                 [RWTestData.simdata.Xs(2,k,1,r), ...
-                                  RWTestData.simdata.Xs(2,k,1,r)+3*sin(RWTestData.simdata.Xs(3,k,1,r)) ],...
-                                 'color',self_color(r),'linestyle','-');
-                            ax = gca; 
+                                RWTestData.simdata.Xs(1,k,1,r) + 3*cos(RWTestData.simdata.Xs(3,k,1,r)) ],...
+                                [RWTestData.simdata.Xs(2,k,1,r), ...
+                                RWTestData.simdata.Xs(2,k,1,r)+3*sin(RWTestData.simdata.Xs(3,k,1,r)) ],...
+                                'color',self_color(r),'linestyle','-');
+                            ax = gca;
                             ax.FontSize = 18;
-    
+                            
                             % -- In the next subplot, plot the velocities of the robots over time
                             subplot(2,2,3);
                             hold on; plot(RWTestData.simdata.vel(1,1:k,1,r), ...
-                                          r_vel(r), 'LineWidth',2); % -- ref robot velocity
-%                             hold on; plot(RWTestData.simdata.vel(1,1:k,1,2), ...
-%                                           'r-', 'LineWidth',2); % -- Auto 1 robot velocity
-%                             hold on; plot(RWTestData.simdata.vel(1,1:k,1,3), ...
-%                                           'g-', 'LineWidth',2); % -- Auto 2 robot velocity
+                                r_vel(r), 'LineWidth',2); % -- ref robot velocity
+                            %                             hold on; plot(RWTestData.simdata.vel(1,1:k,1,2), ...
+                            %                                           'r-', 'LineWidth',2); % -- Auto 1 robot velocity
+                            %                             hold on; plot(RWTestData.simdata.vel(1,1:k,1,3), ...
+                            %                                           'g-', 'LineWidth',2); % -- Auto 2 robot velocity
                             xlabel('Time step');
                             ylabel('Velocity (m/s)');
-                            ax = gca; 
+                            ax = gca;
                             ax.FontSize = 18;
-    
+                            
                             % -- In the next subplot, plot the turn rates of the robots over time
                             subplot(2,2,4);
                             hold on; plot(RWTestData.simdata.omega(1,1:k,1,r), ...
-                                          r_vel(r), 'LineWidth',2); % -- ref robot turn rate
-%                             hold on; plot(RWTestData.simdata.omega(1,1:k,1,2), ...
-%                                           'r-', 'LineWidth',2); % -- Auto 1 robot turn rate
-%                             hold on; plot(RWTestData.simdata.omega(1,1:k,1,3), ...
-%                                           'g-', 'LineWidth',2); % -- Auto 2 robot turn rate
-                        
+                                r_vel(r), 'LineWidth',2); % -- ref robot turn rate
+                            %                             hold on; plot(RWTestData.simdata.omega(1,1:k,1,2), ...
+                            %                                           'r-', 'LineWidth',2); % -- Auto 1 robot turn rate
+                            %                             hold on; plot(RWTestData.simdata.omega(1,1:k,1,3), ...
+                            %                                           'g-', 'LineWidth',2); % -- Auto 2 robot turn rate
+                            
                             xlabel('Time step');
                             ylabel('Turn rate (rad/s)');
                         end
-                        ax = gca; 
+                        ax = gca;
                         ax.FontSize = 18;
                         drawnow;
                         pause(0.1);
                     end
-                
+                    
                 end
                 i = i + 1;
             end
@@ -1409,9 +1131,9 @@ ID_Data=csvread('../src/IDList_Completed.csv',1,0);
 
 % -- define the Velocity file name for each condition
 condfiles = ["/EKFVel_condition_1.csv",...
-             "/EKFVel_condition_2.csv",...
-             "/EKFVel_condition_3.csv",...
-             "/EKFVel_condition_4.csv"];
+    "/EKFVel_condition_2.csv",...
+    "/EKFVel_condition_3.csv",...
+    "/EKFVel_condition_4.csv"];
 
 % -- create 1D array to contain all velocity data for all participants
 % -- and conditions ran during the experiment
@@ -1425,13 +1147,13 @@ for participant = 1:size(ID_Data,1)
     for cond = 1:size(condfiles, 2)
         % -- create str that points to the csv file where data is stored
         VelFile = strcat(loc, num2str(ID_Data(participant,1)), condfiles(cond));
-
+        
         % -- pull the data
         VelData = csvread(VelFile);
-
+        
         % -- collect the averaged out veloctiy data
         Velocity(i) = mean(VelData);
-
+        
         i = i + 1;
     end
 end
