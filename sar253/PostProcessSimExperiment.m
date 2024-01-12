@@ -15,8 +15,8 @@ clear variables
 % -- plot which robot found the missing target
 % PlotWhoFoundTarget(SimExp);
 % PlotWhoFoundTarget_testSet();
-TimeGained();
-% plot_performance_comparison();
+% TimeGained();
+plot_performance_comparison();
 
 % -- plot all trajectories
 % PlotAllTraj(SimExp);

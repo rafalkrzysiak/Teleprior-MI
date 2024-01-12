@@ -29,7 +29,7 @@ ConfigChoice={"alpha_t/TotalDist", "alpha_t/FreezeTime", "alpha_0", ...
     "alpha_1",  "RandomWalk"};
 
 
-nsims = 13; %number of simulations
+nsims = 5; %number of simulations
 
 % say ii=3 for e.g. to run only for alpha_0
 
