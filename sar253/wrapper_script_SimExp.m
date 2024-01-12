@@ -29,7 +29,7 @@ ConfigChoice={"alpha_t/TotalDist", "alpha_t/FreezeTime", "alpha_0", ...
     "alpha_1",  "RandomWalk"};
 
 
-nsims = 5; %number of simulations
+nsims = 1; %number of simulations
 
 % say ii=3 for e.g. to run only for alpha_0
 
@@ -54,8 +54,11 @@ for ii = 1:size(ConfigChoice,2)
     % get the number of simulations already done 
     % if there is a bad batch, simply remove the folder and rerun
     existing_files=dir(strcat(dataFolder, ConfigSetup, "/"));
+    % remove all hidden files
+    existing_files=existing_files(~ismember({existing_files.name},...
+        {'.','..', '.DS_Store'}));
     
-    restart_num=size(existing_files,1)-2;
+    restart_num=size(existing_files,1);
     
     for test = restart_num+1:restart_num+nsims % -- looping through every environment
         
