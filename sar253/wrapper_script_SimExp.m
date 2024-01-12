@@ -15,6 +15,7 @@ addpath ../src
 ID_Data=csvread('../src/IDList_Completed.csv',1,0);
 
 dataFolder="../../simdata/"; % this can sit outside the github
+% https://www.dropbox.com/scl/fo/5shjyymaunngx1qepwhl3/h?rlkey=02dsr4ej3gxaswcc7fa5h6mji&dl=0
 
 % -- defining a variable to be a flag for us to easily switch
 % -- between conditions wanting to test under for updating alpha of the

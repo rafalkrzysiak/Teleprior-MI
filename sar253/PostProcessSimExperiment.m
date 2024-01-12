@@ -16,11 +16,11 @@ clear variables
 % PlotWhoFoundTarget(SimExp);
 % PlotWhoFoundTarget_testSet();
 % TimeGained();
-plot_performance_comparison();
+% plot_performance_comparison();
 
 % -- plot all trajectories
 % PlotAllTraj(SimExp);
-% PlotTrajTestDataSet();
+PlotTrajTestDataSet();
 % PlotRWControls();
 % ControlInputMapped();
 
