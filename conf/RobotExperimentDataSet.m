@@ -9,7 +9,7 @@ traj_loc = ['..', filesep, 'data', filesep, 'FILTERED', filesep, id,...
     filesep, 'EKFtraj_condition_', cond, '.csv'];
 
 traj = csvread(traj_loc); % -- pull data from csv file
-tf = 1000; % -- size(traj,2)
+tf = 3000; % -- size(traj,2)
 xs = zeros(5, tf);
 
 % -- sometimes the robot starts too close to the initial wall for condition 1

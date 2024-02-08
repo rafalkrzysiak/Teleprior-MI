@@ -187,7 +187,10 @@ for jj=1:param.nsim
     % -- begin simulating the condition
     for k = k0:kF
         
-        %         fprintf('Sim: %d, Time step: %d\n',jj,k); % -- display the time step number
+        % -- end the msimulation if the target was found
+        if k == param.T
+            break
+        end
         
         % -- loop for every robot in the environment
         for robot = 1:param.agents
@@ -367,7 +370,7 @@ for jj=1:param.nsim
                 sim_end = 1;
                 break
             end
-            
+
             if param.closedloop
                 % maximize mutual information
                 [omega(1,k,1,robot),vel(1,k,1,robot),I(:,k,1,robot)] = ...
@@ -442,7 +445,7 @@ for jj=1:param.nsim
         end
         
         % -- end the msimulation if the target was found
-        if Num_target_found(jj) == 1 || sim_end == 1
+        if Num_target_found(jj) == 1 || sim_end == 1 || k == param.T
             break
         end
         

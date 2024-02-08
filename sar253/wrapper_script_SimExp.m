@@ -30,11 +30,11 @@ ConfigChoice={"alpha_t/TotalDist", "alpha_t/FreezeTime", "alpha_0", ...
     "alpha_1",  "RandomWalk"};
 
 
-nsims = 1; %number of simulations
+nsims = 100; %number of simulations
 
 % say ii=3 for e.g. to run only for alpha_0
 
-for ii = 1:size(ConfigChoice,2)
+for ii = 5:5%size(ConfigChoice,2)
     
     ConfigSetup = ConfigChoice{ii};
     
@@ -61,7 +61,7 @@ for ii = 1:size(ConfigChoice,2)
     
     restart_num=size(existing_files,1);
     
-    for test = restart_num+1:restart_num+nsims % -- looping through every environment
+    for test = restart_num+1:nsims % -- looping through every environment restart_num+
         
         % here we create the test/train scenario
         % use 26 randomly selected ids to create pdistr and xdistr and run it on 3
