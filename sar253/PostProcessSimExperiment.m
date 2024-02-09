@@ -60,6 +60,10 @@ conditions = ["condition_1",...
     "condition_4"];
 
 cond_names=["xMxT","xMyT","yMxT","yMyT"];
+cond_desc=["No Map, No Target",...
+           "No Map, Yes Target",...
+           "Yes Map, No Target",...
+           "Yes Map, Yes Target"];
 
 % -- define the mat file name used for all participants
 Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
@@ -68,7 +72,7 @@ Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
 parentDir = "../../simdata/alpha_t/TotalDist";
 
 % ids to plot
-ids_to_plot=9;% 197,112
+ids_to_plot=11;% 9> 10
 
 files = dir(parentDir);
 
@@ -118,6 +122,7 @@ for test = ids_to_plot%1:size(files, 1)
                     % -- display the Omron Lab map
                     hold on; imagesc([0 L(1)],[0 L(2)], TestData.img);
                     set(gca,'ydir','reverse');
+                    set(gca, 'fontsize', 16);
                     axis image;
                     
                     % -- plot the target location
@@ -157,7 +162,7 @@ for test = ids_to_plot%1:size(files, 1)
                         TestData.simdata.Xs(2, 1:tf, 1, 3), ...
                         'g-', 'LineWidth', 2); % -- autonomous robot 2 trajectory
                     %                     title(sprintf("\\alpha_k (%s)", cond_names(cond)))
-                    title(cond_names(cond))
+                    title(cond_desc(cond), 'fontweight', 'normal')
                 end
                 i = i + 1;
             end
@@ -209,7 +214,9 @@ for test = ids_to_plot%1:size(files, 1)
                     hold on; plot(1:tf, ...
                         TestData.simdata.alpha(1:tf), ...
                         'k-', 'LineWidth', 3); % -- alpha
+                    grid on;
                     set(gca, 'ylim', [0,1]);
+                    set(gca, 'fontsize', 16);
                     
                     %                     title(cond_names(cond))
                     ylabel('$\alpha_k=p(\mathrm{xMxT}|f_{\tau})$', ...
