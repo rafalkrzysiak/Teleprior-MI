@@ -7,6 +7,10 @@ function p = TargetBeliefSetup(param, p, xs, w0)
 % -- condition, the gaussian distribution is to be tighter/smaller than
 % -- that of xMyT.
 
+% -- Get the target position data that coincides with the correct ID
+targetLoc = param.yMyT_pos(find(param.ID), :, :);
+xt = [targetLoc(2), targetLoc(3)];
+
 % -- set the belief the robot itself
 p(1:3, :, 1) = [xs(1,1)+randn(1,param.N)*w0;
                 xs(2,1)+randn(1,param.N)*w0;
@@ -31,8 +35,8 @@ elseif param.config == "yMxT"
                      rand(1,param.N)*param.L(2)];
 % Gaussian
 elseif param.config == "yMyT"
-    p(4:5, :, 1) = [xs(4,1)+randn(1,param.N)*w0;
-                    xs(5,1)+randn(1,param.N)*w0];
+    p(4:5, :, 1) = [xt(1)+randn(1,param.N)*w0;
+                    xt(2)+randn(1,param.N)*w0];
 
 end
 

@@ -1,4 +1,4 @@
-function [xs, speed, tr, tf, tloc, file_id] = RobotExperimentDataSet(exp_id, condition)
+function [xs, speed, tr, tf, tloc, file_id] = RobotExperimentDataSet(exp_id, condition, param)
 % -- NEW:
 % -- This function will serve to pull trajectory data captured by the 
 % -- overhead tracking system developed for the Omron Lab
@@ -20,7 +20,11 @@ if traj(1,1) < 0.5
  traj(1,1) = traj(1,1) + 0.5;
 end
 
-xs(1:3,1) = traj(1:3,1); % -- store only the (x,y,theta) data for the first timestep
+if param.config ~= "xMxT"
+    xs(1:3,1) = traj(1:3,1)+[0;1;0]; % -- store only the (x,y,theta) data for the first timestep
+else
+    xs(1:3,1) = traj(1:3,1); % -- store only the (x,y,theta) data for the first timestep
+end
 tloc = [mean(traj(4,:)); mean(traj(5,:))]; % -- extract the target location data
 xs(4:5,:) = tloc .* ones(2, tf); % -- store the target location data for all time steps
 

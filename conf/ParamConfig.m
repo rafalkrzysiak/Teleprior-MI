@@ -7,7 +7,8 @@ function [param, maps, folder, bias, ...
 
 param.dt = 0.5; % -- timestep (s)
 param.fps = 2;
-[~, ~, ~, param.T, tloc, file_id] = RobotExperimentDataSet(exp_id, cond); %2500/param.dt; % -- max time (s)
+param.config = "";
+[~, ~, ~, param.T, tloc, file_id] = RobotExperimentDataSet(exp_id, cond, param); %2500/param.dt; % -- max time (s)
 param.N = 1200; % -- number of particles in the simulation
 param.nsim = 1; % -- number of simulations per combination
 param.closedloop = 1; % -- flag for enabling/disabling MI
@@ -31,7 +32,8 @@ param.tau = -1; % tau is set outside
 param.share = 1;
 param.bias = 0;
 param.agents = 1; % -- define the total number of robots to be in the domain
-param.config = "";
+param.yMyT_pos = csvread('../data/targetLoc_yMyT_Condition_4.csv');
+param.ID = 0; % -- let us contain the ID we are running
 
 [~, param.L]=robot_position(maps(1), zeros(1,2));
 

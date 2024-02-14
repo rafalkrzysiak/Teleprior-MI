@@ -151,7 +151,7 @@ for jj=1:param.nsim
     % -- initialize the particles, estimates and positions of the robots
     for r = 1:param.agents
         % -- set the position of the robot and target
-        [Xs(:,:,1,r), speed, tr] = RobotExperimentDataSet(exp_id, condition);
+        [Xs(:,:,1,r), speed, tr] = RobotExperimentDataSet(exp_id, condition, param);
 
         % -- set the particle distribution for the robot and target belief
         p = TargetBeliefSetup(param, p, Xs, w0);

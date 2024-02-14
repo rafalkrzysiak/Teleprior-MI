@@ -31,7 +31,7 @@ conds = [1, 2, 3, 4];
 
 nsims = 1; %number of simulations
 
-for ii = 1:2 %size(ConfigChoice,2)
+for ii = 4:size(ConfigChoice,2)
     
     ConfigSetup = ConfigChoice{ii};
     
@@ -77,6 +77,7 @@ for ii = 1:2 %size(ConfigChoice,2)
         
         % -- set the map configuration to be tested
         param.config = ConfigSetup;
+        param.ID = partID;
         
         % -- display information about the simulation
         fprintf('Config:%s, Participant:%04d, Config completion status:%0.1f%%\n', ...
