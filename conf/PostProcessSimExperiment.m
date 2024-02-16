@@ -92,8 +92,8 @@ for ii = 1:size(files, 1)
     
     % -- show trajectory data of human
     plot(trajData(1,:), trajData(2,:), 'k-', 'LineWidth', 2);
-    txy=ginput(1);
-    fprintf('%s, %.2f, %.2f\n',files(ii).name, txy(1), txy(2)); 
+    %txy=ginput(1);
+    %fprintf('%s, %.2f, %.2f\n',files(ii).name, txy(1), txy(2)); 
 end
 
 end
