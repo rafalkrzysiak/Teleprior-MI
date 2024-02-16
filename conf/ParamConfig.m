@@ -34,6 +34,7 @@ param.bias = 0;
 param.agents = 1; % -- define the total number of robots to be in the domain
 param.yMyT_pos = csvread('../data/targetLoc_yMyT_Condition_4.csv');
 param.ID = 0; % -- let us contain the ID we are running
+param.lfn_range = 2*param.r_visible; % -- range detection for the likelihood function only
 
 [~, param.L]=robot_position(maps(1), zeros(1,2));
 

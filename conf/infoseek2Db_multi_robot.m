@@ -816,7 +816,8 @@ else % -- if the robot does not see the target
     %     idx = (dist_from_robot < (r_visible*.75));
     % -- if the robot does not see the target, we reset the weights for 90%  of
     % -- the particles
-    idx = (dist_from_robot < param.r_visible(robot) && abs(Zh) < param.r_FOV(robot)/2);
+%     idx = (dist_from_robot < param.r_visible(robot) && abs(Zh) < param.r_FOV(robot)/2);
+    idx = (dist_from_robot < param.lfn_range && abs(Zh) < param.r_FOV(robot)/2);
     %     if rand < .9
     wts(idx) = 0;
     %     end

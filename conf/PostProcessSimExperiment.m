@@ -26,7 +26,7 @@ cond_nums=["condition_1","condition_2","condition_3","condition_4"];
 Matfile = "OmronLab_p=1200_nsim=1_agents=1.mat";
 
 % condition number
-cond_type=4;
+cond_type=3;
 
 % -- data to plot
 simDir = strcat("./data/", cond_names{cond_type});
@@ -44,8 +44,8 @@ figure(1); gcf;clf;
 
 % -- begin looping through each test folder
 for ii = 1:size(files, 1)
-%     subplot(5,6,ii);
-    figure(ii); gcf; clf;
+    subplot(5,6,ii);
+%     figure(ii); gcf; clf;
     
     % -- read condition directory
     condFile = strcat(simDir, "/", files(ii).name, "/", Matfile);
