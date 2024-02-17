@@ -176,7 +176,7 @@ for jj=1:param.nsim
     % -- running in simulation, which will leave robot_1 with all zeros
     d = zeros(kF, 1);
     TotalDist = zeros(kF, 1, 2);
-    alpha = d;
+    alpha = ones(kF, 1);
     pDxMxT = d;
     pDyMyT = d;
     f_time = d;

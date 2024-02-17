@@ -31,7 +31,7 @@ conds = [1, 2, 3, 4];
 
 nsims = 1; %number of simulations
 
-for ii = 2:3%size(ConfigChoice,2)
+for ii = 1:size(ConfigChoice,2)
     
     ConfigSetup = ConfigChoice{ii};
     
