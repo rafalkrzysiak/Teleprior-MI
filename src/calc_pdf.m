@@ -4,17 +4,19 @@ function [pdata, x]=calc_pdf(dstr, xlbl, conditions)
 alldata=[dstr{:}];
 edges=linspace(min(alldata), max(alldata), 10);
 
-% calculate probabilities
+% calculate probabilities p(feature|knowledge)
 for k=1:4
     data = dstr{k};
     [n,x]=histcounts(data, edges);
     pdata(:,k)= n/sum(n);
 end
 
+% normalize so that all values sum up to one
+
 if nargin >2 % quiet option
     % plot everything
     gca; cla;
-    for k=[1,4]
+    for k=1:4
         plot(x(1:end-1),pdata(:,k), 'linewidth', 2);
         hold on;
     end
@@ -23,7 +25,7 @@ if nargin >2 % quiet option
     set(gca, 'fontsize', 16);
     xlabel(xlbl)
     ylabel('p')
-    legend(conditions([1,4]))
+    legend(conditions)
     drawnow;
 end
 

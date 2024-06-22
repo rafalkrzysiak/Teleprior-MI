@@ -10,17 +10,18 @@ function PostProcessSimExperiment()
 clear variables
 
 % -- import the data saved
-%SimExp = ImportAllData();
+% ImportAllData();
+
 
 % -- plot which robot found the missing target
 % PlotWhoFoundTarget(SimExp);
 % PlotWhoFoundTarget_testSet();
 % TimeGained();
-% plot_performance_comparison();
+plot_performance_comparison();
 
 % -- plot all trajectories
 % PlotAllTraj(SimExp);
-PlotTrajTestDataSet();
+% PlotTrajTestDataSet();
 % PlotRWControls();
 % ControlInputMapped();
 
@@ -29,26 +30,61 @@ PlotTrajTestDataSet();
 % GetAverageVelocityExp();
 end
 
-function SimExp = ImportAllData()
+function ImportAllData()
 
 % -- Define the mat file name and the conditions wanting to observe
 % -- these values will be stored as strings for ease
-Conditions = ["/condition_1", "/condition_4"];
-MatFile = "/OmronLab_p=1200_nsim=1_agents=3.mat";
+% -- define the conditions tested
+conditions = {'condition_1','condition_2','condition_3','condition_4'};
+
+% -- define the mat file name used for all participants
+Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
+
+% strategies
+strategies={'alpha_t/TotalDist/','alpha_t/FreezeTime/','RandomWalk/',...
+    'alpha_0/', 'alpha_1/'};
 
 % -- get the list of participants
-loc = "data/OmronLab/3robots/";
-ids = ls(loc); % -- get all in the folder
-ids = ids(3:end-1,1:4); % -- reformat to only have the numbers
+expTime = csvread('../data/TimeToFind.csv');
+expTime = expTime(:,1:4);
+expTime(:,1)=expTime(:,1)/2.27; % scaling to compensate for length and obstacles
+expTime(:,1:4) = expTime(:,1:4)-5.0; % -- adjusting for humans entering code into computer
+IDs = csvread('../src/IDList_Completed.csv', 1);
+IDs = IDs(:,1);
 
+% simulated data
+loc = "../../simdata/";
+fps=2;
+csvdata=[];
 % -- begin looping through all participants and conditions ran
-for i = 1:size(ids, 1)
-    for j = 1:size(Conditions, 2)
-        % -- load and save the data in a single structure
-        SimExp(i, j) = load(loc + ids(i,:) + Conditions(j) + MatFile);
+for ss = 1:size(strategies,2)
+    runs = dir(loc+strategies{ss});
+    runs=runs(~ismember({runs.name},{'.','..', '.DS_Store'}));
+    
+    for rr=1:size(runs,1)
+        part=dir(loc+strategies{ss}+runs(rr).name+'/');
+        part=part(~ismember({part.name},{'.','..', '.DS_Store'}));
+        for pp=1:size(part,1)
+            pidx=find(str2double(part(pp).name)==IDs);
+            for cc=1:size(conditions,2)
+                data = load(loc+strategies{ss}+runs(rr).name+'/'+...
+                    part(pp).name+'/'+conditions{cc}+'/'+Matfile);
+                csvdata=[csvdata; ...
+                    ss, rr, str2double(part(pp).name), cc, ...
+                    data.simdata.Which_robot, data.simdata.time/fps,...
+                    data.simdata.success, expTime(pidx,cc)];
+                
+            end
+        end
     end
 end
+T = array2table(csvdata);
+T.Properties.VariableNames = {'strategy','run','pid', ...
+    'condition', 'succesfulrobot', ...
+    'timesec', 'succcess', 'expTime'};
+writetable(T,'performance_data.csv');
 
+%csvwrite('performance_data.csv', csvdata)
 end
 
 function PlotTrajTestDataSet()
@@ -61,9 +97,9 @@ conditions = ["condition_1",...
 
 cond_names=["xMxT","xMyT","yMxT","yMyT"];
 cond_desc=["No Map, No Target",...
-           "No Map, Yes Target",...
-           "Yes Map, No Target",...
-           "Yes Map, Yes Target"];
+    "No Map, Yes Target",...
+    "Yes Map, No Target",...
+    "Yes Map, Yes Target"];
 
 % -- define the mat file name used for all participants
 Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
@@ -411,68 +447,67 @@ timecount = 0;
 fps=2; % frame rate for simdata --SB
 
 files = dir(parentDir);
+files=files(~ismember({files.name},...
+    {'.','..', '.DS_Store'}));
+
 num_sims=size(files, 1);
 
 testTime = zeros(num_sims, 4);
 for test = 1:num_sims
     % can collapse all these into a single function for efficiency --SB
-    % -- make sure that we capture a number not '.' or '..'
-    if (files(test).name ~= "." && files(test).name ~= ".." && ...
-            files(test).name ~= ".DS_Store")
+    
+    
+    % -- within the test number folder, get the participant numbers
+    subDir = strcat(parentDir, "/", files(test).name);
+    participant_folders = dir(subDir);
+    participant_folders=participant_folders(~ismember({participant_folders.name},...
+        {'.','..', '.DS_Store'}));
+    
+    % -- begin looping through all the participant folders
+    for participant = 1:size(participant_folders, 1)
         
-        % -- within the test number folder, get the participant numbers
-        subDir = strcat(parentDir, "/", files(test).name);
-        participant_folders = dir(subDir);
+        % -- create participant directory
+        partDir = strcat(subDir,"/",participant_folders(participant).name);
         
-        % -- begin looping through all the participant folders
-        for participant = 1:size(participant_folders, 1)
-            % -- make sure that we capture a number not '.' or '..'
-            if (participant_folders(participant).name ~= "." && ...
-                    participant_folders(participant).name ~= ".." && ...
-                    participant_folders(participant).name ~= ".DS_Store")
-                
-                % -- create participant directory
-                partDir = strcat(subDir,"/",participant_folders(participant).name);
-                
-                % -- begin looping through all conditions tested
-                for cond = 1:size(conditions, 2)
-                    
-                    % -- create condition directory
-                    condDir = strcat(partDir, "/", conditions(cond));
-                    condFile = strcat(condDir, "/", Matfile);
-                    
-                    % -- read the data captured for the test
-                    TestData = load(condFile);
-                    
-                    % -- check if the autonomous robot found the target
-                    if TestData.simdata.Which_robot ~= 0
-                        % -- compare the ID looking at with the list
-                        % -- to get the original time ran
-                        for id = 1:size(IDs, 1)
-                            if num2str(IDs(id)) == participant_folders(participant).name
-                                % -- get the time difference and store it
-                                %                                 if cond ~= 4
-                                % only count if the difference is positive
-                                if timeArray(id, cond) - TestData.simdata.time/fps > 0
-                                    testTime(condCount(1,cond), cond) = ...
-                                        timeArray(id, cond) - TestData.simdata.time/fps;
-                                end
-                                % Commenting this out because we want to
-                                % ignore deception - SB
-                                %                                 else
-                                %                                     testTime(condCount(1,cond), cond) = ...
-                                %                                         abs(timeArray(id, cond) + timeArray(id, cond+1) - TestData.simdata.time);
-                                %                                 end
-                                timecount = timecount + 1;
-                                break;
-                            end
+        % -- begin looping through all conditions tested
+        for cond = 1:size(conditions, 2)
+            
+            % -- create condition directory
+            condDir = strcat(partDir, "/", conditions(cond));
+            condFile = strcat(condDir, "/", Matfile);
+            
+            % -- read the data captured for the test
+            TestData = load(condFile);
+            
+            % -- check if the autonomous robot found the target
+            if TestData.simdata.Which_robot ~= 0
+                % -- compare the ID looking at with the list
+                % -- to get the original time ran
+                for id = 1:size(IDs, 1)
+                    if num2str(IDs(id)) == participant_folders(participant).name
+                        % -- get the time difference and store it
+                        %                                 if cond ~= 4
+                        % counting total time... -- SB
+                        % only count if the difference is positive
+                        if timeArray(id, cond) - TestData.simdata.time/fps > 0
+                            testTime(condCount(1,cond), cond) = ...
+                                timeArray(id, cond) - TestData.simdata.time/fps;
                         end
+                        
+                        % Commenting this out because we want to
+                        % ignore deception - SB
+                        %                                 else
+                        %                                     testTime(condCount(1,cond), cond) = ...
+                        %                                         abs(timeArray(id, cond) + timeArray(id, cond+1) - TestData.simdata.time);
+                        %                                 end
+                        timecount = timecount + 1;
+                        break;
                     end
-                    condCount(1,cond) = condCount(1,cond) + 1;
                 end
-                i = i + 1;
             end
+            condCount(1,cond) = condCount(1,cond) + 1;
         end
+        i = i + 1;
     end
 end
 
@@ -488,6 +523,96 @@ stdTimeArrayComp = [std(testTime(testTime(:,1) ~= 0, 1)), ...
 end
 
 function plot_performance_comparison()
+data=readtable('performance_data.csv');
+
+% the way simulations are setup, if the robot that finds the target is more
+% than 0, then the robot is autonomous otherwise it is human. The human
+% time may not be recorded accurately because it may not have satisfied the
+% criteria, therefore in this case, we pick the experiment time.
+
+data.timesec(data.succesfulrobot==0)=data.expTime(data.succesfulrobot==0);
+
+
+% strategies
+strategies={'alpha_t/TotalDist/','alpha_t/FreezeTime/','RandomWalk/',...
+    'alpha_0/', 'alpha_1/'};
+
+markers={'^m', 'sr', 'db', 'ok'};
+
+figure(1); gcf; clf;
+subplot(1,3,1);
+fracTrials=zeros(4,5);
+for cc=1:4
+    for ss=1:5
+        idx=data.condition==cc & data.strategy==ss;
+        fracTrials(cc,ss)=sum(data.timesec(idx)<data.expTime(idx))/sum(idx);
+    end
+    plot(0:1:4, fracTrials(cc,:), markers{cc}, ...
+    'MarkerFaceColor', markers{cc}(2), 'MarkerSize', 18, ...
+    'LineWidth', 2); hold on;
+end
+
+grid on;
+
+set(gca,'fontsize', 24);
+set(gca, 'ylim', [0,1]);
+set(gca, 'xtick', 0:4);
+xticklabels(strategies);
+xtickangle(30);
+ylabel({'Fraction of trials where', 'human-robot team found target before single human'})
+
+subplot(1,3,2);
+mu=zeros(4,5);
+st=zeros(4,5);
+for cc=1:4
+    for ss=1:5
+        idx=data.condition==cc & data.strategy==ss & data.timesec<data.expTime;
+        mu(cc,ss)=mean(data.expTime(idx)-data.timesec(idx));
+        st(cc,ss)=std(data.expTime(idx)-data.timesec(idx));
+%         boxplot(data.timesec(data.condition==cc), ...
+%             data.strategy(data.condition==cc),'PlotStyle','compact');
+    end
+    errorbar(0:1:4, mu(cc,:), st(cc,:), markers{cc}, ...
+    'MarkerFaceColor', markers{cc}(2), 'MarkerSize', 18, ...
+    'LineWidth', 2); hold on;
+    hold on;
+end
+grid on;
+set(gca,'fontsize', 24);
+set(gca, 'ylim', [0,140]);
+set(gca, 'xtick', 0:4);
+xticklabels(strategies);
+xtickangle(30);
+ylabel('Time saved over single person trials')
+
+
+subplot(1,3,3);
+mu=zeros(4,5);
+st=zeros(4,5);
+for cc=1:4
+    for ss=1:5
+        idx=data.condition==cc & data.strategy==ss;
+        mu(cc,ss)=mean(data.timesec(idx));
+        st(cc,ss)=std(data.timesec(idx));
+%         boxplot(data.timesec(data.condition==cc), ...
+%             data.strategy(data.condition==cc),'PlotStyle','compact');
+    end
+    errorbar(0:1:4, mu(cc,:), st(cc,:), markers{cc}, ...
+    'MarkerFaceColor', markers{cc}(2), 'MarkerSize', 18, ...
+    'LineWidth', 2); hold on;
+    hold on;
+end
+grid on;
+set(gca,'fontsize', 24);
+set(gca, 'ylim', [0,140]);
+set(gca, 'xtick', 0:4);
+xticklabels(strategies);
+xtickangle(30);
+ylabel('Time to find')
+
+end
+
+function plot_performance_comparison_deprecated()
 
 load('timegained_workspace.mat')
 

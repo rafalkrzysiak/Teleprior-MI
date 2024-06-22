@@ -576,7 +576,7 @@ for jj=1:param.nsim
                 I(:,:,1,:), alpha, TotalDist, pDxMxT, pDyMyT, ConfigSetup)
         end
         
-        % -- end the msimulation if the target was found
+        % -- end the simulation if the target was found
         if Num_target_found(jj) == 1 || sim_end == 1
             break
         end
