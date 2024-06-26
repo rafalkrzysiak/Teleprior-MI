@@ -20,7 +20,7 @@ subplot(231);
 % time to find
 % hyp: time to find will depend on prior knowledge. 
 timeArray = csvread('../data/TimeToFind.csv');
-timeArray(:,1)=timeArray(:,1)/2.27; % scaling to compensate for length and obstacles
+timeArray(:,1)=timeArray(:,1)/1.135; % scaling to compensate for length and obstacles
 t_time = array2table(timeArray,...
     'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
 plot_and_stats(t_time, 1:4, xticklbl, 'Time to find (s)','(a)',[],1);
@@ -29,7 +29,7 @@ plot_and_stats(t_time, 1:4, xticklbl, 'Time to find (s)','(a)',[],1);
 % Total distance traveled
 subplot(232);
 TotalDistArray = csvread('../data/TotalDistanceTravel.csv');
-TotalDistArray(:,1)=TotalDistArray(:,1)/2.27;
+TotalDistArray(:,1)=TotalDistArray(:,1)/1.135;
 t_TotalDist = array2table(TotalDistArray,...
     'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
 plot_and_stats(t_TotalDist, 1:4,  xticklbl, 'Distance travelled (m)','(b)',[], 1);
@@ -253,9 +253,9 @@ for ii=1:6
     subplot(2,3,ii)
     plot_and_stats(array2table(NASATLXArray(refDataforc4==0,:,ii)), 1:4,  xticklbl, ...
         ylbl{ii}, xlbl{ii}, [0 100],1);
-    hold on;
-    plot(4, NASATLXArray(refDataforc4==0,4,ii), 'o', 'markersize', ...
-        12, 'color', 'k', 'markerface', ones(1,3));
+%     hold on;
+%     plot(4, NASATLXArray(refDataforc4==0,4,ii), 'o', 'markersize', ...
+%         12, 'color', 'k', 'markerface', ones(1,3));
 end
 
 diary off
@@ -267,9 +267,15 @@ fprintf('[%s] \n', ylbl);
 
 if disp1
 % time_bp=boxplot(table2array(t_time(:,1:4)), 'labels', {'C1','C2','C3','C4'});
-plot(table2array(data_table(:,colidx))', '-o', 'markersize', 12, 'color', ones(1,3)*.5, 'markerface', ones(1,3)*.75);
+% plot(table2array(data_table(:,colidx))', '-o', 'markersize', 12, 'color', ones(1,3)*.5, 'markerface', ones(1,3)*.75);
+% boxplot(table2array(data_table(:,colidx)), 'color', ones(1,3)*.5);
+mu=mean(table2array(data_table(:,colidx)));
+st=std(table2array(data_table(:,colidx)),[],1);
+bar(mu, 'Facecolor', ones(1,3)*.5);
 hold on;
-plot(median(table2array(data_table(:,colidx))), 'k+', 'markersize', 16, 'linewidth', 2);
+errorbar(1:size(mu,2), mu, st, 'k.');
+% hold on;
+% plot(median(table2array(data_table(:,colidx))), 'k+', 'markersize', 16, 'linewidth', 2);
 set(gca, 'xtick', 1:4)
 ylabel(ylbl);
 xlabel(xlbl);

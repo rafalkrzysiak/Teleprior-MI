@@ -67,11 +67,12 @@ conditions = ["1","2","3","4"];
 % timeStayingInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
 % timeTurningInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
 % timeStayingStill(ID_List, trials, conditions, ID_conditions, ID_Data)
-% DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
+DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
 % PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
+% --- figure 3 in paper
 % PlotTrajectoryWithAllInfo_robot_movement(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
-get_distance_from_target(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
+% get_distance_from_target(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 % SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 % SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % NASATLXData(ID_List, trials, conditions, ID_conditions, ID_Data)
@@ -1309,8 +1310,8 @@ for Condition = 1:4
         
 
         % -- plot all data prior to condition 4
-        hold on; plot(X(5,1), X(5,2), 'bs', 'markersize', 10, 'linewidth', 3); % -- starting point
-        plot(X(end,1), X(end,2), 'bx', 'markersize', 10, 'linewidth', 3); % -- end point
+        hold on; plot(X(5,1), X(5,2), 'o',  'color', [30, 136, 229]/255,'markersize', 10, 'linewidth', 3); % -- starting point
+        plot(X(end,1), X(end,2), 'x', 'color', [30, 136, 229]/255, 'markersize', 10, 'linewidth', 3); % -- end point
         
 
         
@@ -1323,7 +1324,9 @@ for Condition = 1:4
             plot(Xh(5:end,1), Xh(5:end,2), '-', ...
                         'color',[0,0,0]+alpha, 'linewidth', 1); % -- trajectory
         end
-        plot(X(end,3), X(end,4), 'gs', 'markersize', 10, 'linewidth', 3); % -- Target location
+        if X(end,3)
+        plot(X(end,3), X(end,4), 's', 'color', [0,77,64]/255, 'markersize', 10, 'linewidth', 3); % -- Target location
+        end
         axis image; xlabel('X(m)'); ylabel('Y(m)'); 
         %title(sprintf('Condition: %d', Condition), 'fontsize', 18, 'fontweight', 'normal');
         clear X Xh;
@@ -1490,6 +1493,11 @@ end
 MaxSpeed = 0.65;
 MaxTurnRate = 3.5;
 
+cond_label={'\begin{tabular}{c}No Map \\ No Target (C1)\end{tabular}',...
+                 '\begin{tabular}{c}No Map \\ Yes Target (C2)\end{tabular}',...
+                 '\begin{tabular}{c}Yes Map \\ No Target (C3)\end{tabular}',...
+                 '\begin{tabular}{c}Yes Map \\ Yes Target (C4)\end{tabular}'};
+
 for ii = 5:5
     
     % -- only want to loop through individuals that hav undergone
@@ -1542,6 +1550,7 @@ for ii = 5:5
                 plot(X(1,:), X(2,:), 'b-', 'linewidth', 3); % -- trajectory
                 plot(X(4,1), X(5,1), 'rs', 'markersize', 6, 'linewidth', 3); % -- Target location
                 axis image; 
+                ylabel(sprintf('%s', cond_label{Condition}), 'interpreter', 'latex');
                 %title(sprintf('Condition:%d', Condition), 'fontsize', 18, 'fontweight', 'normal');
 
                 % -- plot the speed of the robot
@@ -1592,6 +1601,7 @@ for ii = 5:5
                 plot(X(4,1), X(5,1), 'rs', 'markersize', 6, 'linewidth', 3); % -- Target location
                 set(gca, 'fontsize', 16);
                 axis image; 
+                ylabel(sprintf('%s', cond_label{Condition}), 'interpreter', 'latex');
                 %title(sprintf('Condition:%d', Condition), 'fontsize', 18, 'fontweight', 'normal');
 
                 % -- plot the speed of the robot
@@ -1637,10 +1647,11 @@ for ii = 5:5
                 set(gca,'xdir','reverse','ydir','reverse');
                 hold on; plot(X(1,ID_Data(ii,end)), X(2,ID_Data(ii,end)), 'bs', 'markersize', 6, 'linewidth', 3); % -- starting point
                 plot(X(1,end), X(2,end), 'bx', 'markersize', 6, 'linewidth', 3); % -- end point
-                plot(X(1,ID_Data(ii,end):end), X(2,ID_Data(ii,end):end), 'b-', 'linewidth', 3); % -- trajectory
+                plot(X(1,ID_Data(ii,end):end), X(2,ID_Data(ii,end):end), 'k:', 'linewidth', 3); % -- trajectory
                 plot(X(4,1), X(5,1), 'rs', 'markersize', 6, 'linewidth', 3); % -- Target location
                 set(gca, 'fontsize', 16);
                 axis image; 
+                ylabel(sprintf('%s', cond_label{Condition}), 'interpreter', 'latex');
                 %title(sprintf('Condition:%d', Condition), 'fontsize', 18, 'fontweight', 'normal');
 
                 % -- plot the commanded speed of the robot
