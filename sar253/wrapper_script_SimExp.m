@@ -31,11 +31,11 @@ ConfigChoice={"alpha_t/TotalDist", "alpha_t/FreezeTime", ...
     "alpha_1",  "RandomWalk"};
 
 
-nsims = 4; %number of simulations
+nsims = 100; %number of simulations
 
 % say ii=3 for e.g. to run only for alpha_0
 
-for ii = 3%size(ConfigChoice,2)
+for ii = 1:3%size(ConfigChoice,2)
     
     ConfigSetup = ConfigChoice{ii};
     
