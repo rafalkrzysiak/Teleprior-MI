@@ -1,92 +1,132 @@
-function [alpha, pDxMxT_k, pDyMyT_k] = UpdateAlpha(feature_k, pdist, x, alpha)
-% -- this function will serve to update alpha given the distance
-% -- traveled by the reference robot. Probabilities are calculated
-% -- using experimental data captured by the Omron lab teleoperation
-
-% alpha is the posterior which recursively gets updated every time step.
-
-% -- Tau was determined in post process (pass tau)
-% tau = 50;
-
-% -- We need at minimum 2 timesteps to calculate the distance
-% -- traveled by reference robot. If the condition is not met,
-% -- set alpha to the pre determined value param.alphaBegin
-% -- which is defined in the ParamConfig.m file
-% if k > 1
-% -- calculate the distance traveled by the reference robot
-% -- within the environment
-% calculate d once outside and send as a vector of T-1 elements where
-% each element is just the distance between the k and k-1-th time-step
-%     d(k, 1) = sqrt(sum((Xh(6:7,k) - Xh(6:7,k-1)).^2)); % comment or delete
-
-% -- only enter when we have at minimum of param.alphaBuffer steps available
-% -- param.alphaBuffer is entered in the ParamConfig.m file
-% -- the param.alphaBuffer value is arbitrarly chosen for right now,
-% -- possible more optimized value will replace in future
-% SB: alphbuffer is tau in 2023-05-19.pdf and will be decided based on
-% an optimization that runs to maximize the KLdistance between the pdfs
-% of the random vector X=[speed, turn rate, ...] so, we can set it here
-% and not treat it as a control design parameter.
-% for example, set tau=50
-% -- needed a buffer at the beginning of the alpha/totaldist calculation
-% -- the believed location of the reference robot jumps meters in timesteps [1 3]
-% -- 3 was added to avoid the massive jump in distance which created a
-% -- Nan value for pDxMxT_k and pDyMyT_k using the interp1 function
+function pKk_fk = UpdateAlpha(feature_k, pdist, x_dist, pK_km1)
+% UpdateAlpha will update the weighting factor alpha_k which is the
+% posterior probability p(pK_k=xMxT|feature_k)
+% pdist=p(feature_k|K) for each of the four types of prior knowledge
+% feature_k is average speed, turn rate, fraction freezing time
+% x_dist is the support/range of the pdf
+% 
+% pK_k= p(K_k|feature_k) 
+% pK_km1=p(K_km1|feature_k)
 
 % -- calculate p(d|xMxT) and p(d|yMyT)
 % -- discussed during zoom meeting 5/23/2023
-if feature_k < max(x)
-    pDxMxT_k = interp1(x, pdist(:,1), feature_k); % p(d|xMxT)
-    pDyMyT_k = interp1(x, pdist(:,4), feature_k); % p(d|yMyT)
-else
-    pDxMxT_k = 0.00001;
-    pDyMyT_k = 0.00001;
-end
 
-if isnan(pDxMxT_k)
-    pDxMxT_k = 0.00001;
-end
-
-if isnan(pDyMyT_k)
-    pDyMyT_k = 0.00001;
-end
-
-% -- avoid zero probabilities
-if ~pDxMxT_k
-    pDxMxT_k = 0.00001;
-end
-
-if ~pDyMyT_k
-    pDyMyT_k = 0.00001;
-end
-
+% 
+% if feature_k < max(x_dist)
+%     p_f_xMxT = interp1(x_dist, pdist(:,1), feature_k); % p(f|xMxT)
+%     p_f_xMyT = interp1(x_dist, pdist(:,2), feature_k); % p(f|xMyT)
+%     p_f_yMxT = interp1(x_dist, pdist(:,3), feature_k); % p(f|xMyT)
+%     p_f_yMyT = interp1(x_dist, pdist(:,4), feature_k); % p(f|yMyT)
+% else
+%     p_f_xMxT = 0.00001;
+%     p_f_xMyT = 0.00001;
+%     p_f_yMxT = 0.00001;
+%     p_f_yMyT = 0.00001;
+% end
+% 
+% if isnan(p_f_xMxT)
+%     p_f_xMxT = 0.00001;
+% end
+% 
+% if isnan(p_f_xMyT)
+%     p_f_xMyT = 0.00001;
+% end
+% 
+% if isnan(p_f_yMxT)
+%     p_f_yMxT = 0.00001;
+% end
+% 
+% if isnan(p_f_yMyT)
+%     p_f_yMyT = 0.00001;
+% end
+% 
 % % -- avoid zero probabilities
-% p_k = pDxMxT_k + pDyMyT_k;
-% if ~p_k
-%     pDxMxT_k = 0.001;
-%     pDyMyT_k = 0.001;
+% if ~p_f_xMxT
+%     p_f_xMxT = 0.00001;
+% end
+% 
+% if ~p_f_xMyT
+%     p_f_xMyT = 0.00001;
+% end
+% 
+% if ~p_f_yMxT
+%     p_f_yMxT = 0.00001;
+% end
+% 
+% if ~p_f_yMyT
+%     p_f_yMyT = 0.00001;
 % end
 
+% update for thri revision
+p_f_Kk=zeros(1,4);
+pKk_fk=zeros(1,4);
+
+for ii=1:4
+    if numel(feature_k)==2
+        if feature_k(1) < max(x_dist(1,:)) && feature_k(2) < max(x_dist(2,:))
+                p_f_Kk(ii)=interp2(x_dist(1,:), x_dist(2,:), pdist(:,:,ii), ...
+                                        feature_k(1), feature_k(2));
+        else
+            p_f_Kk(ii)=0.00001;
+        end
+    else
+        if feature_k < max(x_dist)
+            p_f_Kk(ii)=interp1(x_dist, pdist(:,ii), feature_k);
+        else
+            p_f_Kk(ii)=0.00001;
+        end
+    end
+    
+    if isnan(p_f_Kk(ii))
+        p_f_Kk(ii)=0.00001;
+    end
+    
+    % -- avoid zero probabilities
+    if ~p_f_Kk(ii)
+        p_f_Kk(ii)=0.00001;
+    end
+end
+
 % -- update alpha
-% -- we can play around with this calculation
-% -- TO DO:
-% -- 1. Need to make more dynamic numerator calculation, meaning
-% --    The alpha calculation depends on which condition we are running
 % Bayes' rule
-% p(xMxT|d)=p(d|xMxT)*p(xMxT)/marginal_p(d)
-% where marginal_p(d)=p(d|xMxT)*p(xMxT) + p(d|yMyT)*(1-p(xMxT))
+% p(K[k]=xMxT|f_k)=p(f_k|xMxT)*p(xMxT[k-1])/{normalization factor}
+% where 
+% {normalization factor}    =   p(f_k|xMxT)*p(xMxT[k-1]) + ...
+%                               p(f_k|xMyT)*p(xMyT[k-1]) + ...
+%                               p(f_k|yMxT)*p(yMxT[k-1]) + ...
+%                               p(f_k|yMyT)*p(yMyT[k-1])
+
+for ii=1:4
+    pKk_fk(ii)=p_f_Kk(ii)*pK_km1(ii);
+end
+
+% normalization factor
+normf=sum(pKk_fk);
+
+for ii=1:4
+    pKk_fk(ii)=pKk_fk(ii)/normf;
+end
+
+% if any of the probabilities are << 0 then make them small so that they
+% can recover
+for ii=1:4
+    if pKk_fk(ii) < 0.001
+        pKk_fk(ii)=0.001;
+    end
+end
+
 % makes the assumption that the operator can either have no
 % knowledge or full knowledge
-alpha = (pDxMxT_k * alpha)/(pDxMxT_k*alpha + pDyMyT_k*(1-alpha));
-%alpha = (pDyMyT_k * alpha)/(pDyMyT_k*alpha + pDxMxT_k*(1-alpha));
+% alpha = (p_f_xMxT * alpha)/(p_f_xMxT*alpha + p_f_yMyT*(1-alpha));
+% alpha = (p_f_yMyT * alpha)/(p_f_yMyT*alpha + p_f_xMxT*(1-alpha));
 
 
 
 % -- make sure that alpha is not too far into 0
 % -- If alpha is zero, alpha will never recover above zero
-if alpha < 0.01
-    alpha = 0.01;
-end
+% if alpha < 0.01
+%     alpha = 0.01;
+% end
 
 
 

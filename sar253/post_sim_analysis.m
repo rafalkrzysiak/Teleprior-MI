@@ -12,14 +12,14 @@ clear variables
 % run import and the performance comparison
 
 % -- import the data saved
-% ImportAllData();
+ImportAllData();
 
 
 % -- plot which robot found the missing target
 % PlotWhoFoundTarget(SimExp); 
 % PlotWhoFoundTarget_testSet();
 % TimeGained();
-plot_performance_comparison();
+% plot_performance_comparison();
 
 % -- plot all trajectories
 % PlotAllTraj(SimExp);
@@ -43,7 +43,8 @@ conditions = {'condition_1','condition_2','condition_3','condition_4'};
 Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
 
 % strategies
-strategies={'alpha_t/TotalDist/','alpha_t/FreezeTime/','RandomWalk/',...
+strategies={'alpha_t/TotalDist/','alpha_t/FreezeTime/', ...
+    'alpha_t/DistAndFreeze/','RandomWalk/', ...
     'alpha_0/', 'alpha_1/'};
 
 % -- get the list of participants
@@ -536,20 +537,25 @@ data.timesec(data.succesfulrobot==0)=data.expTime(data.succesfulrobot==0);
 
 
 % strategies
-strategies={'alpha_t/TotalDist/','alpha_t/FreezeTime/','RandomWalk/',...
+strategies={'alpha_t/TotalDist/','alpha_t/FreezeTime/', ...
+    'alpha_t/DistAndFreeze/','RandomWalk/', ...
     'alpha_0/', 'alpha_1/'};
+
+strategies_labels={'\alpha_k (distance)','\alpha_k (freezing)',...
+    '\alpha_k (distance and freezing)', 'random',...
+    '\alpha=0', '\alpha=1'};
 
 markers={'^m', 'sr', 'db', 'ok'};
 
 figure(1); gcf; clf;
-subplot(1,3,1);
+subplot(1,2,1);
 fracTrials=zeros(4,5);
 for cc=1:4
-    for ss=1:5
+    for ss=1:6
         idx=data.condition==cc & data.strategy==ss;
         fracTrials(cc,ss)=sum(data.timesec(idx)<data.expTime(idx))/sum(idx);
     end
-    plot(0:1:4, fracTrials(cc,:), markers{cc}, ...
+    plot(0:1:5, fracTrials(cc,:), markers{cc}, ...
     'MarkerFaceColor', markers{cc}(2), 'MarkerSize', 18, ...
     'LineWidth', 2); hold on;
 end
@@ -558,11 +564,17 @@ grid on;
 
 set(gca,'fontsize', 24);
 set(gca, 'ylim', [0,1]);
-set(gca, 'xtick', 0:4);
-xticklabels(strategies);
+set(gca, 'xtick', 0:5);
+xticklabels(strategies_labels);
 xtickangle(30);
-ylabel({'Fraction of trials where', 'human-robot team found target before single human'})
+ylabel({'Fraction of trials where human-robot',  'team found target before single human'})
 
+legend('No Map, No Target',...
+    'No Map, Yes Target',...
+    'Yes Map, No Target',...
+    'Yes Map, Yes Target');
+
+%{
 subplot(1,3,2);
 mu=zeros(4,5);
 st=zeros(4,5);
@@ -586,9 +598,9 @@ set(gca, 'xtick', 0:4);
 xticklabels(strategies);
 xtickangle(30);
 ylabel('Time saved over single person trials')
+%}
 
-
-subplot(1,3,3);
+subplot(1,2,2);
 mu=zeros(4,5);
 st=zeros(4,5);
 for cc=1:4
@@ -608,14 +620,9 @@ grid on;
 set(gca,'fontsize', 24);
 set(gca, 'ylim', [0,220]);
 set(gca, 'xtick', 0:4);
-xticklabels(strategies);
+xticklabels(strategies_labels);
 xtickangle(30);
 ylabel('Time to find')
-
-legend('No Map, No Target',...
-    'No Map, Yes Target',...
-    'Yes Map, No Target',...
-    'Yes Map, Yes Target');
 
 end
 

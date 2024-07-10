@@ -67,7 +67,9 @@ conditions = ["1","2","3","4"];
 % timeStayingInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
 % timeTurningInPlace(ID_List, trials, conditions, ID_conditions, ID_Data);
 % timeStayingStill(ID_List, trials, conditions, ID_conditions, ID_Data)
-DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
+% DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
+% HeatMapTraj(ID_List, trials, conditions, ID_conditions, ID_Data);
+pdfSpeedAndTurnRate(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
 % PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 % --- figure 3 in paper
@@ -1260,6 +1262,86 @@ csvwrite(['stats data', filesep, 'fractionTimeTurningInPlace.csv'], ...
  
 end
 
+function HeatMapTraj(ID_List, trials, conditions, ID_conditions, ID_Data)
+
+% -- get the number of participants
+Ns=size(ID_Data,1);
+
+% -- opacity of the trajectory line
+alpha = 0.25;
+
+% -- Load the omron lab mosaic OmronLabMosaicCrop_lowres 
+OmronLabMap = imread('../data/maps/blankMap.jpg');
+
+figure(1); gcf; clf;
+% -- loop though all conditions and sub-conditions
+for Condition = 1:4
+   % -- create a figure that corresponds to the condition number
+
+   subplot(2,2,Condition);
+   % -- plot the Search environment
+%    imagesc([-0.2 15],[-0.5 7], flip(OmronLabMap));
+   set(gca,'xdir','reverse','ydir','reverse');
+   
+   % -- loop through all participants of the experiment
+   for ii = 1:Ns
+       
+        % -- create the string that corresponds to the name of the file
+        % -- that contains the trajectory data
+        RawTrajFile = strcat('../data/RAW/', num2str(ID_Data(ii,1)), ...
+            '/trial_000', num2str(Condition+1), '/data.csv');
+        
+        % -- load the file that contains the trajectory data
+        RawData = csvread(RawTrajFile,2);
+        X(:,1) = RawData(:,4); X(:,2) = RawData(:,5); 
+        X(:,3) = RawData(:,13); X(:,4) = RawData(:,14);
+        X = X(X(:,1)~=0,:); % -- remove the zeros
+        
+        
+        % -- that contains the EKF trajectory data
+        EKFTrajFile = strcat('../data/FILTERED/', num2str(ID_Data(ii,1)), ...
+            '/EKFtraj_condition_', num2str(Condition), '.csv');
+        
+        % -- load the file that contains the trajectory data
+
+        EKFData = csvread(EKFTrajFile); 
+
+        EKFData=EKFData';
+        Xh(:,1) = EKFData(:,1); 
+        Xh(:,2) = EKFData(:,2); 
+        
+
+        % -- plot all data prior to condition 4
+        hold on;
+%         hold on; plot(X(5,1), X(5,2), 'o',  'color', [30, 136, 229]/255,'markersize', 10, 'linewidth', 3); % -- starting point
+%         plot(X(end,1), X(end,2), 'x', 'color', [30, 136, 229]/255, 'markersize', 10, 'linewidth', 3); % -- end point
+        
+
+        
+        if Condition==4 && ID_Data(ii,2)
+            plot(Xh(5:ID_Data(ii, 8),1), Xh(5:ID_Data(ii, 8),2), '.', ...
+                        'color',[0,0,0], 'linewidth', 1); % -- trajectory
+            plot(Xh(ID_Data(ii, 8):end,1), Xh(ID_Data(ii, 8):end,2), '.', ...
+                        'color',[0,0,0], 'linewidth', 1); % -- trajectory
+        else
+            plot(Xh(5:end,1), Xh(5:end,2), '.', ...
+                        'color',[0,0,0]+alpha, 'linewidth', 1); % -- trajectory
+        end
+%         if X(end,3)
+%         plot(X(end,3), X(end,4), 's', 'color', [0,77,64]/255, 'markersize', 10, 'linewidth', 3); % -- Target location
+%         end
+        axis image; xlabel('X(m)'); ylabel('Y(m)'); 
+        %title(sprintf('Condition: %d', Condition), 'fontsize', 18, 'fontweight', 'normal');
+        clear X Xh;
+   end % -- end participant loop
+   ax = gca;
+   ax.FontSize = 18;
+   drawnow;
+end % -- end condition loop
+
+end
+
+
 function DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data)
 
 % -- get the number of participants
@@ -1337,6 +1419,8 @@ for Condition = 1:4
 end % -- end condition loop
 
 end
+
+
 
 function CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data)
 Ns = size(ID_Data, 1);
@@ -2173,6 +2257,114 @@ csvwrite('stats data/NASATLXMean.csv',TLX_mean);
 csvwrite('stats data/NASATLXstd.csv',TLX_std);
 
 end
+
+function pdfSpeedAndTurnRate(ID_List, trials, conditions, ID_conditions, ID_Data)
+% -- create a variable to contain the total time
+% -- that each participant statyed in place during each of the trials
+% -- with size (# trials x # participants)
+timeStayingStill = zeros(size(trials,2)+1, size(ID_List,1));
+fractionTimeStayingStill = timeStayingStill;
+totalTime=timeStayingStill;
+% -- if speed is < 0.1 m/s save the number of timesteps
+% -- where 0.1 m/s is the threshhold
+thresh = 0.1;
+
+% -- time step dt
+dt = 0.5;
+
+% -- loop through every trial ran
+for TRIAL = 1:size(trials,2)
+    % -- convert the trial/condition variable into a number
+    trial = num2str(trials(TRIAL));
+    condition = num2str(conditions(TRIAL));
+    
+    % -- loop through all IDs 
+    for ID = 1:size(ID_List,1)
+        % -- read the data from the csv file
+        participantID = num2str(ID_List(ID));
+        
+        % -- read the data from the filtered data folder
+        % -- and store the data in a variable "X" and "Y"
+        % -- State X and Y are each a 5xT matrix where T is total time
+        dir = strcat("../data/FILTERED/", participantID, "/EKFom_condition_", condition, ".csv");
+        tr = csvread(dir);
+        
+        diry = strcat("../data/FILTERED/", participantID, "/EKFVel_condition_", condition, ".csv");
+        sp = csvread(diry);
+        
+        % -- check what condition we are looking at
+        if TRIAL == 4
+            % -- if condition 4b
+            if ID_Data(ID, 2) % -- if break condition condition met
+                for t = 1:size(X,1) % -- loop throughout the entire time
+                    if t >= ID_Data(ID,end) % -- if the timestep is on or past the inaccurate point, add the timesteps
+                        if X(t, 1) < thresh && Y(t,1) < thresh % -- both speed and turn rate below threshold value
+                            timeStayingStill(TRIAL+1, ID) = timeStayingStill(TRIAL+1, ID) + 1;
+                        end
+                        totalTime(TRIAL+1, ID)=totalTime(TRIAL+1, ID)+1;
+                    else % -- if the timestep is prior to inaccurate point, add the time steps
+                        if X(t, 1) < thresh && Y(t,1) < thresh
+                            timeStayingStill(TRIAL, ID) = timeStayingStill(TRIAL, ID) + 1;
+                        end
+                        totalTime(TRIAL, ID)=totalTime(TRIAL, ID)+1;
+                    end
+                end
+%                 fractionTimeStayingStill(TRIAL, ID) = timeStayingStill(TRIAL, ID)/size(X,1);
+%                 fractionTimeStayingStill(TRIAL+1, ID) = timeStayingStill(TRIAL+1, ID)/size(X,1);
+                
+            % -- otherwise, condition 4a
+            else
+                   data(str2double(condition)).tr=[data(str2double(condition)).tr, tr];
+              
+            end
+            
+        % -- conditions 1-3
+        else
+            % -- loop through the duration of the trial starting with t = 0
+            for t = 1:size(X,1)
+               if X(t, 1) < thresh && Y(t,1) < thresh
+                   timeStayingStill(TRIAL, ID) = timeStayingStill(TRIAL, ID) + 1;
+               end
+               totalTime(TRIAL, ID)=totalTime(TRIAL, ID)+1;
+            end
+%             fractionTimeStayingStill(TRIAL, ID) = timeStayingStill(TRIAL, ID)/size(X,1);
+        end
+        fractionTimeStayingStill(TRIAL, ID) = timeStayingStill(TRIAL, ID)/totalTime(TRIAL,ID);
+    end
+end
+
+% for the 4b condition.
+TRIAL=4;
+for ID = 1:size(ID_List,1)
+    if ID_Data(ID, 2)
+        fractionTimeStayingStill(TRIAL+1, ID) = timeStayingStill(TRIAL+1, ID)/totalTime(TRIAL+1,ID);
+    end
+end
+
+% -- convert from time steps to total time
+timeStayingStill = dt*timeStayingStill;
+
+% -- once the total time in place for every participant 
+% -- per trial is calculated, plot the total time in place
+% -- against every participant
+figure(1); gcf; clf;
+for participant = 1:size(ID_List,1)
+    hold on; plot([1, 2, 3, 4], timeStayingStill(1:4, participant), '.-', 'linewidth', 2, 'markersize', 2);
+end
+
+% -- Make the figure look nice
+ax = gca;
+axis([1 4 0 300]); grid on;
+xlabel('Condition number'); ylabel('Total time stayed in place (s)');
+ax.XTickLabel = {'1', '', '2', '','3', '', '4'};
+ax.FontSize = 18;
+
+% -- save the data
+csvwrite(['stats data', filesep, 'timeStayingStill.csv'], [timeStayingStill',ID_Data(:,3:7)]);
+csvwrite(['stats data', filesep, 'FractionTimeStayingStill.csv'], [fractionTimeStayingStill',ID_Data(:,3:7)]);
+
+end
+
 
 function timeStayingStill(ID_List, trials, conditions, ID_conditions, ID_Data)
 % -- create a variable to contain the total time

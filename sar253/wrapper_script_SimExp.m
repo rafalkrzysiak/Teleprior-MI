@@ -26,15 +26,16 @@ dataFolder="../../simdata/"; % this can sit outside the github
 % -- "alpha_0"
 % -- "alpha_1"
 % -- "RandomWalk"
-ConfigChoice={"alpha_t/TotalDist", "alpha_t/FreezeTime", "alpha_0", ...
+ConfigChoice={"alpha_t/TotalDist", "alpha_t/FreezeTime", ...
+    "alpha_t/DistAndFreeze", "alpha_0", ...
     "alpha_1",  "RandomWalk"};
 
 
-nsims = 100; %number of simulations
+nsims = 4; %number of simulations
 
 % say ii=3 for e.g. to run only for alpha_0
 
-for ii = 5:5%size(ConfigChoice,2)
+for ii = 3%size(ConfigChoice,2)
     
     ConfigSetup = ConfigChoice{ii};
     
@@ -89,6 +90,14 @@ for ii = 5:5%size(ConfigChoice,2)
             data=extract_freezing_data(tau, ids_train, ...
                 dtTrack, dtCommand); % distance
             [pdstr, xdstr]=calc_pdf(data);
+        elseif ConfigSetup=="alpha_t/DistAndFreeze"
+            tau=15;
+            dstr_dist=extract_dist_data(tau, ids_train, ...
+                dtTrack, dtCommand); % distance
+            dstr_freeze=extract_freezing_data(tau, ids_train, ...
+                dtTrack, dtCommand); % freeze
+            [pdstr, x_dist1, x_frz1]=calc_pdf_2D(dstr_dist, dstr_freeze);
+            xdstr=[x_dist1; x_frz1];
         else
             tau=-1; % to prevent it from running elsewhere
             pdstr=[];

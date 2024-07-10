@@ -17,7 +17,10 @@ for cond=1:4
             append1=append1(:,1:ID_Data(ii,end));
         end
         % create distribution after rejecting last 5s of the trial
-        data1=append1(:,1:(size(append1,2)-10));
+        % *but* add 1 because for dist we take a diff so we lose one data
+        % point and we need to match it with others to make a 2D
+        % distribution
+        data1=append1(:,1:(size(append1,2)-10+1));
 %         toremove=mod(size(data,2)-1,obsvFrames); % because of diff
 %         data1=data(:,1:end-toremove);
         

@@ -139,7 +139,7 @@ for jj=1:param.nsim
     omega = Z; % -- omega values used every time step
     vel = omega; % -- velocity values used every time step
     I = zeros(5,param.T,1,param.agents); % -- holds rb_information regarding the mutual rb_info
-
+    
     
     % ^^ initial estimate of target location
     % is just uniformly distributed, so we have no idea where the target is
@@ -157,7 +157,7 @@ for jj=1:param.nsim
         p(1:3,:,1,r)=[X0(1,1,1,r)+randn(1,param.N)*w0;
             X0(2,1,1,r)+randn(1,param.N)*w0;
             X0(3,1,1,r)+randn(1,param.N)*w0];
-       
+        
         
         % -- should assign each value separately -- SB
         %         if r == 1 % human operated robot
@@ -211,8 +211,7 @@ for jj=1:param.nsim
     d = zeros(kF, 1);
     TotalDist = zeros(kF, 1, 2);
     alpha = d;
-    pDxMxT = d;
-    pDyMyT = d;
+    pK=ones(4,kF)*1/4; % initial probabilities
     f_time = d;
     
     % -- set the alpha to be what it was in the beginning
@@ -256,13 +255,13 @@ for jj=1:param.nsim
             [Neighbors, ~] = find(info_SI(:,robot) == 1);
             
             % these values are 1 because 1-0 is 1!
-%             kappa = 5;
-%             rij0 = 1.5;
-%             phuman = 1-(1-1)./(1+exp(-kappa*(rij(robot,1)-rij0)));
-%             probot = 1-(1-1)./(1+exp(-kappa*(Rr(robot,1)-rij0)));
+            %             kappa = 5;
+            %             rij0 = 1.5;
+            %             phuman = 1-(1-1)./(1+exp(-kappa*(rij(robot,1)-rij0)));
+            %             probot = 1-(1-1)./(1+exp(-kappa*(Rr(robot,1)-rij0)));
             
             phuman=1; probot=1;
-                
+            
             % -- check the distance between robot and simulated target
             rij(robot,1) = sqrt((Xs(4,k,1,robot)-Xs(1,k,1,robot))^2+...
                 (Xs(5,k,1,robot)-Xs(2,k,1,robot))^2);
@@ -440,13 +439,12 @@ for jj=1:param.nsim
                 if k > param.fps*param.tau+3
                     feature_k = sum(d(k-param.fps*param.tau+1:k, 1));
                     
-                    [alpha(k+1,1), pDxMxT(k+1,1), pDyMyT(k+1,1)] = ...
-                        UpdateAlpha(feature_k, pdstr, xdstr, alpha(k,1));
+                    pK(:,k+1) = ...
+                        UpdateAlpha(feature_k, pdstr, xdstr, pK(:,k));
+                    alpha(k+1)=pK(1,k+1); % alpha is p(K=xMxT|feature)
                 else
                     % move this out of UpdateAlpha
                     alpha(k+1,1)=param.alphaBegin;
-                    pDxMxT(k+1,1)=0.00001;
-                    pDyMyT(k+1,1)=0.00001;
                 end
                 %                 end
                 
@@ -474,19 +472,58 @@ for jj=1:param.nsim
                 % -- This is where we will calculate the amount of time
                 % -- the human controlled robot was "frozen" for.
                 if k > param.fps*param.tau+3
-                    feature_k = sum(f_time(k-param.fps*param.tau+1:k, 1))/(param.fps*param.tau);
+                    feature_k = sum(f_time(k-param.fps*param.tau+1:k, 1))/...
+                        (param.fps*param.tau);
                     % it's actually fraction of time spent freezing so
                     % need to divide by fps*param.tau
                     % check that the value lies between 0-1 by running it through a test trial
                     % to make sure that this is correct -- SB
-                    [alpha(k+1,1), pDxMxT(k+1,1), pDyMyT(k+1,1)] = ...
-                        UpdateAlpha(feature_k, pdstr, xdstr, alpha(k,1));
+                    pK(:,k+1) = ...
+                        UpdateAlpha(feature_k, pdstr, xdstr, pK(:,k));
+                    alpha(k+1)=pK(1,k+1); % alpha is p(K=xMxT|feature)
                 else
                     % move this out of UpdateAlpha
                     alpha(k+1,1)=param.alphaBegin;
-                    pDxMxT(k+1,1)=0.00001;
-                    pDyMyT(k+1,1)=0.00001;
-                end                
+                end
+            elseif ConfigSetup == "alpha_t/DistAndFreeze"
+                if k > 2
+                    d(k, 1) = sqrt(sum((Xs(1:2,k,1,1) - Xs(1:2,k-1,1,1)).^2));
+                    % -- check if the robot speed and turn rate are
+                    % -- less than 0.1 m/s or rad/s
+                    % -- IF abs(speed_data) < 0.1 & abs(tr_data) < 0.1
+                    if abs(speed(k)) < 0.1 && abs(tr(k)) < 0.1
+                        % -- add up individual time steps of the
+                        % -- simulation if the human controlled robot
+                        % -- is "freezing"
+                        f_time(k, 1) = 1; % this was 0.5 but should be 1 because we are counting frames --SB
+                    else
+                        % -- if the human controlled robot is
+                        % -- understood to not be "freezing" under the
+                        % -- required conditions, add 0.0s
+                        f_time(k, 1) = 0;
+                    end
+                else
+                    d(k, 1) = 0;
+                    f_time(k, 1) = 0;
+                end
+                
+                % -- This is where we will calculate the amount of time
+                % -- the human controlled robot was "frozen" for.
+                if k > param.fps*param.tau+3
+                    feature_k = [sum(d(k-param.fps*param.tau+1:k, 1)), ...
+                        sum(f_time(k-param.fps*param.tau+1:k, 1))/...
+                        (param.fps*param.tau)];
+                    % it's actually fraction of time spent freezing so
+                    % need to divide by fps*param.tau
+                    % check that the value lies between 0-1 by running it through a test trial
+                    % to make sure that this is correct -- SB
+                    pK(:,k+1) = ...
+                        UpdateAlpha(feature_k, pdstr, xdstr, pK(:,k));
+                    alpha(k+1)=pK(1,k+1); % alpha is p(K=xMxT|feature)
+                else
+                    % move this out of UpdateAlpha
+                    alpha(k+1,1)=param.alphaBegin;
+                end
             elseif ConfigSetup == "RandomWalk"
                 % turn rate uniformly distributed between  [-0.25, 0.25]
                 omega(1,k,1,robot)=0.5*rand-0.25; %param.omega0+0.1*randn;
@@ -508,7 +545,7 @@ for jj=1:param.nsim
                 [omega(1,k,1,robot),vel(1,k,1,robot),I(:,k,1,robot)] = ...
                     O_MI(k, p, wts, bin_map, Z(:,k,1,:), robot, Zr(:,k,1,:), alpha(k+1,1));
             end
-             
+            
             
             % -- get the range and bearing rb_information for every fiducial
             % -- for every robot in the simulation
@@ -589,6 +626,7 @@ for jj=1:param.nsim
     simdata(jj).Xh = Xh; % -- estimate robot position
     simdata(jj).Xs = Xs; % -- simulated robot position
     simdata(jj).alpha= alpha; % alpha value -- SB?
+    simdata(jj).pK = pK;
     %simdata(jj).p = p; % -- particle state of all robots
     %simdata(jj).P = P; % -- covariance
     simdata(jj).vel = vel; % -- velocity values throughout the whole simulation

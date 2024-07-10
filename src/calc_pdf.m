@@ -11,17 +11,18 @@ for k=1:4
     pdata(:,k)= n/sum(n);
 end
 
-% normalize so that all values sum up to one
-
-if nargin >2 % quiet option
+if nargin >2 % verbose option
+    % normalize so that all values sum up to one
+    load colorblind_colormap.mat
     % plot everything
     gca; cla;
     for k=1:4
-        plot(x(1:end-1),pdata(:,k), 'linewidth', 2);
+        plot(x(1:end-1),pdata(:,k), 'color', ...
+            colorblind(k,:), 'linewidth', 2);
         hold on;
     end
     grid on;
-    set(gca,'ylim',[0,1])
+%     set(gca,'ylim',[0,1])
     set(gca, 'fontsize', 16);
     xlabel(xlbl)
     ylabel('p')
