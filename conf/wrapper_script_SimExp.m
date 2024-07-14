@@ -26,7 +26,7 @@ dataFolder="data/"; % this can sit outside the github
 % -- "yMyT" -> Yes Map Yes Target
 ConfigChoice={"xMxT", "xMyT",...
               "yMxT", "yMyT"};
-conds = [1, 2, 3, 4];
+conds = [1, 2, 3];
 
 
 nsims = 1; %number of simulations
