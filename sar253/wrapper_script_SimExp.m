@@ -14,7 +14,7 @@ function wrapper_script_SimExp
 addpath ../src
 ID_Data=csvread('../src/IDList_Completed.csv',1,0);
 
-dataFolder="../../simdata/"; % this can sit outside the github
+dataFolder="../../simdata-nr=2/"; % this can sit outside the github
 % https://www.dropbox.com/scl/fo/5shjyymaunngx1qepwhl3/h?rlkey=02dsr4ej3gxaswcc7fa5h6mji&dl=0
 
 % -- defining a variable to be a flag for us to easily switch
@@ -31,11 +31,11 @@ ConfigChoice={"alpha_t/TotalDist", "alpha_t/FreezeTime", ...
     "alpha_1",  "RandomWalk"};
 
 
-nsims = 100; %number of simulations
+nsims = 1; %number of simulations
 
 % say ii=3 for e.g. to run only for alpha_0
 
-for ii = 1:3%size(ConfigChoice,2)
+for ii = 1:size(ConfigChoice,2)
     
     ConfigSetup = ConfigChoice{ii};
     

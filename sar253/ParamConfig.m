@@ -12,7 +12,7 @@ param.N = 1200; % -- number of particles in the simulation
 param.nsim = 1; % -- number of simulations per combination
 param.closedloop = 1; % -- flag for enabling/disabling MI
 param.debug = 0; % -- flag for enabling/disabling debug plots
-agents = 3; % -- number of agents in the simulation including the human robot
+agents = 2; % -- number of agents in the simulation including the human robot
 param.r_visible = 1.5*ones(1,agents); % -- visible range of the robots (m), human robot has slightly higher range % 4 -> 2
 param.r_FOV = 2*pi*ones(1,agents);
 param.r_FOV(1) = 70*pi/18; % -- human robot 70*pi/180 has FOV of 70 degrees, autonomous robots have 360 degrees
@@ -30,7 +30,7 @@ param.alphaBegin = 0.25; % all 4 states set to probability 1/4
 param.tau = -1; % tau is set outside
 param.share = 1;
 param.bias = 0;
-param.agents = 3; % -- define the total number of robots to be in the domain
+param.agents = agents; % -- define the total number of robots to be in the domain
 
 [~, param.L]=robot_position(maps(1), zeros(1,2));
 
