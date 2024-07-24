@@ -59,7 +59,7 @@ conditions = ["1","2","3","4"];
 % FilterAll(ID_List, trials, conditions, ID_conditions, PartialRAW, ID_Data);
 % PlotAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 % PlotAllTurnRates(ID_List, trials, conditions, ID_conditions);
-% timeToFind(ID_List, trials, conditions, ID_conditions, ID_Data);
+timeToFind(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CompareSpeed(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CompareTurnRates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % StoreTimeSplit(ID_List, trials, conditions, ID_conditions, ID_Data);
@@ -69,7 +69,7 @@ conditions = ["1","2","3","4"];
 % timeStayingStill(ID_List, trials, conditions, ID_conditions, ID_Data)
 % DensityTrajMap(ID_List, trials, conditions, ID_conditions, ID_Data);
 % HeatMapTraj(ID_List, trials, conditions, ID_conditions, ID_Data);
-pdfSpeedAndTurnRate(ID_List, trials, conditions, ID_conditions, ID_Data);
+% pdfSpeedAndTurnRate(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
 % PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 % --- figure 3 in paper
@@ -583,7 +583,7 @@ AllTimes = zeros(size(ID_List,1), size(trials,2)+1);
 
 % -- scaling factor for condition 1
 % -- when the participant drove across the whole lab
-k_tf = 2.27;
+% k_tf = 2.27;
 
 % -- loop through every trial ran
 for TRIAL = 1:size(trials,2)
@@ -640,7 +640,7 @@ xlabel('Condition', 'fontsize', 12, 'fontweight', 'normal');
 ylabel('Time to find (s)', 'fontsize', 12, 'fontweight', 'normal');
 
 % -- save the times to find the target
-csvwrite('stats data\TimeToFind.csv', [AllTimes, ID_Data(:,3:end-1)]);
+csvwrite('../data/TimeToFind.csv', [ID_Data(:,1), AllTimes, ID_Data(:,2:end)]);
 
 end
 

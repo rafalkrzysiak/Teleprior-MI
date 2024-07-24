@@ -1,0 +1,5 @@
+jj=101; for ii in `ls FreezeTime/`
+do
+mv FreezeTime/$ii FreezeTime/$(printf "%.5d" $jj)
+jj=$(expr $jj + 1)
+done

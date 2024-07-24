@@ -198,8 +198,7 @@ for jj=1:param.nsim
     
     % beginning and ending setps for the filter
     k0 = 1;
-    %     kF = param.T;
-    
+   
     % -- NEW:
     % -- get the total time of the robot Human Subject Trial
     kF = size(Xs(1:3,:,1,1),2);
@@ -620,6 +619,11 @@ for jj=1:param.nsim
         
     end
     
+    if Which_robot > 1 && time(jj) > kF
+        keyboard
+    else
+        fprintf('comment this condition for headless run\n');
+    end
     % -- after the simulation ended, save all the data into a single struct
     % -- doing this will hold alot of rb_information in a single variable
     simdata(jj).param = param; % -- save all the parameters used in the simulation

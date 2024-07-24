@@ -42,7 +42,7 @@ conditions = {'condition_1','condition_2','condition_3','condition_4'};
 
 % -- define the mat file name used for all participants
 % change for agents and then on line 67 for location
-Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
+Matfile = "OmronLab_p=1200_nsim=1_agents=2.mat";
 [~, filename]=fileparts(Matfile);
 
 suffix=split(filename,'_');
@@ -55,23 +55,17 @@ strategies={'alpha_t/TotalDist/', 'alpha_t/FreezeTime/', ...
 
 
 % -- get the list of participants
-time2find = readtable('../data/TimeToFind.csv');
-
-% expTime = expTime(:,1:4);
+expTime = csvread('../data/TimeToFind.csv');
+expTime = expTime(:,1:4);
 % no need to scale because we are simply comparing
 % strategies
 % expTime(:,1)=expTime(:,1)/1.135; % scaling to compensate for length and obstacles
-
-% IDs = csvread('../src/IDList_Completed.csv', 1);
-% IDs = IDs(:,1);
-IDs=time2find.id;
-
-% -- adjusting for humans entering code into computer
-expTime = table2array(time2find(:,2:5));
-expTime = expTime-5;
+expTime(:,1:4) = expTime(:,1:4)-5.0; % -- adjusting for humans entering code into computer
+IDs = csvread('../src/IDList_Completed.csv', 1);
+IDs = IDs(:,1);
 
 % simulated data
-loc = "../../simdata-nr=3/";
+loc = "../../simdata-nr=2/";
 fps=2;
 csvdata=[];
 % -- begin looping through all participants and conditions ran
@@ -90,7 +84,7 @@ for ss = 1:size(strategies,2)
                 csvdata=[csvdata; ...
                     ss, rr, str2double(part(pp).name), cc, ...
                     data.simdata.Which_robot, data.simdata.time/fps,...
-                    data.simdata.success, expTime(pidx,cc), time2find.c4flag(pidx)];
+                    data.simdata.success, expTime(pidx,cc)];
                 
             end
         end
@@ -99,7 +93,7 @@ end
 T = array2table(csvdata);
 T.Properties.VariableNames = {'strategy','run','pid', ...
     'condition', 'whichrobot', ...
-    'timesec', 'success', 'expTime', 'c4flag'};
+    'timesec', 'success', 'expTime'};
 writetable(T,sprintf('performance_data_%s.csv', suffix));
 
 %csvwrite('performance_data.csv', csvdata)
@@ -549,16 +543,16 @@ data(data.success==2,:)=[];
 % if target was not found, then set the timesec as expTime
 data.timesec(data.success==0)=data.expTime(data.success==0);
 
-% for condition 4, half the time the target location was not where
-% the human was looking for initially
-% this means that for a simulation, we are simulating a weird situation
-% where the human is just going somewhere where they don't need to but the
-% autonomous robots go for the true target location
-% best to ignore such trials (meeting on 7/24/24)
-% data.timesec(data.whichrobot>1 & data.timesec>data.expTime)=...
-%     data.expTime(data.whichrobot>1 & data.timesec>data.expTime);
-data(data.condition==4 & data.c4flag==1,:)=[];
-
+% if autonomous robot takes more time than human then give it to human
+% not sure why this is happening in the simulations though!
+% because humans were told that the target is in a different location for
+% half of condition 4, they took longer to find the true target. 
+% In simulations, we are still putting the target where it is but not
+% giving this deception to autonomous robots
+% option 1) autonomous robots find the target earlier but human was
+% deceived, so 
+data.timesec(data.whichrobot>1 & data.timesec>data.expTime)=...
+    data.expTime(data.whichrobot>1 & data.timesec>data.expTime);
 
 
 % strategies
@@ -568,7 +562,7 @@ data(data.condition==4 & data.c4flag==1,:)=[];
 
 strategies_labels={'\alpha_k (distance)','\alpha_k (freezing)',...
     '\alpha_k (distance and freezing)', ...
-    '\alpha=0 (follow)', '\alpha=1 (independent)', 'random'};
+    '\alpha=0', '\alpha=1', 'random'};
 
 markers={'^m', 'sr', 'db', 'ok'};
 

@@ -19,11 +19,9 @@ diary on
 subplot(231);
 % time to find
 % hyp: time to find will depend on prior knowledge. 
-timeArray = csvread('../data/TimeToFind.csv');
-timeArray(:,1)=timeArray(:,1)/1.135; % scaling to compensate for length and obstacles
-t_time = array2table(timeArray,...
-    'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
-plot_and_stats(t_time, 1:4, xticklbl, 'Time to find (s)','(a)',[],1);
+timeArray = readtable('../data/TimeToFind.csv');
+timeArray.c1sec=timeArray.c1sec/1.135; % scaling to compensate for length and obstacles
+plot_and_stats(timeArray, 2:5, xticklbl, 'Time to find (s)','(a)',[],1);
 
 
 % Total distance traveled
@@ -311,7 +309,7 @@ box off;
 ax = gca;
 ax.FontSize = 18;
 ax.TickLabelInterpreter = 'latex';
-ax.XTickLabel = xticklbl(colidx);
+ax.XTickLabel = xticklbl(1:size(mu,2));
 if ~isempty(ylim)
     set(gca, 'ylim', ylim);
 end
