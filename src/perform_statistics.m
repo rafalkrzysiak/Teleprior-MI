@@ -16,38 +16,35 @@ if exist(dfile, 'file') ; delete(dfile); end
 diary(dfile)
 diary on
 
-subplot(231);
+subplot(221);
 % time to find
 % hyp: time to find will depend on prior knowledge. 
 timeArray = readtable('../data/TimeToFind.csv');
-timeArray.c1sec=timeArray.c1sec/1.135; % scaling to compensate for length and obstacles
-plot_and_stats(timeArray, 2:5, xticklbl, 'Time to find (s)','(a)',[],1);
+% timeArray.c1sec(1:14)=timeArray.c1sec(1:14)/2;
+% timeArray.c1sec(15:end)=timeArray.c1sec(15:end)*3/2;
+timeArray.c1sec=timeArray.c1sec/(1.135); % scaling to compensate for length and obstacles
+plot_and_stats(timeArray, 2:6, xticklbl, 'Time to find (s)','(a)',[],1);
 
 
 % Total distance traveled
-subplot(232);
+subplot(222);
 TotalDistArray = csvread('../data/TotalDistanceTravel.csv');
+% TotalDistArray(1:14,1)=TotalDistArray(1:14,1)/2;
+% TotalDistArray(15:end,1)=TotalDistArray(15:end,1)*3/2;
 TotalDistArray(:,1)=TotalDistArray(:,1)/1.135;
 t_TotalDist = array2table(TotalDistArray,...
     'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
-plot_and_stats(t_TotalDist, 1:4,  xticklbl, 'Distance travelled (m)','(b)',[], 1);
+plot_and_stats(t_TotalDist, 1:5,  xticklbl, 'Distance travelled (m)','(b)',[], 1);
 
-% Fraction time staying in place
-subplot(233);
-timeStayingInPlaceArray = csvread('../data/timeStayingInPlace.csv');
-t_timeStayingInPlace = array2table(timeStayingInPlaceArray,...
-    'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
-plot_and_stats(t_timeStayingInPlace, 1:4,  xticklbl, 'Fraction time staying in place',...
-                    '',[0,1],1);
 
 
 % Fraction time spent turning in place
-subplot(234);
+subplot(223);
 timeTurningInPlaceArray = csvread('../data/fractionTimeTurningInPlace.csv');
 %timeTurningInPlaceArray(:,1)=timeTurningInPlaceArray(:,1)/2.27; % not needed
 t_timeTurningInPlace = array2table(timeTurningInPlaceArray,...
     'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
-plot_and_stats(t_timeTurningInPlace, 1:4,  xticklbl, ...
+plot_and_stats(t_timeTurningInPlace, 1:5,  xticklbl, ...
     'Fraction of time turning in place', '(c)',[0 1], 1);
 
 
@@ -58,29 +55,44 @@ plot_and_stats(t_timeTurningInPlace, 1:4,  xticklbl, ...
 % higher stopping percentage when map is not known
 % Total time in place traveled
 TotalTimeStoppingArray = csvread('../data/timeStayingStill.csv'); 
-TotalTimeStoppingArray(:,1) = TotalTimeStoppingArray(:,1)/2.27;  % <-- Should be dvided by 2.27
+% TotalTimeStoppingArray(:,1) = TotalTimeStoppingArray(:,1)/2.27;  % <-- Should be dvided by 2.27
+TotalTimeStoppingArray(:,1) = TotalTimeStoppingArray(:,1)/1.135;  % <-- Should be dvided by 2.27
 t_TotalTimeStoppingArray = array2table(TotalTimeStoppingArray,...
     'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
 plot_and_stats(t_TotalTimeStoppingArray, 1:4,  xticklbl, ...
     'Average time spent staying still (s)', '', [], 0);
 
 % fraction
-subplot(235);
+subplot(224);
 FractionTimeStayingStillArray = csvread('../data/FractionTimeStayingStill.csv');
 t_FractionTimeStayingStillArray = array2table(FractionTimeStayingStillArray,...
     'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
-plot_and_stats(t_FractionTimeStayingStillArray, 1:4,  xticklbl,...
+plot_and_stats(t_FractionTimeStayingStillArray, 1:5,  xticklbl,...
     'Fraction of time staying still (freezing)', '(d)',[0,1],1);
 
+diary off
+
+
+figure(10); gcf; clf;
+dfile ='H1-stats.txt';
+if exist(dfile, 'file') ; delete(dfile); end
+diary(dfile)
+diary on
+% Fraction time staying in place
+subplot(121);
+timeStayingInPlaceArray = csvread('../data/timeStayingInPlace.csv');
+t_timeStayingInPlace = array2table(timeStayingInPlaceArray,...
+    'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
+plot_and_stats(t_timeStayingInPlace, 1:4,  xticklbl, 'Fraction time staying in place',...
+                    '',[0,1],1);
+
 % frequency of stops
-subplot(236);
+subplot(122);
 FreqStopsArray = csvread('../data/FreqStops.csv');
 t_FreqStopsArray = array2table(FreqStopsArray,...
     'VariableNames',{'C1','C2','C3','C4','C5'});
 plot_and_stats(t_FreqStopsArray, 1:4,  xticklbl,...
     'Frequency of stops', '',[],1);
-
-diary off
 
 %% commanded speed etc.
 figure(2); gcf; clf;
@@ -122,7 +134,7 @@ subplot(121);
 EKFSpdData = csvread('../data/RobotSpeedData.csv');
 t_EKFSpd = array2table(EKFSpdData,...
     'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
-plot_and_stats(t_EKFSpd, 1:4,  xticklbl, ...
+plot_and_stats(t_EKFSpd, 1:5,  xticklbl, ...
     'Robot speed (m/s)', '(a)', [], 1);
 set(gca, 'YLim', [0, 0.3]);
 
@@ -134,7 +146,7 @@ subplot(122);
 EKFOmegaArray = csvread('../data/RobotTurnrateData.csv');
 t_EKFOmega = array2table(EKFOmegaArray,...
     'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
-plot_and_stats(t_EKFOmega, 1:4,  xticklbl, ...
+plot_and_stats(t_EKFOmega, 1:5,  xticklbl, ...
     'Robot turn rate (rad/s)', '(b)', [],1);
 set(gca, 'YLim', [0, 1.1]);
 
@@ -249,9 +261,18 @@ ylbl={'Mental','Physical','Temporal','Performance','Effort','Frustration'};
 
 for ii=1:6
     subplot(2,3,ii)
-    plot_and_stats(array2table(NASATLXArray(refDataforc4==0,:,ii)), 1:4,  xticklbl, ...
+    % first plot for all
+    plot_and_stats(array2table(NASATLXArray(:,:,ii)), 1:4,  xticklbl, ...
         ylbl{ii}, xlbl{ii}, [0 100],1);
-%     hold on;
+    hold on;
+    % hightlight the ones that had a different target
+    muC4b=mean(NASATLXArray(refDataforc4==0,4,ii));
+    stC4b=std(NASATLXArray(refDataforc4==0,4,ii),[],1);
+    bC4b=bar(4, muC4b, 'FaceColor', ...
+                0.25*ones(1,3), 'barwidth', 0.5);
+    hold on;
+    errorbar(4, muC4b, stC4b, '.', 'color', ones(1,3)*.25);
+    set(bC4b,'FaceAlpha',0.2)        
 %     plot(4, NASATLXArray(refDataforc4==0,4,ii), 'o', 'markersize', ...
 %         12, 'color', 'k', 'markerface', ones(1,3));
 end
@@ -259,22 +280,50 @@ end
 diary off
 
 
-function plot_and_stats(data_table, colidx, xticklbl, ylbl, xlbl, ylim, disp1)
+function plot_and_stats(data_table, colidx1, xticklbl, ylbl, xlbl, ylim, disp1)
 
 fprintf('[%s] \n', ylbl);
 
+% if we are passing more than 4 columns that means the rest are only for 
+% display
+if numel(colidx1)>=4
+colidx=colidx1(1:4);
+else
+    colidx=colidx1;
+end
+
 if disp1
+
+% individual plots
 % time_bp=boxplot(table2array(t_time(:,1:4)), 'labels', {'C1','C2','C3','C4'});
+% mu=mean(table2array(data_table(:,colidx)));
 % plot(table2array(data_table(:,colidx))', '-o', 'markersize', 12, 'color', ones(1,3)*.5, 'markerface', ones(1,3)*.75);
-% boxplot(table2array(data_table(:,colidx)), 'color', ones(1,3)*.5);
+% % boxplot(table2array(data_table(:,colidx)), 'color', ones(1,3)*.5);
+% hold on;
+% plot(median(table2array(data_table(:,colidx))), 'k+', 'markersize', 16, 'linewidth', 2);
+
+% bar charts
 mu=mean(table2array(data_table(:,colidx)));
 st=std(table2array(data_table(:,colidx)),[],1);
 bar(mu, 'Facecolor', ones(1,3)*.5);
 hold on;
 errorbar(1:size(mu,2), mu, st, 'k.');
+
+% barx=1:4;
+% barw=0.5*ones(1,4);
+% barw(4)=0.25;
+% for ii =1:4
+%     bar(barx(ii), mu(ii), 'Facecolor', ones(1,3)*.5, ...
+%         'barwidth', barw(ii));
+%     hold on
+%     errorbar(barx(ii), mu(ii), st(ii), 'k.');
+% end
 % hold on;
-% plot(median(table2array(data_table(:,colidx))), 'k+', 'markersize', 16, 'linewidth', 2);
+% errorbar(1:size(mu,2), mu, st, 'k.');
+
 set(gca, 'xtick', 1:4)
+set(gca, 'xlim', [0.25, 4.75])
+grid on;
 ylabel(ylbl);
 xlabel(xlbl);
 end
@@ -288,6 +337,15 @@ if p_data < 0.05
     end
 end
 
+if numel(colidx1)>numel(colidx)
+    idx_nz=table2array(data_table(:,colidx1(end)))>0;
+    muC4b=mean(table2array(data_table(idx_nz,colidx1(end))));
+    stC4b=std(table2array(data_table(idx_nz,colidx1(end))),[],1);
+    bc4b=bar(4, muC4b, 'Facecolor', ones(1,3)*.25, 'barwidth', 0.5);
+    hold on;
+    errorbar(4, muC4b, stC4b, '.', 'color', ones(1,3)*.25);
+    set(bc4b,'FaceAlpha',0.2)
+end
 % ANOVA repeated measures
 % if numel(colidx)==4
 %     within4=array2table([1 2 3 4]', 'variablenames', {'cond'});

@@ -16,7 +16,7 @@ clear variables
 
 
 % -- plot which robot found the missing target
-plot_performance_comparison();
+plot_performance_comparison('performance_data_agents=3.csv');
 % PlotTrajTestDataSet();
 
 % -- plot all trajectories
@@ -126,7 +126,7 @@ Matfile = "OmronLab_p=1200_nsim=1_agents=2.mat";
 parentDir = "../../simdata-nr=2/alpha_t/TotalDist";
 
 % ids to plot
-ids_to_plot=1;% 9> 10
+ids_to_plot=20;% 9> 10
 
 files = dir(parentDir);
 files=files(~ismember({files.name},{'.','..', '.DS_Store'}));
@@ -532,8 +532,8 @@ end
 % 
 % end
 
-function plot_performance_comparison()
-data=readtable('performance_data_agents=3.csv');
+function plot_performance_comparison(file)
+data=readtable(file);
 
 % the way simulations are setup, if the robot that finds the target is more
 % than 0, then the robot is autonomous otherwise it is human. The human
@@ -543,6 +543,7 @@ data=readtable('performance_data_agents=3.csv');
 % further
 % data.timesec(data.successfulrobot==0)=data.expTime(data.successfulrobot==0);
 
+fprintf('total sims: %d\n', size(data,1));
 
 % remove trials where the robot went out of domain
 data(data.success==2,:)=[];
@@ -557,8 +558,13 @@ data.timesec(data.success==0)=data.expTime(data.success==0);
 % best to ignore such trials (meeting on 7/24/24)
 % data.timesec(data.whichrobot>1 & data.timesec>data.expTime)=...
 %     data.expTime(data.whichrobot>1 & data.timesec>data.expTime);
-data(data.condition==4 & data.c4flag==1,:)=[];
+idx1=data.condition==4 & data.c4flag==1;
+fprintf('Sims within yMyT where target was placed else: %d\n',sum(idx1));
+data(idx1,:)=[];
 
+% finally any that are more than expTime should be set to expTime
+data.timesec(data.whichrobot>1 & data.timesec>data.expTime)=...
+    data.expTime(data.whichrobot>1 & data.timesec>data.expTime);
 
 
 % strategies
@@ -568,7 +574,7 @@ data(data.condition==4 & data.c4flag==1,:)=[];
 
 strategies_labels={'\alpha_k (distance)','\alpha_k (freezing)',...
     '\alpha_k (distance and freezing)', ...
-    '\alpha=0 (follow)', '\alpha=1 (independent)', 'random'};
+    '\alpha=0 (only assist)', '\alpha=1 (search independently)', 'random'};
 
 markers={'^m', 'sr', 'db', 'ok'};
 
@@ -592,8 +598,13 @@ set(gca, 'ylim', [0,1]);
 set(gca, 'xtick', 0:5);
 xticklabels(strategies_labels);
 xtickangle(30);
-ylabel({'Fraction of trials where human-robot',  'team found target before single human'})
-
+if str2double(file(end-4))==3
+    ylabel({'Fraction of trials where human-robot team',...
+        'of 3 robots found target before single human'})
+else
+        ylabel({'Fraction of trials where human-robot team',...
+        'of 2 robots found target before single human'})
+end
 legend('No Map, No Target',...
     'No Map, Yes Target',...
     'Yes Map, No Target',...
@@ -612,16 +623,16 @@ for cc=1:4
     end
     errorbar((0:1:5)+cc*.15-.3, mu(cc,:), st(cc,:), markers{cc}, ...
         'MarkerFaceColor', markers{cc}(2), 'MarkerSize', 18, ...
-        'LineWidth', 2); hold on;
+        'LineWidth', 3); hold on;
     hold on;
 end
 grid on;
 set(gca,'fontsize', 24);
-set(gca, 'ylim', [0,220]);
+set(gca, 'ylim', [0,300]);
 set(gca, 'xtick', 0:5);
 xticklabels(strategies_labels);
 xtickangle(30);
-ylabel('Time to find')
+ylabel('Time to find (s)')
 
 %{
 subplot(1,3,2);

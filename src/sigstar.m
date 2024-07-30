@@ -286,7 +286,7 @@ function H=makeSignificanceBar(x,y,p)
     x=repmat(x,2,1);
     y=repmat(y,4,1);
 
-    H(1)=plot(x(:),y,'-k','LineWidth',1.5,'Tag','sigstar_bar');
+    H(1)=plot(x(:),y,'-k','LineWidth',2,'Tag','sigstar_bar');
 
     %Increase offset between line and text if we will print "n.s."
     %instead of a star. 
@@ -300,7 +300,7 @@ function H=makeSignificanceBar(x,y,p)
     H(2)=text(mean(x(:)),starY,stars,...
         'HorizontalAlignment','Center',...
         'BackGroundColor','none',...
-        'Tag','sigstar_stars');
+        'Tag','sigstar_stars', 'fontsize', 24);
 
     Y=ylim;
     if Y(2)<starY

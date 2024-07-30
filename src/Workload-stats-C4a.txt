@@ -4,47 +4,47 @@ tbl_data =
 
   4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
 
-  Columns 1 through 2
+  Columns 1 through 3
 
-    {'Source' }    {'SS'     }
-    {'Columns'}    {[23.1333]}
-    {'Error'  }    {[41.8667]}
-    {'Total'  }    {[     65]}
+    {'Source' }    {'SS'      }    {'df' }
+    {'Columns'}    {[ 17.4655]}    {[  3]}
+    {'Error'  }    {[101.5345]}    {[ 84]}
+    {'Total'  }    {[     119]}    {[115]}
 
-  Columns 3 through 4
+  Columns 4 through 5
 
-    {'df'}    {'MS'      }
-    {[ 3]}    {[  7.7111]}
-    {[42]}    {[  0.9968]}
-    {[59]}    {0×0 double}
+    {'MS'      }    {'Chi-sq'  }
+    {[  5.8218]}    {[ 12.7689]}
+    {[  1.2087]}    {0×0 double}
+    {0×0 double}    {0×0 double}
 
-  Columns 5 through 6
+  Column 6
 
-    {'Chi-sq'  }    {'Prob>Chi-sq'}
-    {[ 16.0154]}    {[     0.0011]}
-    {0×0 double}    {0×0 double   }
-    {0×0 double}    {0×0 double   }
+    {'Prob>Chi-sq'}
+    {[     0.0052]}
+    {0×0 double   }
+    {0×0 double   }
 
 
 res_data =
 
-  Columns 1 through 3
+  Columns 1 through 4
 
-    1.0000    2.0000   -0.0911
-    1.0000    3.0000   -0.3578
-    1.0000    4.0000    0.5755
-    2.0000    3.0000   -1.4245
-    2.0000    4.0000   -0.4911
-    3.0000    4.0000   -0.2245
+    1.0000    2.0000    0.1725    0.9828
+    1.0000    3.0000   -0.0689    0.7414
+    1.0000    4.0000    0.0862    0.8966
+    2.0000    3.0000   -1.0517   -0.2414
+    2.0000    4.0000   -0.8965   -0.0862
+    3.0000    4.0000   -0.6551    0.1552
 
-  Columns 4 through 6
+  Columns 5 through 6
 
-    1.0667    2.2245    0.0904
-    0.8000    1.9578    0.4099
-    1.7333    2.8911    0.0005
-   -0.2667    0.8911    1.0000
-    0.6667    1.8245    0.7724
-    0.9333    2.0911    0.2006
+    1.7931    0.0083
+    1.5517    0.0947
+    1.7069    0.0211
+    0.5689    1.0000
+    0.7241    1.0000
+    0.9655    1.0000
 
 [Physical] 
 
@@ -52,47 +52,47 @@ tbl_data =
 
   4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
 
-  Columns 1 through 2
+  Columns 1 through 3
 
-    {'Source' }    {'SS'     }
-    {'Columns'}    {[11.2333]}
-    {'Error'  }    {[34.7667]}
-    {'Total'  }    {[     46]}
+    {'Source' }    {'SS'     }    {'df' }
+    {'Columns'}    {[ 8.6379]}    {[  3]}
+    {'Error'  }    {[54.3621]}    {[ 84]}
+    {'Total'  }    {[     63]}    {[115]}
 
-  Columns 3 through 4
+  Columns 4 through 5
 
-    {'df'}    {'MS'      }
-    {[ 3]}    {[  3.7444]}
-    {[42]}    {[  0.8278]}
-    {[59]}    {0×0 double}
+    {'MS'      }    {'Chi-sq'  }
+    {[  2.8793]}    {[ 11.9286]}
+    {[  0.6472]}    {0×0 double}
+    {0×0 double}    {0×0 double}
 
-  Columns 5 through 6
+  Column 6
 
-    {'Chi-sq'  }    {'Prob>Chi-sq'}
-    {[ 10.9891]}    {[     0.0118]}
-    {0×0 double}    {0×0 double   }
-    {0×0 double}    {0×0 double   }
+    {'Prob>Chi-sq'}
+    {[     0.0076]}
+    {0×0 double   }
+    {0×0 double   }
 
 
 res_data =
 
-  Columns 1 through 3
+  Columns 1 through 4
 
-    1.0000    2.0000   -0.1407
-    1.0000    3.0000   -0.7407
-    1.0000    4.0000    0.0927
-    2.0000    3.0000   -1.5740
-    2.0000    4.0000   -0.7407
-    3.0000    4.0000   -0.1407
+    1.0000    2.0000    0.1173    0.7069
+    1.0000    3.0000   -0.2448    0.3448
+    1.0000    4.0000    0.0139    0.6034
+    2.0000    3.0000   -0.9517   -0.3621
+    2.0000    4.0000   -0.6930   -0.1034
+    3.0000    4.0000   -0.3310    0.2586
 
-  Columns 4 through 6
+  Columns 5 through 6
 
-    0.8333    1.8073    0.1440
-    0.2333    1.2073    1.0000
-    1.0667    2.0407    0.0232
-   -0.6000    0.3740    0.6247
-    0.2333    1.2073    1.0000
-    0.8333    1.8073    0.1440
+    1.2965    0.0094
+    0.9344    0.7369
+    1.1930    0.0416
+    0.2275    0.6312
+    0.4861    1.0000
+    0.8482    1.0000
 
 [Temporal] 
 
@@ -100,47 +100,47 @@ tbl_data =
 
   4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
 
-  Columns 1 through 2
+  Columns 1 through 3
 
-    {'Source' }    {'SS'     }
-    {'Columns'}    {[11.7667]}
-    {'Error'  }    {[46.7333]}
-    {'Total'  }    {[58.5000]}
+    {'Source' }    {'SS'      }    {'df' }
+    {'Columns'}    {[ 10.5000]}    {[  3]}
+    {'Error'  }    {[     105]}    {[ 84]}
+    {'Total'  }    {[115.5000]}    {[115]}
 
-  Columns 3 through 4
+  Columns 4 through 5
 
-    {'df'}    {'MS'      }
-    {[ 3]}    {[  3.9222]}
-    {[42]}    {[  1.1127]}
-    {[59]}    {0×0 double}
+    {'MS'      }    {'Chi-sq'  }
+    {[  3.5000]}    {[  7.9091]}
+    {[  1.2500]}    {0×0 double}
+    {0×0 double}    {0×0 double}
 
-  Columns 5 through 6
+  Column 6
 
-    {'Chi-sq'  }    {'Prob>Chi-sq'}
-    {[  9.0513]}    {[     0.0286]}
-    {0×0 double}    {0×0 double   }
-    {0×0 double}    {0×0 double   }
+    {'Prob>Chi-sq'}
+    {[     0.0479]}
+    {0×0 double   }
+    {0×0 double   }
 
 
 res_data =
 
-  Columns 1 through 3
+  Columns 1 through 4
 
-    1.0000    2.0000   -0.8317
-    1.0000    3.0000   -0.3984
-    1.0000    4.0000    0.0683
-    2.0000    3.0000   -0.6651
-    2.0000    4.0000   -0.1984
-    3.0000    4.0000   -0.6317
+    1.0000    2.0000   -0.1604    0.6379
+    1.0000    3.0000   -0.1086    0.6897
+    1.0000    4.0000   -0.0569    0.7414
+    2.0000    3.0000   -0.7466    0.0517
+    2.0000    4.0000   -0.6948    0.1034
+    3.0000    4.0000   -0.7466    0.0517
 
-  Columns 4 through 6
+  Columns 5 through 6
 
-    0.2667    1.3651    1.0000
-    0.7000    1.7984    0.5562
-    1.1667    2.2651    0.0304
-    0.4333    1.5317    1.0000
-    0.9000    1.9984    0.1838
-    0.4667    1.5651    1.0000
+    1.4362    0.2100
+    1.4880    0.1359
+    1.5397    0.0857
+    0.8500    1.0000
+    0.9017    1.0000
+    0.8500    1.0000
 
 [Performance] 
 
@@ -148,47 +148,26 @@ tbl_data =
 
   4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
 
-  Columns 1 through 2
-
-    {'Source' }    {'SS'     }
-    {'Columns'}    {[ 6.4333]}
-    {'Error'  }    {[29.5667]}
-    {'Total'  }    {[     36]}
-
-  Columns 3 through 4
-
-    {'df'}    {'MS'      }
-    {[ 3]}    {[  2.1444]}
-    {[42]}    {[  0.7040]}
-    {[59]}    {0×0 double}
-
-  Columns 5 through 6
-
-    {'Chi-sq'  }    {'Prob>Chi-sq'}
-    {[  8.0417]}    {[     0.0452]}
-    {0×0 double}    {0×0 double   }
-    {0×0 double}    {0×0 double   }
-
-
-res_data =
-
   Columns 1 through 3
 
-    1.0000    2.0000   -0.3617
-    1.0000    3.0000   -0.8950
-    1.0000    4.0000   -0.1283
-    2.0000    3.0000   -1.3950
-    2.0000    4.0000   -0.6283
-    3.0000    4.0000   -0.0950
+    {'Source' }    {'SS'     }    {'df' }
+    {'Columns'}    {[ 5.0517]}    {[  3]}
+    {'Error'  }    {[60.4483]}    {[ 84]}
+    {'Total'  }    {[65.5000]}    {[115]}
 
-  Columns 4 through 6
+  Columns 4 through 5
 
-    0.5000    1.3617    0.7547
-   -0.0333    0.8283    1.0000
-    0.7333    1.5950    0.1485
-   -0.5333    0.3283    0.6148
-    0.2333    1.0950    1.0000
-    0.7667    1.6283    0.1134
+    {'MS'      }    {'Chi-sq'  }
+    {[  1.6839]}    {[  6.7099]}
+    {[  0.7196]}    {0×0 double}
+    {0×0 double}    {0×0 double}
+
+  Column 6
+
+    {'Prob>Chi-sq'}
+    {[     0.0817]}
+    {0×0 double   }
+    {0×0 double   }
 
 [Effort] 
 
@@ -196,47 +175,47 @@ tbl_data =
 
   4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
 
-  Columns 1 through 2
+  Columns 1 through 3
 
-    {'Source' }    {'SS'     }
-    {'Columns'}    {[24.3333]}
-    {'Error'  }    {[35.6667]}
-    {'Total'  }    {[     60]}
+    {'Source' }    {'SS'     }    {'df' }
+    {'Columns'}    {[27.6379]}    {[  3]}
+    {'Error'  }    {[90.3621]}    {[ 84]}
+    {'Total'  }    {[    118]}    {[115]}
 
-  Columns 3 through 4
+  Columns 4 through 5
 
-    {'df'}    {'MS'      }
-    {[ 3]}    {[  8.1111]}
-    {[42]}    {[  0.8492]}
-    {[59]}    {0×0 double}
+    {'MS'      }    {'Chi-sq'  }
+    {[  9.2126]}    {[ 20.3771]}
+    {[  1.0757]}    {0×0 double}
+    {0×0 double}    {0×0 double}
 
-  Columns 5 through 6
+  Column 6
 
-    {'Chi-sq'  }    {'Prob>Chi-sq'}
-    {[ 18.2500]}    {[ 3.9060e-04]}
-    {0×0 double}    {0×0 double   }
-    {0×0 double}    {0×0 double   }
+    {'Prob>Chi-sq'}
+    {[ 1.4178e-04]}
+    {0×0 double   }
+    {0×0 double   }
 
 
 res_data =
 
-  Columns 1 through 3
+  Columns 1 through 4
 
-    1.0000    2.0000    0.1543
-    1.0000    3.0000    0.0209
-    1.0000    4.0000    0.6209
-    2.0000    3.0000   -1.2457
-    2.0000    4.0000   -0.6457
-    3.0000    4.0000   -0.5124
+    1.0000    2.0000    0.4172    1.2241
+    1.0000    3.0000    0.3310    1.1379
+    1.0000    4.0000    0.1414    0.9483
+    2.0000    3.0000   -0.8931   -0.0862
+    2.0000    4.0000   -1.0828   -0.2759
+    3.0000    4.0000   -0.9965   -0.1897
 
-  Columns 4 through 6
+  Columns 5 through 6
 
-    1.2667    2.3791    0.0160
-    1.1333    2.2457    0.0431
-    1.7333    2.8457    0.0002
-   -0.1333    0.9791    1.0000
-    0.4667    1.5791    1.0000
-    0.6000    1.7124    0.9284
+    2.0310    0.0004
+    1.9448    0.0012
+    1.7552    0.0116
+    0.7207    1.0000
+    0.5310    1.0000
+    0.6172    1.0000
 
 [Frustration] 
 
@@ -244,24 +223,45 @@ tbl_data =
 
   4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
 
-  Columns 1 through 2
+  Columns 1 through 3
 
-    {'Source' }    {'SS'     }
-    {'Columns'}    {[ 7.1000]}
-    {'Error'  }    {[40.4000]}
-    {'Total'  }    {[47.5000]}
+    {'Source' }    {'SS'     }    {'df' }
+    {'Columns'}    {[15.7414]}    {[  3]}
+    {'Error'  }    {[88.2586]}    {[ 84]}
+    {'Total'  }    {[    104]}    {[115]}
 
-  Columns 3 through 4
+  Columns 4 through 5
 
-    {'df'}    {'MS'      }
-    {[ 3]}    {[  2.3667]}
-    {[42]}    {[  0.9619]}
-    {[59]}    {0×0 double}
+    {'MS'      }    {'Chi-sq'  }
+    {[  5.2471]}    {[ 13.1683]}
+    {[  1.0507]}    {0×0 double}
+    {0×0 double}    {0×0 double}
+
+  Column 6
+
+    {'Prob>Chi-sq'}
+    {[     0.0043]}
+    {0×0 double   }
+    {0×0 double   }
+
+
+res_data =
+
+  Columns 1 through 4
+
+    1.0000    2.0000    0.1908    0.9483
+    1.0000    3.0000   -0.0851    0.6724
+    1.0000    4.0000   -0.5161    0.2414
+    2.0000    3.0000   -1.0334   -0.2759
+    2.0000    4.0000   -1.4644   -0.7069
+    3.0000    4.0000   -1.1885   -0.4310
 
   Columns 5 through 6
 
-    {'Chi-sq'  }    {'Prob>Chi-sq'}
-    {[  6.7263]}    {[     0.0812]}
-    {0×0 double}    {0×0 double   }
-    {0×0 double}    {0×0 double   }
+    1.7058    0.0057
+    1.4299    0.1151
+    0.9989    1.0000
+    0.4817    1.0000
+    0.0506    0.0829
+    0.3265    0.7998
 

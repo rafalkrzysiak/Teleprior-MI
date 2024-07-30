@@ -1,99 +1,3 @@
-[Time to find (s)] 
-
-tbl_data =
-
-  4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
-
-  Columns 1 through 2
-
-    {'Source' }    {'SS'      }
-    {'Columns'}    {[105.1379]}
-    {'Error'  }    {[ 39.8621]}
-    {'Total'  }    {[145.0000]}
-
-  Columns 3 through 4
-
-    {'df' }    {'MS'      }
-    {[  3]}    {[ 35.0460]}
-    {[ 84]}    {[  0.4745]}
-    {[115]}    {0×0 double}
-
-  Columns 5 through 6
-
-    {'Chi-sq'  }    {'Prob>Chi-sq'}
-    {[ 63.0828]}    {[ 1.2894e-13]}
-    {0×0 double}    {0×0 double   }
-    {0×0 double}    {0×0 double   }
-
-
-res_data =
-
-  Columns 1 through 3
-
-    1.0000    2.0000    0.8987
-    1.0000    3.0000    0.1745
-    1.0000    4.0000    1.6918
-    2.0000    3.0000   -1.6186
-    2.0000    4.0000   -0.1013
-    3.0000    4.0000    0.6228
-
-  Columns 4 through 6
-
-    1.7931    2.6876    0.0000
-    1.0690    1.9634    0.0097
-    2.5862    3.4807    0.0000
-   -0.7241    0.1703    0.1961
-    0.7931    1.6876    0.1159
-    1.5172    2.4117    0.0000
-
-[Distance travelled (m)] 
-
-tbl_data =
-
-  4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
-
-  Columns 1 through 2
-
-    {'Source' }    {'SS'      }
-    {'Columns'}    {[      81]}
-    {'Error'  }    {[ 64.0000]}
-    {'Total'  }    {[145.0000]}
-
-  Columns 3 through 4
-
-    {'df' }    {'MS'      }
-    {[  3]}    {[      27]}
-    {[ 84]}    {[  0.7619]}
-    {[115]}    {0×0 double}
-
-  Columns 5 through 6
-
-    {'Chi-sq'  }    {'Prob>Chi-sq'}
-    {[ 48.6000]}    {[ 1.5870e-10]}
-    {0×0 double}    {0×0 double   }
-    {0×0 double}    {0×0 double   }
-
-
-res_data =
-
-  Columns 1 through 3
-
-    1.0000    2.0000    0.7262
-    1.0000    3.0000    0.0021
-    1.0000    4.0000    1.3469
-    2.0000    3.0000   -1.6186
-    2.0000    4.0000   -0.2738
-    3.0000    4.0000    0.4504
-
-  Columns 4 through 6
-
-    1.6207    2.5151    0.0000
-    0.8966    1.7910    0.0491
-    2.2414    3.1358    0.0000
-   -0.7241    0.1703    0.1961
-    0.6207    1.5151    0.4028
-    1.3448    2.2393    0.0004
-
 [Fraction time staying in place] 
 
 tbl_data =
@@ -124,146 +28,23 @@ tbl_data =
 
 res_data =
 
-  Columns 1 through 3
+  Columns 1 through 4
 
-    1.0000    2.0000   -0.5151
-    1.0000    3.0000   -0.6186
-    1.0000    4.0000    0.1745
-    2.0000    3.0000   -0.9979
-    2.0000    4.0000   -0.2048
-    3.0000    4.0000   -0.1013
-
-  Columns 4 through 6
-
-    0.3793    1.2738    1.0000
-    0.2759    1.1703    1.0000
-    1.0690    1.9634    0.0097
-   -0.1034    0.7910    1.0000
-    0.6897    1.5841    0.2516
-    0.7931    1.6876    0.1159
-
-[Fraction of time turning in place] 
-
-tbl_data =
-
-  4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
-
-  Columns 1 through 2
-
-    {'Source' }    {'SS'      }
-    {'Columns'}    {[  4.4483]}
-    {'Error'  }    {[140.5517]}
-    {'Total'  }    {[     145]}
-
-  Columns 3 through 4
-
-    {'df' }    {'MS'      }
-    {[  3]}    {[  1.4828]}
-    {[ 84]}    {[  1.6732]}
-    {[115]}    {0×0 double}
+    1.0000    2.0000   -0.5151    0.3793
+    1.0000    3.0000   -0.6186    0.2759
+    1.0000    4.0000    0.1745    1.0690
+    2.0000    3.0000   -0.9979   -0.1034
+    2.0000    4.0000   -0.2048    0.6897
+    3.0000    4.0000   -0.1013    0.7931
 
   Columns 5 through 6
 
-    {'Chi-sq'  }    {'Prob>Chi-sq'}
-    {[  2.6690]}    {[     0.4455]}
-    {0×0 double}    {0×0 double   }
-    {0×0 double}    {0×0 double   }
-
-[Average time spent staying still (s)] 
-
-tbl_data =
-
-  4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
-
-  Columns 1 through 2
-
-    {'Source' }    {'SS'     }
-    {'Columns'}    {[50.9310]}
-    {'Error'  }    {[94.0690]}
-    {'Total'  }    {[    145]}
-
-  Columns 3 through 4
-
-    {'df' }    {'MS'      }
-    {[  3]}    {[ 16.9770]}
-    {[ 84]}    {[  1.1199]}
-    {[115]}    {0×0 double}
-
-  Columns 5 through 6
-
-    {'Chi-sq'  }    {'Prob>Chi-sq'}
-    {[ 30.5586]}    {[ 1.0528e-06]}
-    {0×0 double}    {0×0 double   }
-    {0×0 double}    {0×0 double   }
-
-
-res_data =
-
-  Columns 1 through 3
-
-    1.0000    2.0000   -0.0324
-    1.0000    3.0000   -0.5496
-    1.0000    4.0000    0.8642
-    2.0000    3.0000   -1.4117
-    2.0000    4.0000    0.0021
-    3.0000    4.0000    0.5193
-
-  Columns 4 through 6
-
-    0.8621    1.7565    0.0660
-    0.3448    1.2393    1.0000
-    1.7586    2.6531    0.0000
-   -0.5172    0.3772    0.7626
-    0.8966    1.7910    0.0491
-    1.4138    2.3082    0.0002
-
-[Fraction of time staying still (freezing)] 
-
-tbl_data =
-
-  4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
-
-  Columns 1 through 2
-
-    {'Source' }    {'SS'     }
-    {'Columns'}    {[31.0000]}
-    {'Error'  }    {[    114]}
-    {'Total'  }    {[    145]}
-
-  Columns 3 through 4
-
-    {'df' }    {'MS'      }
-    {[  3]}    {[ 10.3333]}
-    {[ 84]}    {[  1.3571]}
-    {[115]}    {0×0 double}
-
-  Columns 5 through 6
-
-    {'Chi-sq'  }    {'Prob>Chi-sq'}
-    {[ 18.6000]}    {[ 3.3072e-04]}
-    {0×0 double}    {0×0 double   }
-    {0×0 double}    {0×0 double   }
-
-
-res_data =
-
-  Columns 1 through 3
-
-    1.0000    2.0000   -0.3427
-    1.0000    3.0000   -0.2048
-    1.0000    4.0000    0.5538
-    2.0000    3.0000   -0.7565
-    2.0000    4.0000    0.0021
-    3.0000    4.0000   -0.1358
-
-  Columns 4 through 6
-
-    0.5517    1.4462    0.6220
-    0.6897    1.5841    0.2516
-    1.4483    2.3427    0.0001
-    0.1379    1.0324    1.0000
-    0.8966    1.7910    0.0491
-    0.7586    1.6531    0.1515
+    1.2738    1.0000
+    1.1703    1.0000
+    1.9634    0.0097
+    0.7910    1.0000
+    1.5841    0.2516
+    1.6876    0.1159
 
 [Frequency of stops] 
 
@@ -291,4 +72,100 @@ tbl_data =
     {[  6.5586]}    {[     0.0874]}
     {0×0 double}    {0×0 double   }
     {0×0 double}    {0×0 double   }
+
+[Robot speed (m/s)] 
+
+tbl_data =
+
+  4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
+
+  Columns 1 through 2
+
+    {'Source' }    {'SS'      }
+    {'Columns'}    {[ 37.9655]}
+    {'Error'  }    {[107.0345]}
+    {'Total'  }    {[     145]}
+
+  Columns 3 through 4
+
+    {'df' }    {'MS'      }
+    {[  3]}    {[ 12.6552]}
+    {[ 84]}    {[  1.2742]}
+    {[115]}    {0×0 double}
+
+  Columns 5 through 6
+
+    {'Chi-sq'  }    {'Prob>Chi-sq'}
+    {[ 22.7793]}    {[ 4.4894e-05]}
+    {0×0 double}    {0×0 double   }
+    {0×0 double}    {0×0 double   }
+
+
+res_data =
+
+  Columns 1 through 4
+
+    1.0000    2.0000   -1.8255   -0.9310
+    1.0000    3.0000   -1.3772   -0.4828
+    1.0000    4.0000   -2.4462   -1.5517
+    2.0000    3.0000   -0.4462    0.4483
+    2.0000    4.0000   -1.5151   -0.6207
+    3.0000    4.0000   -1.9634   -1.0690
+
+  Columns 5 through 6
+
+   -0.0366    0.0362
+    0.4117    0.9268
+   -0.6573    0.0000
+    1.3427    1.0000
+    0.2738    0.4028
+   -0.1745    0.0097
+
+[Robot turn rate (rad/s)] 
+
+tbl_data =
+
+  4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
+
+  Columns 1 through 2
+
+    {'Source' }    {'SS'      }
+    {'Columns'}    {[ 17.6897]}
+    {'Error'  }    {[127.3103]}
+    {'Total'  }    {[     145]}
+
+  Columns 3 through 4
+
+    {'df' }    {'MS'      }
+    {[  3]}    {[  5.8966]}
+    {[ 84]}    {[  1.5156]}
+    {[115]}    {0×0 double}
+
+  Columns 5 through 6
+
+    {'Chi-sq'  }    {'Prob>Chi-sq'}
+    {[ 10.6138]}    {[     0.0140]}
+    {0×0 double}    {0×0 double   }
+    {0×0 double}    {0×0 double   }
+
+
+res_data =
+
+  Columns 1 through 4
+
+    1.0000    2.0000   -0.7910    0.1034
+    1.0000    3.0000   -1.4807   -0.5862
+    1.0000    4.0000   -1.7220   -0.8276
+    2.0000    3.0000   -1.5841   -0.6897
+    2.0000    4.0000   -1.8255   -0.9310
+    3.0000    4.0000   -1.1358   -0.2414
+
+  Columns 5 through 6
+
+    0.9979    1.0000
+    0.3082    0.5028
+    0.0669    0.0879
+    0.2048    0.2516
+   -0.0366    0.0362
+    0.6531    1.0000
 
