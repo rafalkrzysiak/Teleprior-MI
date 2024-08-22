@@ -19,6 +19,7 @@ features={'speed', 'distance', 'turn rate', 'freezing'};
 obsvTime=5:5:30;
 % obsvTime=15;
 % obsvTime=20;
+jointpdf=0;
 
 kldist14=zeros(numel(obsvTime),4);
 wsdist14=zeros(numel(obsvTime),4);
@@ -63,7 +64,7 @@ for ii=1:numel(obsvTime)
         'time staying still (fraction)', conditions);
     [kldist14(ii,4), wsdist14(ii,4)]=calc_pdf_dist(p_frz, x_frz);
     
-    if obsvTime(ii)==15
+    if obsvTime(ii)==15 && jointpdf==1
         [p_dist_frz, x_dist, x_frz]=calc_pdf_2D(dstr_dist, dstr_freeze, ...
                                     '', conditions);
     end

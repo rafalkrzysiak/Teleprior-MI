@@ -59,7 +59,7 @@ conditions = ["1","2","3","4"];
 % FilterAll(ID_List, trials, conditions, ID_conditions, PartialRAW, ID_Data);
 % PlotAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 % PlotAllTurnRates(ID_List, trials, conditions, ID_conditions);
-timeToFind(ID_List, trials, conditions, ID_conditions, ID_Data);
+% timeToFind(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CompareSpeed(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CompareTurnRates(ID_List, trials, conditions, ID_conditions, ID_Data);
 % StoreTimeSplit(ID_List, trials, conditions, ID_conditions, ID_Data);
@@ -73,7 +73,7 @@ timeToFind(ID_List, trials, conditions, ID_conditions, ID_Data);
 % CommandedAcceleration(ID_List, trials, conditions, ID_conditions, ID_Data);
 % PlotTrajectoryWithAllInfo(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 % --- figure 3 in paper
-% PlotTrajectoryWithAllInfo_robot_movement(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
+PlotTrajectoryWithAllInfo_robot_movement(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 % get_distance_from_target(ID_List, trials, conditions, ID_conditions, ID_Data); % -- function used at the end to display everything for individual participants
 % SaveAllSpeeds(ID_List, trials, conditions, ID_conditions, ID_Data);
 % SaveAllTurnrates(ID_List, trials, conditions, ID_conditions, ID_Data);
@@ -614,6 +614,9 @@ for TRIAL = 1:size(trials,2)
             % -- looking at only those who have been given incorrect target
             % -- location information
             if ID_Data(ID, 2)
+                % ** meaning the last column stores the extra time
+                % taken to end the trial if we want time for the whole
+                % trial we should add the two
                 AllTimes(ID,TRIAL+1) = time(end) - time(ID_Data(ID, end));
             end
         else
@@ -893,7 +896,7 @@ for TRIAL = 4:size(conditions,2)
 
             % -- looking at only the participants that were given incorrect
             % -- target location information
-            if ID_Data(ID, 2)
+            if ID_Data(ID, 2) % the second column is 1 if target was inaccurate
                 
                 % -- When we give incorrect target location information to
                 % -- the participants, we place the target in the opposite X
@@ -1577,10 +1580,10 @@ end
 MaxSpeed = 0.65;
 MaxTurnRate = 3.5;
 
-cond_label={'\begin{tabular}{c}No Map \\ No Target (C1)\end{tabular}',...
-                 '\begin{tabular}{c}No Map \\ Yes Target (C2)\end{tabular}',...
-                 '\begin{tabular}{c}Yes Map \\ No Target (C3)\end{tabular}',...
-                 '\begin{tabular}{c}Yes Map \\ Yes Target (C4)\end{tabular}'};
+cond_label={'\begin{tabular}{c}No Map \\ No Target\end{tabular}',...
+                 '\begin{tabular}{c}No Map \\ Yes Target\end{tabular}',...
+                 '\begin{tabular}{c}Yes Map \\ No Target\end{tabular}',...
+                 '\begin{tabular}{c}Yes Map \\ Yes Target\end{tabular}'};
 
 for ii = 5:5
     
@@ -2101,6 +2104,8 @@ for ii = 1:size(ID_Data, 1)
             % -- check if inaccurate
             if ID_Data(ii, 2) % it was inaccurate
                 % store the last n frames into a separate condition
+                % this means that the fifth column only stores data for the
+                % yMyT_I2 portion
                 RobotSpeed(ii, Condition+1) = mean(U_EKF(ID_Data(ii, end): end));
                 CommandedSpeed(ii, Condition+1) = mean(U_com(5*ID_Data(ii, end): end));
                 diff_CommandedSpeed=[0; diff(U_com(5*ID_Data(ii, end): end))];

@@ -8,7 +8,8 @@ xticklbl={'\begin{tabular}{c} No Map \\ No Target\end{tabular}',...
                  '\begin{tabular}{c} Yes Map \\ No Target\end{tabular}',...
                  '\begin{tabular}{c} Yes Map \\ Yes Target\end{tabular}'};
 
-
+% xticklbl={'No Map\\ No Target','No Map, Yes Target',...
+%           'Yes Map, No Target','Yes Map, Yes Target'};
 %% Time to find etc.
 figure(1); gcf; clf;
 dfile ='H1-stats.txt';
@@ -16,18 +17,18 @@ if exist(dfile, 'file') ; delete(dfile); end
 diary(dfile)
 diary on
 
-subplot(221);
+subplot(121);
 % time to find
 % hyp: time to find will depend on prior knowledge. 
 timeArray = readtable('../data/TimeToFind.csv');
 % timeArray.c1sec(1:14)=timeArray.c1sec(1:14)/2;
 % timeArray.c1sec(15:end)=timeArray.c1sec(15:end)*3/2;
-timeArray.c1sec=timeArray.c1sec/(1.135); % scaling to compensate for length and obstacles
+timeArray.c1sec=timeArray.c1sec/(1.135); % scaling to compensate for obstacles
 plot_and_stats(timeArray, 2:6, xticklbl, 'Time to find (s)','(a)',[],1);
 
 
 % Total distance traveled
-subplot(222);
+subplot(122);
 TotalDistArray = csvread('../data/TotalDistanceTravel.csv');
 % TotalDistArray(1:14,1)=TotalDistArray(1:14,1)/2;
 % TotalDistArray(15:end,1)=TotalDistArray(15:end,1)*3/2;
@@ -36,63 +37,6 @@ t_TotalDist = array2table(TotalDistArray,...
     'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
 plot_and_stats(t_TotalDist, 1:5,  xticklbl, 'Distance travelled (m)','(b)',[], 1);
 
-
-
-% Fraction time spent turning in place
-subplot(223);
-timeTurningInPlaceArray = csvread('../data/fractionTimeTurningInPlace.csv');
-%timeTurningInPlaceArray(:,1)=timeTurningInPlaceArray(:,1)/2.27; % not needed
-t_timeTurningInPlace = array2table(timeTurningInPlaceArray,...
-    'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
-plot_and_stats(t_timeTurningInPlace, 1:5,  xticklbl, ...
-    'Fraction of time turning in place', '(c)',[0 1], 1);
-
-
-
-
-% Fraction time staying still
-% hyp: stopping percentage will depend on prior knowledge. 
-% higher stopping percentage when map is not known
-% Total time in place traveled
-TotalTimeStoppingArray = csvread('../data/timeStayingStill.csv'); 
-% TotalTimeStoppingArray(:,1) = TotalTimeStoppingArray(:,1)/2.27;  % <-- Should be dvided by 2.27
-TotalTimeStoppingArray(:,1) = TotalTimeStoppingArray(:,1)/1.135;  % <-- Should be dvided by 2.27
-t_TotalTimeStoppingArray = array2table(TotalTimeStoppingArray,...
-    'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
-plot_and_stats(t_TotalTimeStoppingArray, 1:4,  xticklbl, ...
-    'Average time spent staying still (s)', '', [], 0);
-
-% fraction
-subplot(224);
-FractionTimeStayingStillArray = csvread('../data/FractionTimeStayingStill.csv');
-t_FractionTimeStayingStillArray = array2table(FractionTimeStayingStillArray,...
-    'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
-plot_and_stats(t_FractionTimeStayingStillArray, 1:5,  xticklbl,...
-    'Fraction of time staying still (freezing)', '(d)',[0,1],1);
-
-diary off
-
-
-figure(10); gcf; clf;
-dfile ='H1-stats.txt';
-if exist(dfile, 'file') ; delete(dfile); end
-diary(dfile)
-diary on
-% Fraction time staying in place
-subplot(121);
-timeStayingInPlaceArray = csvread('../data/timeStayingInPlace.csv');
-t_timeStayingInPlace = array2table(timeStayingInPlaceArray,...
-    'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
-plot_and_stats(t_timeStayingInPlace, 1:4,  xticklbl, 'Fraction time staying in place',...
-                    '',[0,1],1);
-
-% frequency of stops
-subplot(122);
-FreqStopsArray = csvread('../data/FreqStops.csv');
-t_FreqStopsArray = array2table(FreqStopsArray,...
-    'VariableNames',{'C1','C2','C3','C4','C5'});
-plot_and_stats(t_FreqStopsArray, 1:4,  xticklbl,...
-    'Frequency of stops', '',[],1);
 
 %% commanded speed etc.
 figure(2); gcf; clf;
@@ -126,8 +70,62 @@ set(gca, 'YLim', [0, 1/2]);
 
 %% robot speed
 figure(3); gcf; clf;
-% Robot speed
+% Fraction time spent turning in place
+subplot(221);
+timeTurningInPlaceArray = csvread('../data/fractionTimeTurningInPlace.csv');
+%timeTurningInPlaceArray(:,1)=timeTurningInPlaceArray(:,1)/2.27; % not needed
+t_timeTurningInPlace = array2table(timeTurningInPlaceArray,...
+    'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
+plot_and_stats(t_timeTurningInPlace, 1:5,  xticklbl, ...
+    'Fraction of time turning in place', '(a)',[0 1], 1);
+
+% Fraction time staying still
+% hyp: stopping percentage will depend on prior knowledge. 
+% higher stopping percentage when map is not known
+% Total time in place traveled
+TotalTimeStoppingArray = csvread('../data/timeStayingStill.csv'); 
+% TotalTimeStoppingArray(:,1) = TotalTimeStoppingArray(:,1)/2.27;  % <-- Should be dvided by 2.27
+TotalTimeStoppingArray(:,1) = TotalTimeStoppingArray(:,1)/1.135;  % <-- Should be dvided by 2.27
+t_TotalTimeStoppingArray = array2table(TotalTimeStoppingArray,...
+    'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
+plot_and_stats(t_TotalTimeStoppingArray, 1:4,  xticklbl, ...
+    'Average time spent staying still (s)', '', [], 0);
+
+% fraction
+subplot(222);
+FractionTimeStayingStillArray = csvread('../data/FractionTimeStayingStill.csv');
+t_FractionTimeStayingStillArray = array2table(FractionTimeStayingStillArray,...
+    'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
+plot_and_stats(t_FractionTimeStayingStillArray, 1:5,  xticklbl,...
+    'Fraction of time staying still (freezing)', '(b)',[0,1],1);
+
+diary off
+
+
+figure(10); gcf; clf;
+dfile ='H1-stats.txt';
+if exist(dfile, 'file') ; delete(dfile); end
+diary(dfile)
+diary on
+% Fraction time staying in place
 subplot(121);
+timeStayingInPlaceArray = csvread('../data/timeStayingInPlace.csv');
+t_timeStayingInPlace = array2table(timeStayingInPlaceArray,...
+    'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
+plot_and_stats(t_timeStayingInPlace, 1:4,  xticklbl, 'Fraction time staying in place',...
+                    '',[0,1],1);
+
+% frequency of stops
+subplot(122);
+FreqStopsArray = csvread('../data/FreqStops.csv');
+t_FreqStopsArray = array2table(FreqStopsArray,...
+    'VariableNames',{'C1','C2','C3','C4','C5'});
+plot_and_stats(t_FreqStopsArray, 1:4,  xticklbl,...
+    'Frequency of stops', '',[],1);
+
+figure(3); gcf;
+% Robot speed
+subplot(223);
 % hyp: speed will depend on prior knowledge.
 % higher speeds when target is known (c2 with c1, c4 with c3)
 % higher speeds when map is known (c3 with c1)
@@ -135,11 +133,11 @@ EKFSpdData = csvread('../data/RobotSpeedData.csv');
 t_EKFSpd = array2table(EKFSpdData,...
     'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
 plot_and_stats(t_EKFSpd, 1:5,  xticklbl, ...
-    'Robot speed (m/s)', '(a)', [], 1);
+    'Robot speed (m/s)', '(c)', [], 1);
 set(gca, 'YLim', [0, 0.3]);
 
 % Robot turn rate
-subplot(122);
+subplot(224);
 % hyp: turn rate will depend on prior knowledge. 
 % Higher turn rate when target is not known
 % no difference when map is known
@@ -147,7 +145,7 @@ EKFOmegaArray = csvread('../data/RobotTurnrateData.csv');
 t_EKFOmega = array2table(EKFOmegaArray,...
     'VariableNames',{'C1','C2','C3','C4','C5','SQ1','SQ2','SQ3','SQ4','SQ5'});
 plot_and_stats(t_EKFOmega, 1:5,  xticklbl, ...
-    'Robot turn rate (rad/s)', '(b)', [],1);
+    'Robot turn rate (rad/s)', '(d)', [],1);
 set(gca, 'YLim', [0, 1.1]);
 
 diary off;
@@ -242,10 +240,10 @@ diary on
 refDataforc4 = csvread('../data/ComTurnrateData.csv');
 refDataforc4=refDataforc4(:,5);
 
-xticklbl={'\begin{tabular}{c} No Map \\ No Target\end{tabular}',...
-                 '\begin{tabular}{c} No Map \\ Yes Target\end{tabular}',...
-                 '\begin{tabular}{c} Yes Map \\ No Target\end{tabular}',...
-                 '\begin{tabular}{c} Yes Map \\ Yes Target\end{tabular}'};
+% xticklbl={'\begin{tabular}{c} No Map \\ No Target\end{tabular}',...
+%                  '\begin{tabular}{c} No Map \\ Yes Target\end{tabular}',...
+%                  '\begin{tabular}{c} Yes Map \\ No Target\end{tabular}',...
+%                  '\begin{tabular}{c} Yes Map \\ Yes Target\end{tabular}'};
 
 NASATLXArray(:,:,1) = csvread('../data/TLX_question_1.csv');
 NASATLXArray(:,:,2) = csvread('../data/TLX_question_2.csv');
@@ -268,11 +266,11 @@ for ii=1:6
     % hightlight the ones that had a different target
     muC4b=mean(NASATLXArray(refDataforc4==0,4,ii));
     stC4b=std(NASATLXArray(refDataforc4==0,4,ii),[],1);
-    bC4b=bar(4, muC4b, 'FaceColor', ...
-                0.25*ones(1,3), 'barwidth', 0.5);
+    bC4b=bar(4.65, muC4b, 'FaceColor', ...
+                0.75*ones(1,3), 'barwidth', 0.5);
     hold on;
-    errorbar(4, muC4b, stC4b, '.', 'color', ones(1,3)*.25);
-    set(bC4b,'FaceAlpha',0.2)        
+    errorbar(4.65, muC4b, stC4b, '.', 'color', ones(1,3)*.75);
+%     set(bC4b,'FaceAlpha',0.8)        
 %     plot(4, NASATLXArray(refDataforc4==0,4,ii), 'o', 'markersize', ...
 %         12, 'color', 'k', 'markerface', ones(1,3));
 end
@@ -322,7 +320,7 @@ errorbar(1:size(mu,2), mu, st, 'k.');
 % errorbar(1:size(mu,2), mu, st, 'k.');
 
 set(gca, 'xtick', 1:4)
-set(gca, 'xlim', [0.25, 4.75])
+set(gca, 'xlim', [0.25, 5.25])
 grid on;
 ylabel(ylbl);
 xlabel(xlbl);
@@ -341,9 +339,9 @@ if numel(colidx1)>numel(colidx)
     idx_nz=table2array(data_table(:,colidx1(end)))>0;
     muC4b=mean(table2array(data_table(idx_nz,colidx1(end))));
     stC4b=std(table2array(data_table(idx_nz,colidx1(end))),[],1);
-    bc4b=bar(4, muC4b, 'Facecolor', ones(1,3)*.25, 'barwidth', 0.5);
+    bc4b=bar(4.65, muC4b, 'Facecolor', ones(1,3)*.75, 'barwidth', 0.5);
     hold on;
-    errorbar(4, muC4b, stC4b, '.', 'color', ones(1,3)*.25);
+    errorbar(4.65, muC4b, stC4b, '.', 'color', ones(1,3)*.75);
     set(bc4b,'FaceAlpha',0.2)
 end
 % ANOVA repeated measures
@@ -365,7 +363,7 @@ end
 if disp1
 box off;
 ax = gca;
-ax.FontSize = 18;
+ax.FontSize = 16;
 ax.TickLabelInterpreter = 'latex';
 ax.XTickLabel = xticklbl(1:size(mu,2));
 if ~isempty(ylim)

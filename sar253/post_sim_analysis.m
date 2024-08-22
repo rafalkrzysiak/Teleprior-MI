@@ -17,7 +17,7 @@ clear variables
 
 % -- plot which robot found the missing target
 plot_performance_comparison('performance_data_agents=3.csv');
-% PlotTrajTestDataSet();
+% plot_success_traj('performance_data_agents=3.csv');
 
 % -- plot all trajectories
 % *deprecated*
@@ -27,6 +27,7 @@ plot_performance_comparison('performance_data_agents=3.csv');
 % TimeGained();
 % PlotRWControls();
 % ControlInputMapped();
+% PlotTrajTestDataSet();
 
 % -- plot all the timeseries alpha values
 % PlotTransientAlpha(SimExp);
@@ -42,7 +43,7 @@ conditions = {'condition_1','condition_2','condition_3','condition_4'};
 
 % -- define the mat file name used for all participants
 % change for agents and then on line 67 for location
-Matfile = "OmronLab_p=1200_nsim=1_agents=3.mat";
+Matfile = "OmronLab_p=1200_nsim=1_agents=2.mat";
 [~, filename]=fileparts(Matfile);
 
 suffix=split(filename,'_');
@@ -71,7 +72,7 @@ expTime = table2array(time2find(:,2:5));
 expTime = expTime-5;
 
 % simulated data
-loc = "../../simdata-nr=3/";
+loc = "../../simdata-nr=2/";
 fps=2;
 csvdata=[];
 % -- begin looping through all participants and conditions ran
@@ -85,12 +86,14 @@ for ss = 1:size(strategies,2)
         for pp=1:size(part,1)
             pidx=find(str2double(part(pp).name)==IDs);
             for cc=1:size(conditions,2)
-                data = load(loc+strategies{ss}+runs(rr).name+'/'+...
-                    part(pp).name+'/'+conditions{cc}+'/'+Matfile);
+                matfilename=[loc+strategies{ss}+runs(rr).name+'/'+...
+                    part(pp).name+'/'+conditions{cc}+'/'+Matfile];
+                data = load(matfilename);
                 csvdata=[csvdata; ...
                     ss, rr, str2double(part(pp).name), cc, ...
                     data.simdata.Which_robot, data.simdata.time/fps,...
-                    data.simdata.success, expTime(pidx,cc), time2find.c4flag(pidx)];
+                    data.simdata.success, expTime(pidx,cc), ...
+                    time2find.c4flag(pidx), matfilename];
                 
             end
         end
@@ -99,7 +102,7 @@ end
 T = array2table(csvdata);
 T.Properties.VariableNames = {'strategy','run','pid', ...
     'condition', 'whichrobot', ...
-    'timesec', 'success', 'expTime', 'c4flag'};
+    'timesec', 'success', 'expTime', 'c4flag', 'matfile'};
 writetable(T,sprintf('performance_data_%s.csv', suffix));
 
 %csvwrite('performance_data.csv', csvdata)
@@ -126,7 +129,7 @@ Matfile = "OmronLab_p=1200_nsim=1_agents=2.mat";
 parentDir = "../../simdata-nr=2/alpha_t/TotalDist";
 
 % ids to plot
-ids_to_plot=20;% 9> 10
+ids_to_plot=25;% 9> 10
 
 files = dir(parentDir);
 files=files(~ismember({files.name},{'.','..', '.DS_Store'}));
@@ -182,26 +185,29 @@ for test = ids_to_plot%1:size(files, 1)
             
             % -- plot the target location
             plot(TestData.simdata.tloc(1, 1), ...
-                TestData.simdata.tloc(1, 2), ...
-                'm*', 'LineWidth', 3, 'MarkerSize', 12); % -- Target location
+                TestData.simdata.tloc(1, 2),'s', ...
+                'color', [0,77,64]/255, ...
+                 'LineWidth', 3, 'MarkerSize', 12); % -- Target location
             
             % -- plot the beginning and end points of the robots
             plot(TestData.simdata.Xs(1, 1, 1, 1), ...
-                TestData.simdata.Xs(2, 1, 1, 1), ...
-                'ks', 'LineWidth', 3, 'MarkerSize', 12); % -- experiment robot (human controlled robot start)
+                TestData.simdata.Xs(2, 1, 1, 1), 'o', ...
+                'color', [30, 136, 229]/255, ...
+                'LineWidth', 3, 'MarkerSize', 12); % -- experiment robot (human controlled robot start)
             for rr=1:nr-1
             plot(TestData.simdata.Xs(1, 1, 1, rr+1), ...
-                TestData.simdata.Xs(2, 1, 1, rr+1), ...
-                'gs', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 1 start
+                TestData.simdata.Xs(2, 1, 1, rr+1),'go', ...
+                'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 1 start
             end
             
             plot(TestData.simdata.Xs(1, tf, 1, 1), ...
-                TestData.simdata.Xs(2, tf, 1, 1), ...
-                'ko', 'LineWidth', 3, 'MarkerSize', 12); % -- experiment robot (human controlled robot end)
+                TestData.simdata.Xs(2, tf, 1, 1), 'x', ...
+                'color', [30, 136, 229]/255, ...
+                'LineWidth', 3, 'MarkerSize', 12); % -- experiment robot (human controlled robot end)
             for rr=1:nr-1
             plot(TestData.simdata.Xs(1, tf, 1, rr+1), ...
-                TestData.simdata.Xs(2, tf, 1, rr+1), ...
-                'go', 'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 1 end
+                TestData.simdata.Xs(2, tf, 1, rr+1), 'gx',...
+                'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 1 end
             end
             
             % -- On top of the domain map, plot all trajectories of the robots
@@ -531,6 +537,123 @@ end
 %     std(testTime(testTime(:,4) ~= 0, 4))];
 % 
 % end
+function plot_success_traj(file)
+data=readtable(file);
+% remove trials where the robot went out of domain
+data(data.success==2,:)=[];
+% if target was not found, then set the timesec as expTime
+data.timesec(data.success==0)=data.expTime(data.success==0);
+
+% for condition 4, half the time the target location was not where
+% the human was looking for initially
+% this means that for a simulation, we are simulating a weird situation
+% where the human is just going somewhere where they don't need to but the
+% autonomous robots go for the true target location
+% best to ignore such trials (meeting on 7/24/24)
+% data.timesec(data.whichrobot>1 & data.timesec>data.expTime)=...
+%     data.expTime(data.whichrobot>1 & data.timesec>data.expTime);
+idx1=data.condition==4 & data.c4flag==1;
+fprintf('Sims within yMyT where target was placed else: %d\n',sum(idx1));
+data(idx1,:)=[];
+
+% pick trials for each condition
+% -- define the domain size
+L= [18 9];
+
+cond_desc=["No Map, No Target",...
+    "No Map, Yes Target",...
+    "Yes Map, No Target",...
+    "Yes Map, Yes Target"];
+
+figure(1); gcf; clf;
+
+for cond=1:4
+    % autonomous robot found the target
+%     idx2show=find(data.condition==cond & data.whichrobot>1);
+    % any robot found the target
+    idx2show=find(data.condition==cond & data.strategy==1);
+    % used 5 for nr=3, 15 for nr=2
+    idx2show=idx2show(5); % keep changing the index here
+    
+    % find the first instance where all 4 rows exist
+    sim=load(data.matfile{idx2show});
+    
+     % -- get the end time
+    tf = sim.simdata.time;
+    nr = size(sim.simdata.Xs,4);
+            
+    % -- plot everything nicely
+    subplot(2, 4, 2*cond-1);
+    cla;
+    % -- display the Omron Lab map
+    hold on; 
+    imagesc([0 L(1)],[0 L(2)], sim.img);
+    set(gca,'ydir','reverse');
+    set(gca, 'fontsize', 16);
+    axis image;
+    
+    % -- plot the target location
+    plot(sim.simdata.tloc(1, 1), ...
+        sim.simdata.tloc(1, 2),'s', ...
+        'color', [0,77,64]/255, ...
+         'LineWidth', 3, 'MarkerSize', 12); % -- Target location
+
+    % -- plot the beginning and end points of the robots
+    plot(sim.simdata.Xs(1, 1, 1, 1), ...
+        sim.simdata.Xs(2, 1, 1, 1), 'o', ...
+        'color', [30, 136, 229]/255, ...
+        'LineWidth', 3, 'MarkerSize', 12); % -- experiment robot (human controlled robot start)
+    for rr=1:nr-1
+    plot(sim.simdata.Xs(1, 1, 1, rr+1), ...
+        sim.simdata.Xs(2, 1, 1, rr+1),'go', ...
+        'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 1 start
+    end
+
+    plot(sim.simdata.Xs(1, tf, 1, 1), ...
+        sim.simdata.Xs(2, tf, 1, 1), 'x', ...
+        'color', [30, 136, 229]/255, ...
+        'LineWidth', 3, 'MarkerSize', 12); % -- experiment robot (human controlled robot end)
+    for rr=1:nr-1
+    plot(sim.simdata.Xs(1, tf, 1, rr+1), ...
+        sim.simdata.Xs(2, tf, 1, rr+1), 'gx',...
+        'LineWidth', 3, 'MarkerSize', 12); % -- autonomous robot 1 end
+    end
+
+    % -- On top of the domain map, plot all trajectories of the robots
+    plot(sim.simdata.Xs(1, 1:tf, 1, 1), ...
+        sim.simdata.Xs(2, 1:tf, 1, 1), ...
+        'k-', 'LineWidth', 2); % -- experiment robot (human controlled robot trajectory)
+    for rr=1:nr-1
+    plot(sim.simdata.Xs(1, 1:tf, 1, rr+1), ...
+        sim.simdata.Xs(2, 1:tf, 1, rr+1), ...
+        'g-', 'LineWidth', 2); % -- autonomous robot 1 trajectory
+    end
+    %                     title(sprintf("\\alpha_k (%s)", cond_names(cond)))
+    title(cond_desc(cond), 'fontweight', 'normal')
+    
+    % plot alpha
+    % -- get the end time
+    tf = sim.simdata.time;
+
+    % -- plot everything nicely
+    subplot(2, 4, 2*cond);
+    cla;
+
+    % -- plot the target location
+    hold on; plot(1:tf, ...
+        sim.simdata.alpha(1:tf), ...
+        'k-', 'LineWidth', 3); % -- alpha
+    grid on;
+    set(gca, 'ylim', [0,1]);
+    set(gca, 'fontsize', 16);
+
+    %                     title(cond_names(cond))
+    ylabel('$\alpha_k=p(\mathrm{xMxT}|f_{\tau})$', ...
+        'interpreter', 'latex')
+    xlabel('time (s)');
+            
+end
+end
 
 function plot_performance_comparison(file)
 data=readtable(file);
@@ -579,7 +702,32 @@ strategies_labels={'\alpha_k (distance)','\alpha_k (freezing)',...
 markers={'^m', 'sr', 'db', 'ok'};
 
 figure(1); gcf; clf;
-subplot(1,2,1);
+
+subplot(1,3,1);
+mu=zeros(4,5);
+st=zeros(4,5);
+for cc=1:4
+    for ss=1:6
+        idx=data.condition==cc & data.strategy==ss;
+        mu(cc,ss)=mean(data.timesec(idx));
+        st(cc,ss)=std(data.timesec(idx));
+        %         boxplot(data.timesec(data.condition==cc), ...
+        %             data.strategy(data.condition==cc),'PlotStyle','compact');
+    end
+    errorbar((0:1:5)+cc*.15-.3, mu(cc,:), st(cc,:), markers{cc}, ...
+        'MarkerFaceColor', markers{cc}(2), 'MarkerSize', 18, ...
+        'LineWidth', 3); hold on;
+    hold on;
+end
+grid on;
+set(gca,'fontsize', 24);
+set(gca, 'ylim', [0,300]);
+set(gca, 'xtick', 0:5);
+xticklabels(strategies_labels);
+xtickangle(30);
+ylabel('Time to find (s)')
+
+subplot(1,3,2);
 fracTrials=zeros(4,5);
 for cc=1:4
     for ss=1:6
@@ -610,20 +758,21 @@ legend('No Map, No Target',...
     'Yes Map, No Target',...
     'Yes Map, Yes Target');
 
-subplot(1,2,2);
+  
+subplot(1,3,3);
 mu=zeros(4,5);
 st=zeros(4,5);
 for cc=1:4
     for ss=1:6
-        idx=data.condition==cc & data.strategy==ss;
-        mu(cc,ss)=mean(data.timesec(idx));
-        st(cc,ss)=std(data.timesec(idx));
-        %         boxplot(data.timesec(data.condition==cc), ...
-        %             data.strategy(data.condition==cc),'PlotStyle','compact');
+        idx=data.condition==cc & data.strategy==ss & data.timesec<data.expTime;
+        mu(cc,ss)=mean(data.expTime(idx)-data.timesec(idx));
+        st(cc,ss)=std(data.expTime(idx)-data.timesec(idx));
+%         boxplot(data.timesec(data.condition==cc), ...
+%             data.strategy(data.condition==cc),'PlotStyle','compact');
     end
     errorbar((0:1:5)+cc*.15-.3, mu(cc,:), st(cc,:), markers{cc}, ...
-        'MarkerFaceColor', markers{cc}(2), 'MarkerSize', 18, ...
-        'LineWidth', 3); hold on;
+    'MarkerFaceColor', markers{cc}(2), 'MarkerSize', 18, ...
+    'LineWidth', 2); hold on;
     hold on;
 end
 grid on;
@@ -632,35 +781,7 @@ set(gca, 'ylim', [0,300]);
 set(gca, 'xtick', 0:5);
 xticklabels(strategies_labels);
 xtickangle(30);
-ylabel('Time to find (s)')
-
-%{
-subplot(1,3,2);
-mu=zeros(4,5);
-st=zeros(4,5);
-for cc=1:4
-    for ss=1:5
-        idx=data.condition==cc & data.strategy==ss & data.timesec<data.expTime;
-        mu(cc,ss)=mean(data.expTime(idx)-data.timesec(idx));
-        st(cc,ss)=std(data.expTime(idx)-data.timesec(idx));
-%         boxplot(data.timesec(data.condition==cc), ...
-%             data.strategy(data.condition==cc),'PlotStyle','compact');
-    end
-    errorbar(0:1:4, mu(cc,:), st(cc,:), markers{cc}, ...
-    'MarkerFaceColor', markers{cc}(2), 'MarkerSize', 18, ...
-    'LineWidth', 2); hold on;
-    hold on;
-end
-grid on;
-set(gca,'fontsize', 24);
-set(gca, 'ylim', [0,220]);
-set(gca, 'xtick', 0:4);
-xticklabels(strategies);
-xtickangle(30);
-ylabel('Time saved over single person trials')
-    %}
-    
-    
+ylabel('Time gained over single human trials (s)')    
     
 end
 
