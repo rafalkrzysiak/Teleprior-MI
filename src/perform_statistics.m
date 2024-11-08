@@ -237,8 +237,8 @@ if exist(dfile, 'file') ; delete(dfile); end
 diary(dfile)
 diary on
 
-refDataforc4 = csvread('../data/ComTurnrateData.csv');
-refDataforc4=refDataforc4(:,5);
+refDataforc4 = csvread('../data/TimeToFind.csv',1,0);
+refDataforc4=refDataforc4(:,6);
 
 % xticklbl={'\begin{tabular}{c} No Map \\ No Target\end{tabular}',...
 %                  '\begin{tabular}{c} No Map \\ Yes Target\end{tabular}',...
@@ -264,8 +264,8 @@ for ii=1:6
         ylbl{ii}, xlbl{ii}, [0 100],1);
     hold on;
     % hightlight the ones that had a different target
-    muC4b=mean(NASATLXArray(refDataforc4==0,4,ii));
-    stC4b=std(NASATLXArray(refDataforc4==0,4,ii),[],1);
+    muC4b=mean(NASATLXArray(refDataforc4~=0,4,ii));
+    stC4b=std(NASATLXArray(refDataforc4~=0,4,ii),[],1);
     bC4b=bar(4.65, muC4b, 'FaceColor', ...
                 0.75*ones(1,3), 'barwidth', 0.5);
     hold on;

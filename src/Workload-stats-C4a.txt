@@ -1,142 +1,98 @@
-if system_dependent('IsDebugMode')==1, dbstep in; end
-if system_dependent('IsDebugMode')==1, dbstep out; end
-if system_dependent('IsDebugMode')==1, dbstep in; end
-if system_dependent('IsDebugMode')==1, dbstep in; end
-if system_dependent('IsDebugMode')==1, dbstep; end
 [Mental] 
-if system_dependent('IsDebugMode')==1, dbstep; end
-if system_dependent('IsDebugMode')==1, dbstep; end
-colids
-{Undefined function or variable 'colids'.
-} 
-colidx
-
-colidx =
-
-     1     2     3     4
-
-data_table(:,colidx)
-
-ans =
-
-  29×4 <a href="matlab:helpPopup table" style="font-weight:bold">table</a>
-
-    <strong>Var1</strong>    <strong>Var2</strong>    <strong>Var3</strong>    <strong>Var4</strong>
-    <strong>____</strong>    <strong>____</strong>    <strong>____</strong>    <strong>____</strong>
-
-     70      30      60      50 
-     20      10      15      15 
-      5       5      10       0 
-      5       0       0       0 
-      0       0       0       0 
-     65       0      40       5 
-      0       0       0      40 
-     30      10      30      20 
-     20      15      20      15 
-     30       0      25       0 
-     20      60      60      40 
-      0       0       0       0 
-     35       0       0      25 
-     50       0       5       0 
-     20       0       5       0 
-     40      35      35      40 
-     45      50      50      30 
-     85      60      55      65 
-      0      25       0       0 
-     40      45      10      40 
-     15       0       0       0 
-     60      20      15      45 
-     25      35       5       0 
-     55      60      65      70 
-     40      25      20      45 
-     35       5      20       5 
-     25      45      15       5 
-     10       5       0       0 
-     30       5      40      45 
-
-anova(data_table(:,colidx))
-{Undefined function or variable 'anova'.
-} 
-anova1(data_table(:,colidx))
-{Error using <a href="matlab:matlab.internal.language.introspective.errorDocCallback('anova1', '/Applications/MATLAB_R2018a.app/toolbox/stats/stats/anova1.m', 75)" style="font-weight:bold">anova1</a> (<a href="matlab: opentoline('/Applications/MATLAB_R2018a.app/toolbox/stats/stats/anova1.m',75,0)">line 75</a>)
-Subscripting a table using linear indexing (one subscript) or
-multidimensional indexing (three or more subscripts) is not
-supported. Use a row subscript and a variable subscript.
-} 
-anova(table2array(data_table(:,colidx)))
-{Undefined function or variable 'anova'.
-} 
-kruskalwallis(table2array(data_table(:,colidx)))
-
-ans =
-
-    0.1698
-
-friedman(table2array(data_table(:,colidx)))
-
-ans =
-
-    0.0052
-
-anova1(table2array(data_table(:,colidx)))
-
-ans =
-
-    0.1944
-
-friedman(table2array(data_table(:,colidx)))
-
-ans =
-
-    0.0052
-
-[p_data, tbl_data, stats_data]=friedman(table2array(data_table(:,colidx)))
-
-p_data =
-
-    0.0052
-
 
 tbl_data =
 
   4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
 
-  Columns 1 through 4
+  Column 1
 
-    {'Source' }    {'SS'      }    {'df' }    {'MS'      }
-    {'Columns'}    {[ 17.4655]}    {[  3]}    {[  5.8218]}
-    {'Error'  }    {[101.5345]}    {[ 84]}    {[  1.2087]}
-    {'Total'  }    {[     119]}    {[115]}    {0×0 double}
+    {'Source' }
+    {'Columns'}
+    {'Error'  }
+    {'Total'  }
 
-  Columns 5 through 6
+  Column 2
 
-    {'Chi-sq'  }    {'Prob>Chi-sq'}
-    {[ 12.7689]}    {[     0.0052]}
-    {0×0 double}    {0×0 double   }
-    {0×0 double}    {0×0 double   }
+    {'SS'      }
+    {[ 17.4655]}
+    {[101.5345]}
+    {[     119]}
+
+  Column 3
+
+    {'df' }
+    {[  3]}
+    {[ 84]}
+    {[115]}
+
+  Column 4
+
+    {'MS'      }
+    {[  5.8218]}
+    {[  1.2087]}
+    {0×0 double}
+
+  Column 5
+
+    {'Chi-sq'  }
+    {[ 12.7689]}
+    {0×0 double}
+    {0×0 double}
+
+  Column 6
+
+    {'Prob>Chi-sq'}
+    {[     0.0052]}
+    {0×0 double   }
+    {0×0 double   }
 
 
-stats_data = 
+res_data =
 
-  <a href="matlab:helpPopup struct" style="font-weight:bold">struct</a> with fields:
+  Column 1
 
-       source: 'friedman'
-            n: 29
-    meanranks: [3.1552 2.1724 2.4138 2.2586]
-        sigma: 1.1695
+    1.0000
+    1.0000
+    1.0000
+    2.0000
+    2.0000
+    3.0000
 
-multcompare(stats_data, 'Ctype','bonferroni', 'Display', 'off')
+  Column 2
 
-ans =
+    2.0000
+    3.0000
+    4.0000
+    3.0000
+    4.0000
+    4.0000
 
-  Columns 1 through 5
+  Column 3
 
-    1.0000    2.0000    0.1725    0.9828    1.7931
-    1.0000    3.0000   -0.0689    0.7414    1.5517
-    1.0000    4.0000    0.0862    0.8966    1.7069
-    2.0000    3.0000   -1.0517   -0.2414    0.5689
-    2.0000    4.0000   -0.8965   -0.0862    0.7241
-    3.0000    4.0000   -0.6551    0.1552    0.9655
+    0.1725
+   -0.0689
+    0.0862
+   -1.0517
+   -0.8965
+   -0.6551
+
+  Column 4
+
+    0.9828
+    0.7414
+    0.8966
+   -0.2414
+   -0.0862
+    0.1552
+
+  Column 5
+
+    1.7931
+    1.5517
+    1.7069
+    0.5689
+    0.7241
+    0.9655
 
   Column 6
 
@@ -147,38 +103,471 @@ ans =
     1.0000
     1.0000
 
-multcompare(stats_data, 'Ctype','bonferroni', 'Display', 'off')
+[Physical] 
 
-ans =
+tbl_data =
 
-    1.0000    2.0000    0.1725    0.9828    1.7931    0.0083
-    1.0000    3.0000   -0.0689    0.7414    1.5517    0.0947
-    1.0000    4.0000    0.0862    0.8966    1.7069    0.0211
-    2.0000    3.0000   -1.0517   -0.2414    0.5689    1.0000
-    2.0000    4.0000   -0.8965   -0.0862    0.7241    1.0000
-    3.0000    4.0000   -0.6551    0.1552    0.9655    1.0000
+  4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
 
-multcompare(stats_data, 'Ctype','bonferroni', 'Display', 'on')
-Note: Intervals can be used for testing but are not simultaneous confidence intervals.
+  Column 1
 
-ans =
+    {'Source' }
+    {'Columns'}
+    {'Error'  }
+    {'Total'  }
 
-    1.0000    2.0000    0.1725    0.9828    1.7931    0.0083
-    1.0000    3.0000   -0.0689    0.7414    1.5517    0.0947
-    1.0000    4.0000    0.0862    0.8966    1.7069    0.0211
-    2.0000    3.0000   -1.0517   -0.2414    0.5689    1.0000
-    2.0000    4.0000   -0.8965   -0.0862    0.7241    1.0000
-    3.0000    4.0000   -0.6551    0.1552    0.9655    1.0000
+  Column 2
 
-multcompare(stats_data)
-Note: Intervals can be used for testing but are not simultaneous confidence intervals.
+    {'SS'     }
+    {[ 8.6379]}
+    {[54.3621]}
+    {[     63]}
 
-ans =
+  Column 3
 
-    1.0000    2.0000    0.1937    0.9828    1.7718    0.0075
-    1.0000    3.0000   -0.0477    0.7414    1.5304    0.0745
-    1.0000    4.0000    0.1075    0.8966    1.6856    0.0184
-    2.0000    3.0000   -1.0304   -0.2414    0.5477    0.8609
-    2.0000    4.0000   -0.8752   -0.0862    0.7028    0.9923
-    3.0000    4.0000   -0.6339    0.1552    0.9442    0.9579
+    {'df' }
+    {[  3]}
+    {[ 84]}
+    {[115]}
+
+  Column 4
+
+    {'MS'      }
+    {[  2.8793]}
+    {[  0.6472]}
+    {0×0 double}
+
+  Column 5
+
+    {'Chi-sq'  }
+    {[ 11.9286]}
+    {0×0 double}
+    {0×0 double}
+
+  Column 6
+
+    {'Prob>Chi-sq'}
+    {[     0.0076]}
+    {0×0 double   }
+    {0×0 double   }
+
+
+res_data =
+
+  Column 1
+
+    1.0000
+    1.0000
+    1.0000
+    2.0000
+    2.0000
+    3.0000
+
+  Column 2
+
+    2.0000
+    3.0000
+    4.0000
+    3.0000
+    4.0000
+    4.0000
+
+  Column 3
+
+    0.1173
+   -0.2448
+    0.0139
+   -0.9517
+   -0.6930
+   -0.3310
+
+  Column 4
+
+    0.7069
+    0.3448
+    0.6034
+   -0.3621
+   -0.1034
+    0.2586
+
+  Column 5
+
+    1.2965
+    0.9344
+    1.1930
+    0.2275
+    0.4861
+    0.8482
+
+  Column 6
+
+    0.0094
+    0.7369
+    0.0416
+    0.6312
+    1.0000
+    1.0000
+
+[Temporal] 
+
+tbl_data =
+
+  4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
+
+  Column 1
+
+    {'Source' }
+    {'Columns'}
+    {'Error'  }
+    {'Total'  }
+
+  Column 2
+
+    {'SS'      }
+    {[ 10.5000]}
+    {[     105]}
+    {[115.5000]}
+
+  Column 3
+
+    {'df' }
+    {[  3]}
+    {[ 84]}
+    {[115]}
+
+  Column 4
+
+    {'MS'      }
+    {[  3.5000]}
+    {[  1.2500]}
+    {0×0 double}
+
+  Column 5
+
+    {'Chi-sq'  }
+    {[  7.9091]}
+    {0×0 double}
+    {0×0 double}
+
+  Column 6
+
+    {'Prob>Chi-sq'}
+    {[     0.0479]}
+    {0×0 double   }
+    {0×0 double   }
+
+
+res_data =
+
+  Column 1
+
+    1.0000
+    1.0000
+    1.0000
+    2.0000
+    2.0000
+    3.0000
+
+  Column 2
+
+    2.0000
+    3.0000
+    4.0000
+    3.0000
+    4.0000
+    4.0000
+
+  Column 3
+
+   -0.1604
+   -0.1086
+   -0.0569
+   -0.7466
+   -0.6948
+   -0.7466
+
+  Column 4
+
+    0.6379
+    0.6897
+    0.7414
+    0.0517
+    0.1034
+    0.0517
+
+  Column 5
+
+    1.4362
+    1.4880
+    1.5397
+    0.8500
+    0.9017
+    0.8500
+
+  Column 6
+
+    0.2100
+    0.1359
+    0.0857
+    1.0000
+    1.0000
+    1.0000
+
+[Performance] 
+
+tbl_data =
+
+  4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
+
+  Column 1
+
+    {'Source' }
+    {'Columns'}
+    {'Error'  }
+    {'Total'  }
+
+  Column 2
+
+    {'SS'     }
+    {[ 5.0517]}
+    {[60.4483]}
+    {[65.5000]}
+
+  Column 3
+
+    {'df' }
+    {[  3]}
+    {[ 84]}
+    {[115]}
+
+  Column 4
+
+    {'MS'      }
+    {[  1.6839]}
+    {[  0.7196]}
+    {0×0 double}
+
+  Column 5
+
+    {'Chi-sq'  }
+    {[  6.7099]}
+    {0×0 double}
+    {0×0 double}
+
+  Column 6
+
+    {'Prob>Chi-sq'}
+    {[     0.0817]}
+    {0×0 double   }
+    {0×0 double   }
+
+[Effort] 
+
+tbl_data =
+
+  4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
+
+  Column 1
+
+    {'Source' }
+    {'Columns'}
+    {'Error'  }
+    {'Total'  }
+
+  Column 2
+
+    {'SS'     }
+    {[27.6379]}
+    {[90.3621]}
+    {[    118]}
+
+  Column 3
+
+    {'df' }
+    {[  3]}
+    {[ 84]}
+    {[115]}
+
+  Column 4
+
+    {'MS'      }
+    {[  9.2126]}
+    {[  1.0757]}
+    {0×0 double}
+
+  Column 5
+
+    {'Chi-sq'  }
+    {[ 20.3771]}
+    {0×0 double}
+    {0×0 double}
+
+  Column 6
+
+    {'Prob>Chi-sq'}
+    {[ 1.4178e-04]}
+    {0×0 double   }
+    {0×0 double   }
+
+
+res_data =
+
+  Column 1
+
+    1.0000
+    1.0000
+    1.0000
+    2.0000
+    2.0000
+    3.0000
+
+  Column 2
+
+    2.0000
+    3.0000
+    4.0000
+    3.0000
+    4.0000
+    4.0000
+
+  Column 3
+
+    0.4172
+    0.3310
+    0.1414
+   -0.8931
+   -1.0828
+   -0.9965
+
+  Column 4
+
+    1.2241
+    1.1379
+    0.9483
+   -0.0862
+   -0.2759
+   -0.1897
+
+  Column 5
+
+    2.0310
+    1.9448
+    1.7552
+    0.7207
+    0.5310
+    0.6172
+
+  Column 6
+
+    0.0004
+    0.0012
+    0.0116
+    1.0000
+    1.0000
+    1.0000
+
+[Frustration] 
+
+tbl_data =
+
+  4×6 <a href="matlab:helpPopup cell" style="font-weight:bold">cell</a> array
+
+  Column 1
+
+    {'Source' }
+    {'Columns'}
+    {'Error'  }
+    {'Total'  }
+
+  Column 2
+
+    {'SS'     }
+    {[15.7414]}
+    {[88.2586]}
+    {[    104]}
+
+  Column 3
+
+    {'df' }
+    {[  3]}
+    {[ 84]}
+    {[115]}
+
+  Column 4
+
+    {'MS'      }
+    {[  5.2471]}
+    {[  1.0507]}
+    {0×0 double}
+
+  Column 5
+
+    {'Chi-sq'  }
+    {[ 13.1683]}
+    {0×0 double}
+    {0×0 double}
+
+  Column 6
+
+    {'Prob>Chi-sq'}
+    {[     0.0043]}
+    {0×0 double   }
+    {0×0 double   }
+
+
+res_data =
+
+  Column 1
+
+    1.0000
+    1.0000
+    1.0000
+    2.0000
+    2.0000
+    3.0000
+
+  Column 2
+
+    2.0000
+    3.0000
+    4.0000
+    3.0000
+    4.0000
+    4.0000
+
+  Column 3
+
+    0.1908
+   -0.0851
+   -0.5161
+   -1.0334
+   -1.4644
+   -1.1885
+
+  Column 4
+
+    0.9483
+    0.6724
+    0.2414
+   -0.2759
+   -0.7069
+   -0.4310
+
+  Column 5
+
+    1.7058
+    1.4299
+    0.9989
+    0.4817
+    0.0506
+    0.3265
+
+  Column 6
+
+    0.0057
+    0.1151
+    1.0000
+    1.0000
+    0.0829
+    0.7998
 
